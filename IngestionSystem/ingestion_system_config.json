@@ -1,0 +1,6 @@
+{
+  "operative_mode" : "development",
+  "endpoint_ip" : "172.16.0.20",
+  "endpoint_port" : 5000,
+  "missing_samples_threshold" : 50
+}

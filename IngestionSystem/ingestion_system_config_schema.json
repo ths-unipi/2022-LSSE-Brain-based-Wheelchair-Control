@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "properties": {
+    "operative_mode": {
+      "type": "string"
+    },
+    "endpoint_ip": {
+      "type": "string"
+    },
+    "endpoint_port": {
+      "type": "integer"
+    },
+    "missing_samples_threshold": {
+      "type": "integer"
+    }
+  }
+}
