@@ -7,7 +7,7 @@ CONFIG_SCHEMA_PATH = '../ingestion_system_config_schema.json'
 
 class IngestionSystem:
     """
-        IngestionSystem class acts as a controller for the system
+        IngestionSystem class
     """
 
     def __init__(self) -> None:
@@ -30,10 +30,10 @@ class IngestionSystem:
             print(f'[-] Failed to open {json_path}')
             exit(-1)
 
-    def validate_schema(self, loaded_config: dict) -> bool:
+    def validate_schema(self, loaded_json: dict) -> bool:
         try:
             loaded_schema = self.load_json(CONFIG_SCHEMA_PATH)
-            validate(loaded_config, loaded_schema)
+            validate(loaded_json, loaded_schema)
 
         except ValidationError:
             print('[-] Configuration validation failed')
