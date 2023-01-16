@@ -25,9 +25,8 @@ class DevelopmentSystem:
         self.mental_command_classifier = None
 
     def run(self):
+        print('[+] Development System thread started')
+
         if self.config['operational_mode'] == 'waiting_for_dataset':
             learning_session_set = JsonIO.get_instance().get_queue().get(block=True)
             print(learning_session_set)
-
-    def open_server(self):
-        JsonIO.get_instance().listen('0.0.0.0', 5000)

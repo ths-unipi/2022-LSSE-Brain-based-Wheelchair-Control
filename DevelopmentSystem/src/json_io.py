@@ -26,7 +26,10 @@ class JsonIO:
         return True
 
     def listen(self, ip, port):
-        self.app.run(host=ip, port=port, debug=True)
+        self.app.run(host=ip, port=port, debug=False)
+
+    def get_app(self) -> Flask:
+        return self.app
 
     def get_queue(self) -> queue:
         return self.queue
