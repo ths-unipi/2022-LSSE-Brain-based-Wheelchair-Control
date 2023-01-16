@@ -1,0 +1,8 @@
+{
+  "type": "object",
+  "properties": {
+    "uuid": {"type": "integer"},
+    "command_thought": {"type": "string"}
+  },
+  "required": ["uuid", "command_thought"]
+}
