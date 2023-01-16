@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "uuid": {
+      "type": "string"
+    },
+    "label": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "uuid",
+    "label"
+  ]
+}

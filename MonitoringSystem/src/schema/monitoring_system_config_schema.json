@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "testing_mode": {
+      "type": "boolean"
+    },
+    "labels_threshold": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "testing_mode",
+    "labels_threshold"
+  ]
+}
