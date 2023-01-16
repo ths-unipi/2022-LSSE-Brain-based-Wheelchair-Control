@@ -34,7 +34,7 @@ class MentalCommandClassifier:
         file_path = os.path.join(os.path.abspath('..'), 'data', f'{self.uuid}.sav')
         joblib.dump(self.classifier, file_path)
 
-    def rebuild(self, training_parameters: dict, uuid=None) -> None:
+    def rebuild(self, training_parameters: dict, uuid: int = None) -> None:
         if uuid is None:
             self.uuid += 1                              # autoincrement useful during the grid search
         else:
