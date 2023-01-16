@@ -2,7 +2,7 @@ import numpy
 import os
 import json
 import jsonschema
-import mathplot.pyplot
+import matplotlib.pyplot
 
 class BalanceBarChartReportGenerator:
 

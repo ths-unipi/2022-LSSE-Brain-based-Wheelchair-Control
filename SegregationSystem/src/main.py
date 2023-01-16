@@ -8,23 +8,20 @@ from src.segregation_system import SegregationSystem
 
 app = JsonIO.get_instance().get_app()
 
+
 @app.post('/json')
 def post_json():
     if request.json is None:
         return {'error': 'No JSON received'}, 500
 
     received_json = request.json
-    segregation_system_config = import_config()
-    segregation_system = SegregationSystem()
-    segregation_system.segregation_system_config = segregation_system_config
-
-    new_thread = Thread(target=segregation_system.run, args=(received_json,))
+    new_thread = Thread(target=JsonIO.get_instance().receive, args=(received_json,))
     new_thread.start()
 
     return {}, 200
 
 
-def import_config():
+if __name__ == '__main__':
 
     config_path = os.path.join(os.path.abspath('..'), 'segregation_system_config.json')
     schema_path = os.path.join(os.path.abspath('..'), 'segregation_system_config_schema.json')
@@ -40,15 +37,18 @@ def import_config():
 
     except FileNotFoundError:
         print(f'Failed to open segregation_system_config.json')
-        return None
+        exit(1)
 
     except ValidationError:
         print('Config validation failed')
-        return None
+        exit(1)
 
-    return segregation_system_config
+    SegregationSystem.get_instance().segregation_system_config = segregation_system_config
 
+    segregation_system = Thread(target=SegregationSystem.get_instance().run, args=())
+    segregation_system.start()
 
-if __name__ == '__main__':
     JsonIO.get_instance().listener("0.0.0.0", "5000")
+
+
 
