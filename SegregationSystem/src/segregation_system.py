@@ -5,7 +5,7 @@ from src.json_io import JsonIO
 from src.prepared_session_collector import PreparedSessionCollector
 from src.balance_bar_chart_report_generator import BalanceBarChartReportGenerator
 from src.radar_diagram_quality_report_generator import RadarDiagramQualityReportGenerator
-
+from src.learning_session_set_splitter import LearningSessionSetSplitter
 
 class SegregationSystem:
 
@@ -50,7 +50,7 @@ class SegregationSystem:
 
     def run(self):
         self._import_config()
-        collector = PreparedSessionCollector()
+        collector = PreparedSessionCollector(self.segregation_system_config)
         collector.segregation_system_config = self.segregation_system_config
 
         while True:
@@ -69,19 +69,52 @@ class SegregationSystem:
                 else:
                     continue
 
-                if collector.check_collecting_threshold() is True:
-                    self.segregation_system_config['operative_mode'] = 'balancing_op_mode'
-                    self._save_config()
+                if collector.check_collecting_threshold() is False:
                     continue
+
+                dataset = collector.load_learning_session_set()
+                if dataset is None:
+                    print("Load database error")
+                    continue
+
+                b_generator = BalanceBarChartReportGenerator()
+                info = b_generator.generate_balance_bar_chart(dataset)
+                b_generator.generate_balancing_report(info)
+
+                self.segregation_system_config['operative_mode'] = 'balancing_op_mode'
+                self._save_config()
+                exit(0)
 
             # ---------------- BALANCING OP MODE -----------------------
             elif op_mode == 'balancing_op_mode':
-                pass
+
+                dataset = collector.load_learning_session_set()
+                if dataset is None:
+                    print("Load database error")
+                    continue
+
+                q_generator = RadarDiagramQualityReportGenerator()
+                info = q_generator.generate_radar_diagram(dataset)
+                q_generator.generate_quality_report(info)
+
+                self.segregation_system_config['operative_mode'] = 'quality_op_mode'
+                self._save_config()
+                exit(0)
 
             # ---------------- QUALITY OP MODE -----------------------
 
             elif op_mode == 'quality_op_mode':
-                pass
+                splitter = LearningSessionSetSplitter(self.segregation_system_config)
+                dataset = collector.load_learning_session_set()
+                splitted_dataset = splitter.generate_training_validation_testing_set(dataset)
+
+                # JsonIO.send(self.segregation_system_config['port'], self.segregation_system_config['ip'], splitted_dataset)
+
+                self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
+                self.segregation_system_config['user_id'] += 1
+                self._save_config()
+                exit(0)
+
             else:
                 print('Invalid operative mode')
                 exit(1)

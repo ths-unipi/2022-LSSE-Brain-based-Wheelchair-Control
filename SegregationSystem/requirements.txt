@@ -5,4 +5,5 @@ jsonschema
 pytest
 matplotlib
 plotly
+sklearn
 

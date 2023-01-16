@@ -2,13 +2,13 @@ import sqlite3
 import os
 import json
 from jsonschema import validate, ValidationError
-
+import pandas
 
 class PreparedSessionCollector:
 
-    def __init__(self):
-        self.segregation_system_config = None
-        self._prepared_session_counter = 0
+    def __init__(self, config):
+        self.segregation_system_config = config
+        self._prepared_session_counter = self._set_counter()
         self._conn = None
 
     def _open_connection(self):
@@ -36,6 +36,27 @@ class PreparedSessionCollector:
             return False
 
         return True
+
+    def _set_counter(self):
+
+        if not self._open_connection():
+            return None
+
+        user_id = self.segregation_system_config['user_id']
+
+        query = "SELECT session_id FROM p_session WHERE user_id = ? ORDER BY session_id DESC LIMIT 1"
+        cursor = self._conn.cursor()
+        try:
+            cursor.execute(query, (user_id,))
+        except sqlite3.Error as e:
+            print(f"Sqlite Execution Error [{e}]")
+            return None
+
+        res = cursor.fetchone()  # fetchall for more results
+        if res is None:
+            return 0
+        else:
+            return res[0] + 1
 
     def _validate_prepared_session(self, p_session):
 
@@ -70,11 +91,7 @@ class PreparedSessionCollector:
             return False
 
     def load_learning_session_set(self):
-        user_id = None
-        if self.segregation_system_config['operative_mode'] == 'collecting_mode':
-            user_id = self.segregation_system_config['user_id']
-        else:
-            user_id = self.segregation_system_config['user_id'] + 1
+        user_id = self.segregation_system_config['user_id']
 
         if not self._open_connection():
             return None
@@ -101,12 +118,8 @@ class PreparedSessionCollector:
             print("Invalid data")
             return False
 
-        user_id = None
+        user_id = self.segregation_system_config['user_id']
         session_id = self._prepared_session_counter
-        if self.segregation_system_config['operative_mode'] == 'collecting_mode':
-            user_id = self.segregation_system_config['user_id']
-        else:
-            user_id = self.segregation_system_config['user_id'] + 1
 
         if not self._open_connection():
             return False
