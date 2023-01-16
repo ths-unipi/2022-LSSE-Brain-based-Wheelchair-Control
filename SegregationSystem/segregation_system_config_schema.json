@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "operative_mode": {"type": "string"},
+    "testing_mode": {"type": "boolean"},
+    "endpoint_ip": {"type": "string"},
+    "endpoint_port": {"type": "string"},
+    "db_name": {"type": "string"},
+    "collecting_threshold": {"type": "number"},
+    "training_set_size":  {"type": "number"},
+    "validation_set_size": {"type": "number"},
+    "testing_set_size": {"type": "number"}
+  }
+}
