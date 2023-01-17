@@ -31,10 +31,10 @@ class MonitoringSystem:
             validate(self._monitoring_system_config,_config_schema)
 
         except FileNotFoundError:
-            print("File not found")
+            print("[-] File not found")
 
         except ValidationError:
-            print('Config validation failed')
+            print('[-] Config validation failed')
             exit(1)
 
 
@@ -49,7 +49,7 @@ class MonitoringSystem:
             #receive label
             try:
                 session_label = JsonIO.get_instance().get_queue().get(block=True, timeout=None)
-                print("MonitoringSystem - Received label :", session_label)
+                print("[+]MonitoringSystem - Received label :", session_label)
                 with open(SESSION_LABEL_SCHEMA) as f:
                     _label_schema = json.load(f)
                 validate(session_label, _label_schema)
@@ -60,14 +60,14 @@ class MonitoringSystem:
 
                 #check threshold
                 _labels_threshold = self._monitoring_system_config['labels_threshold']
-                print("MonitoringSystem - labels threshold: ", _labels_threshold)
+                print("[+]MonitoringSystem - labels threshold: ", _labels_threshold)
 
 
                 #if threshold exceeded, produce accuracy report
 
 
             except FileNotFoundError as error:
-                print("MonitoringSystem - File not found error: ", error)
+                print("[-]MonitoringSystem - File not found error: ", error)
             except ValidationError as error:
-                print("Validation Error : ", error)
+                print("[-]Validation Error : ", error)
 
