@@ -1,11 +1,14 @@
 {
   "type": "object",
   "properties": {
-    "Up": {"type": "integer"},
-    "Left": {"type": "integer"},
-    "Right": {"type": "integer"},
-    "Down": {"type": "integer"},
-    "Evaluation": {"type": "string"}
+    "move": {"type": "integer"},
+    "left": {"type": "integer"},
+    "right": {"type": "integer"},
+    "stop": {"type": "integer"},
+    "evaluation": {
+      "type": "string",
+      "enum": ["balanced", "not balanced"]
+    }
   },
-  "required": ["Up", "Left", "Right", "Down", "Evaluation"]
+  "required": ["move", "left", "right", "stop", "evaluation"]
 }

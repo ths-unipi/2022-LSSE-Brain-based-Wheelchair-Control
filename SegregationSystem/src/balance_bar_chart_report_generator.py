@@ -13,19 +13,19 @@ class BalanceBarChartReportGenerator:
 
     def generate_balance_bar_chart(self, dataset):
 
-        labels = ['Up', 'Left', 'Right', 'Down']
+        labels = ['move', 'left', 'right', 'stop']
         values = [0, 0, 0, 0]
 
         for p_session in dataset:
             ct = p_session['command_thought']
             index = None
-            if ct == 'up':
+            if ct == 'move':
                 index = 0
             elif ct == 'left':
                 index = 1
             elif ct == 'right':
                 index = 2
-            elif ct == 'down':
+            elif ct == 'stop':
                 index = 3
 
             values[index] += 1
@@ -37,10 +37,10 @@ class BalanceBarChartReportGenerator:
         plt.grid(True)
 
         info = dict()
-        info['Up'] = values[0]
-        info['Left'] = values[1]
-        info['Right'] = values[2]
-        info['Down'] = values[3]
+        info['move'] = values[0]
+        info['left'] = values[1]
+        info['right'] = values[2]
+        info['stop'] = values[3]
 
         chart_path = os.path.join(os.path.abspath('..'), 'data', 'balance_bar_chart.png')
         plt.savefig(chart_path)
@@ -48,7 +48,7 @@ class BalanceBarChartReportGenerator:
 
     def generate_balancing_report(self, info):
 
-        info['Evaluation'] = ''
+        info['evaluation'] = ''
         report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing_report.json')
         with open(report_path, "w") as file:
             json.dump(info, file, indent=4)
@@ -75,7 +75,7 @@ class BalanceBarChartReportGenerator:
             print('Balancing Report has invalid schema')
             return False
 
-        evaluation = report['Evaluation']
+        evaluation = report['evaluation']
 
         if evaluation == 'not balanced':
             print("Dataset not balanced")
@@ -83,6 +83,3 @@ class BalanceBarChartReportGenerator:
         elif evaluation == 'balanced':
             print("Dataset balanced")
             return True
-        else:
-            print("Invalid balancing evaluation")
-            return False

@@ -1,7 +1,7 @@
 {
-    "Up": 3,
-    "Left": 1,
-    "Right": 4,
-    "Down": 4,
-    "Evaluation": "balanced"
+    "move": 4,
+    "left": 1,
+    "right": 1,
+    "stop": 5,
+    "evaluation": "balanced"
 }
