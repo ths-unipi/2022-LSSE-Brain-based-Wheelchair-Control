@@ -1,10 +1,13 @@
+import os
 import json
 from jsonschema import validate, ValidationError
+from threading import Thread
 
+from src.json_io import JsonIO
 from src.raw_sessions_store import RawSessionsStore
 
-CONFIG_PATH = '../resources/ingestion_system_config.json'
-CONFIG_SCHEMA_PATH = '../resources/ingestion_system_config_schema.json'
+CONFIG_FILENAME = 'ingestion_system_config.json'
+CONFIG_SCHEMA_FILENAME = 'ingestion_system_config_schema.json'
 
 
 class IngestionSystem:
@@ -13,24 +16,23 @@ class IngestionSystem:
     """
 
     def __init__(self) -> None:
-        loaded_config = self.load_json(json_path=CONFIG_PATH)
-        loaded_schema = self.load_json(json_path=CONFIG_SCHEMA_PATH)
+        loaded_config = self.load_json(json_filename=CONFIG_FILENAME)
+        loaded_schema = self.load_json(json_filename=CONFIG_SCHEMA_FILENAME)
 
         if self.validate_schema(loaded_json=loaded_config, schema=loaded_schema):
-            print('[+] Configuration loaded')
             self.ingestion_system_config = loaded_config
         else:
             print('[-] Error during the ingestion system initialization phase')
             exit(1)
 
-    def load_json(self, json_path: str) -> dict:
+    def load_json(self, json_filename: str) -> dict:
         try:
-            with open(json_path) as f:
+            with open(os.path.join(os.path.abspath('..'), 'resources', json_filename)) as f:
                 loaded_json = json.load(f)
                 return loaded_json
 
         except FileNotFoundError:
-            print(f'[-] Failed to open {json_path}')
+            print(f'[-] Failed to open resources/{json_filename}')
             exit(-1)
 
     def validate_schema(self, loaded_json: dict, schema: dict) -> bool:
@@ -43,118 +45,50 @@ class IngestionSystem:
         return True
 
     def run(self) -> None:
-
         print('[!] Configuration loaded:')
         print(self.ingestion_system_config)
 
-        # RawSessionsStore
+        operative_mode = self.ingestion_system_config["operative_mode"]
+        print(f'Operative Mode: {operative_mode}')
+
+        # Create an instance of RawSessionsStore
         raw_sessions_store = RawSessionsStore()
 
-        example_record = '{ \
-            "LABELS": "stop", \
-            "TIMESTAMP": "26-Oct-2021 09:03:38", \
-            "UUID": "a923-45b7-gh12-7408003775.463" \
-        }'
+        # Run REST server
+        listener = Thread(target=JsonIO.get_instance().listen, args=('0.0.0.0', 5000))
+        listener.start()
 
-        rec = json.loads(example_record)
-        raw_sessions_store.store_record(record=rec)
+        while True:
+            # Wait for a new record
+            received_record = JsonIO.get_instance().get_received_record()
+            # print(f'[+] Received record: {received_record}')
 
-        example_record = '{ \
-            "TIMESTAMP": "26-Oct-2021 09:04:40", \
-            "UUID" : "a923-45b7-gh12-7408003775.463", \
-            "CALENDAR": "working" \
-        }'
-        rec = json.loads(example_record)
-        raw_sessions_store.store_record(record=rec)
+            uuid = received_record['UUID']
 
-        example_record = '{ \
-            "TIMESTAMP": "26-Oct-2021 09:04:40", \
-            "UUID" : "a923-45b7-gh12-7408003775.463", \
-            "SETTINGS": "indoor" \
-        }'
-        rec = json.loads(example_record)
-        raw_sessions_store.store_record(record=rec)
+            if raw_sessions_store.store_record(record=received_record):
+                if raw_sessions_store.is_session_complete(uuid=uuid, operative_mode=operative_mode):
+                    print(f'[+] SESSION {uuid} IS COMPLETE')
 
-        example_record = '{ \
-            "TIMESTAMP": "26-Oct-2021 09:03:46", \
-            "UUID" : "a923-45b7-gh12-7408003775.463", \
-            "CHANNEL": 2, \
-            "Var5": 3.564453125, \
-            "Var6": 3.759765625, \
-            "Var7": 6.0546875, \
-            "Var8": 3.515625, \
-            "Var9": 15.576171875, \
-            "Var10": 1.611328125, \
-            "Var11": 3.80859375, \
-            "Var12": 7.861328125, \
-            "Var13": 1.611328125, \
-            "Var14": 2.5390625, \
-            "Var15": -5.615234375, \
-            "Var16": 6.201171875, \
-            "Var17": 0, \
-            "Var18": 0, \
-            "Var19": 7.71484375, \
-            "Var20": 4.8828125 \
-        }'
-        rec = json.loads(example_record)
-        raw_sessions_store.store_record(record=rec)
+                    # Load Raw Session from the Data Store
+                    raw_session = dict()
+                    raw_session = raw_sessions_store.load_raw_session(uuid=uuid)
 
-        example_record = '{ \
-            "TIMESTAMP": "26-Oct-2021 09:04:40", \
-            "UUID" : "a923-45b7-gh12-7408003775.463", \
-            "CHANNEL": 12, \
-            "Var5": 1.865453125, \
-            "Var6": 6.059765625, \
-            "Var7": 0, \
-            "Var8": 1.331625, \
-            "Var9": 5.766171875, \
-            "Var10": 1.611328125, \
-            "Var11": 3.80859375, \
-            "Var12": 7.861328125, \
-            "Var13": 1.611328125, \
-            "Var14": 2.5390625, \
-            "Var15": -5.615234375, \
-            "Var16": 6.201171875, \
-            "Var17": 0, \
-            "Var18": 0, \
-            "Var19": 7.71484375, \
-            "Var20": 4.8828125 \
-        }'
-        rec = json.loads(example_record)
-        raw_sessions_store.store_record(record=rec)
+                    # TODO: Mark missing samples
+                    if raw_session['UUID'] is not None:
+                        pass
 
-        example_record = '{ \
-            "TIMESTAMP": "26-Oct-2021 09:03:40", \
-            "UUID" : "a923-45b7-gh12-7408003775.463", \
-            "CHANNEL": 1, \
-            "Var5": 3.564453125, \
-            "Var6": 3.759765625, \
-            "Var7": 6.0546875, \
-            "Var8": 3.515625, \
-            "Var9": 15.576171875, \
-            "Var10": 1.611328125, \
-            "Var11": 3.80859375, \
-            "Var12": 7.861328125, \
-            "Var13": 1.611328125, \
-            "Var14": 2.5390625, \
-            "Var15": -5.615234375, \
-            "Var16": 6.201171875, \
-            "Var17": 0, \
-            "Var18": 0, \
-            "Var19": 7.71484375, \
-            "Var20": 4.8828125 \
-        }'
-        rec = json.loads(example_record)
-        raw_sessions_store.store_record(record=rec)
+                    # Delete Raw Session from the Data Store
+                    if raw_sessions_store.delete_raw_session(uuid=uuid):
+                        print(f'SESSION {uuid} DELETED SUCCESSFULLY')
 
-        raw_sessions_store.load_raw_session(rec['UUID'])
-        if raw_sessions_store.is_session_complete(rec['UUID'], self.ingestion_system_config['operative_mode']):
-            print(f'[{self.ingestion_system_config["operative_mode"]}] SESSION IS COMPLETE')
-        else:
-            print(f'[{self.ingestion_system_config["operative_mode"]}] SESSION IS NOT COMPLETE')
+                    '''  
+                    # Check mark missing samples threshold and send it to the Preparation System            
+                    if missing_samples < self.ingestion_system_config['missing_samples_threshold']:
+                        res = JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['endpoint_ip'],
+                                                   endpoint_port=self.ingestion_system_config['endpoint_port'],
+                                                   raw_session=raw_session)
+                        if res:
+                            print(f'[+] SESSION {uuid} SENT TO THE PREPARATION SYSTEM')'''
 
-        #if raw_sessions_store.delete_raw_session(uuid=rec['UUID']):
-        #    print(f'[+] {rec["UUID"]} deleted from the store')
-
-        # JsonIO
-        # RawSessionIntegrity
+        # =======================================================================
+        # End while

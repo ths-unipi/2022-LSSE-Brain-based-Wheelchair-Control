@@ -1,12 +1,11 @@
+import os
 import sqlite3
 import json
 from jsonschema import validate, ValidationError
 
-from src.raw_session import RawSession
-
-DB_PATH = '../data/RawSessionsStore.db'
+DB_NAME = 'RawSessionsStore.db'
 RECORD_TYPE = ['CALENDAR', 'LABELS', 'SETTINGS', 'CHANNEL']
-NUM_CHANNELS = 12
+NUM_CHANNELS = 22
 
 
 class RawSessionsStore:
@@ -25,7 +24,7 @@ class RawSessionsStore:
 
     def open_connection(self) -> bool:
         try:
-            self._conn = sqlite3.connect(DB_PATH)
+            self._conn = sqlite3.connect(os.path.join(os.path.abspath('..'), 'data', DB_NAME))
             return True
         except sqlite3.Error as e:
             print(f'[-] sqlite3 open connection error [{e}]')
@@ -99,7 +98,8 @@ class RawSessionsStore:
 
     def validate_schema_record(self, record: dict, record_type: str) -> bool:
         try:
-            loaded_schema = self.load_record_schema('../resources/' + record_type.lower() + '_schema.json')
+            record_schema_path = os.path.join(os.path.abspath('..'), 'resources', record_type.lower() + '_schema.json')
+            loaded_schema = self.load_record_schema(record_schema_path)
             validate(record, loaded_schema)
 
         except ValidationError:
@@ -142,9 +142,10 @@ class RawSessionsStore:
     def insert_record(self, parameters: tuple) -> bool:
         try:
             query = 'INSERT INTO raw_session (uuid, calendar, labels, settings, ' \
-                    'channel_1, channel_2, channel_3, channel_4, channel_5, channel_6, ' \
-                    'channel_7, channel_8, channel_9, channel_10, channel_11, channel_12 ) ' \
-                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+                    'channel_1, channel_2, channel_3, channel_4, channel_5, channel_6, channel_7, channel_8, ' \
+                    'channel_9, channel_10, channel_11, channel_12, channel_13, channel_14, channel_15, channel_16, ' \
+                    'channel_17, channel_18, channel_19, channel_20, channel_21, channel_22 ) ' \
+                    'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
             cursor = self._conn.cursor()
             cursor.execute(query, parameters)
             self._conn.commit()
@@ -174,9 +175,9 @@ class RawSessionsStore:
     def store_record(self, record: dict) -> bool:
         self.check_connection()
 
-        print(f'[!] record to store: {record}')
+        # print(f'[!] record to store: {record}')
         record_type = self.get_record_type(record)
-        print(f'[!] record type: {record_type}')
+        # print(f'[!] record type: {record_type}')
 
         if not self.validate_schema_record(record, record_type):
             print("[-] Record schema not valid (record discarded)")
@@ -190,6 +191,8 @@ class RawSessionsStore:
             self.update_record(record=record, column_to_set=column_name)
         else:
             self.insert_record(parameters=self.generate_query_parameters(record, record_type))
+
+        return True
 
     def delete_raw_session(self, uuid: str) -> bool:
         self.check_connection()
@@ -205,7 +208,7 @@ class RawSessionsStore:
 
         return True
 
-    def load_raw_session(self, uuid: str) -> None:
+    def load_raw_session(self, uuid: str) -> dict:
         self.check_connection()
 
         try:
@@ -216,28 +219,28 @@ class RawSessionsStore:
 
             result = cursor.fetchone()
             if result is None:
-                return None
+                return {'UUID': None}
 
-            uuid = result[0]
-            calendar = json.loads(result[1])['CALENDAR']
-            labels = json.loads(result[2])['LABELS']
-            settings = json.loads(result[3])['SETTINGS']
-            headset = list()
+            # Generating a Raw Session
+            raw_session = {
+                'UUID': result[0],
+                'calendar': json.loads(result[1])['CALENDAR'],
+                'labels': json.loads(result[2])['LABELS'],
+                'settings': json.loads(result[3])['SETTINGS'],
+                'headset': list()
+            }
 
             for channel in result[4:]:
                 if channel is not None:
                     channel_json = json.loads(channel)
                     headset_eeg_data = list(channel_json.values())
-                    headset.append(headset_eeg_data[3:])
+                    raw_session['headset'].append(headset_eeg_data[3:])
 
-            raw_session = RawSession(uuid=uuid, calendar=calendar, command_thought=labels, environment=settings,
-                                     headset=headset)
-            print(raw_session)
-            # return raw_session
+            return raw_session
 
         except sqlite3.Error as e:
             print(f'[-] sqlite3 "load_raw_session" error [{e}]')
-            return None
+            return {'UUID': None}
 
     def is_session_complete(self, uuid: str, operative_mode: str) -> bool:
         self.check_connection()
@@ -251,18 +254,18 @@ class RawSessionsStore:
             result = cursor.fetchone()
             column_names = [description[0] for description in cursor.description]
             res = dict(zip(column_names, result))
-            print(res)
+            # print(res)
 
             if operative_mode == 'development':
                 for column_name in res.keys():
                     if res.get(column_name) is None:
-                        print(str(column_name) + ' - ' + str(res.get(column_name)))
+                        # print(str(column_name) + ' - ' + str(res.get(column_name)))
                         return False
 
             else:
                 for column_name in res.keys():
                     if res.get(column_name) is None and column_name != 'LABELS':
-                        print(str(column_name) + ' - ' + str(res.get(column_name)))
+                        # print(str(column_name) + ' - ' + str(res.get(column_name)))
                         return False
 
             return True
