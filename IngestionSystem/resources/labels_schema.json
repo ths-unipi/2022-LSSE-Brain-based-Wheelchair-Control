@@ -2,7 +2,8 @@
   "type": "object",
   "properties": {
     "LABELS": {
-      "type": "string"
+      "type": "string",
+      "enum": ["left", "right", "move", "stop"]
     },
     "TIMESTAMP": {
       "type": "string"

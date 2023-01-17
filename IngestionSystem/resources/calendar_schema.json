@@ -2,7 +2,8 @@
   "type": "object",
   "properties": {
     "CALENDAR": {
-      "type": "string"
+      "type": "string",
+      "enum": ["sport", "shopping", "home", "working"]
     },
     "TIMESTAMP": {
       "type": "string"

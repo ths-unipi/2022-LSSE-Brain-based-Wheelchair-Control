@@ -62,7 +62,7 @@ class IngestionSystem:
         example_record = '{ \
             "TIMESTAMP": "26-Oct-2021 09:04:40", \
             "UUID" : "a923-45b7-gh12-7408003775.463", \
-            "CALENDAR": "shopping" \
+            "CALENDAR": "working" \
         }'
         rec = json.loads(example_record)
         raw_sessions_store.store_record(record=rec)

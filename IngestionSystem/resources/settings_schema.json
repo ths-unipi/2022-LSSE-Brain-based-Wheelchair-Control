@@ -2,7 +2,8 @@
   "type": "object",
   "properties": {
     "SETTINGS": {
-      "type": "string"
+      "type": "string",
+      "enum": ["indoor", "outdoor"]
     },
     "TIMESTAMP": {
       "type": "string"

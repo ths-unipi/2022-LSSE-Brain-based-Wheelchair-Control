@@ -103,7 +103,7 @@ class RawSessionsStore:
             validate(record, loaded_schema)
 
         except ValidationError:
-            print('[-] Configuration validation failed')
+            print('[-] Record schema validation failed')
             return False
 
         return True
