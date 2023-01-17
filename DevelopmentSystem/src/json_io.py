@@ -1,8 +1,8 @@
 import queue
 from threading import Thread
-
 from flask import Flask, request
 from requests import post
+import logging
 
 
 class JsonIO:
@@ -15,6 +15,7 @@ class JsonIO:
 
     def receive(self, learning_session_set: dict) -> None:
         self.queue.put(learning_session_set, block=True)
+        print('[+] New Dataset received')
 
     def send(self, endpoint: str, classifier: dict) -> bool:
         response = post(endpoint + '/classifier', json=classifier)
@@ -28,6 +29,7 @@ class JsonIO:
         return True
 
     def listen(self, ip, port):
+        print('[+] Start Rest Server thread')
         self.app.run(host=ip, port=port, debug=False)
 
     def get_app(self) -> Flask:
@@ -44,6 +46,8 @@ class JsonIO:
 
 
 app = JsonIO.get_instance().get_app()
+log = logging.getLogger('werkzeug')
+log.disabled = True
 
 
 @app.post('/json')
