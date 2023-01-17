@@ -1,0 +1,176 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "operative_mode": {
+      "type": "string",
+      "enum": ["development", "execution"]
+    },
+    "segregation_endpoint_IP": {
+      "type": "string"
+    },
+    "segregation_endpoint_port": {
+      "type": "integer"
+    },
+    "execution_endpoint_IP": {
+      "type": "string"
+    },
+    "execution_endpoint_port": {
+      "type": "integer"
+    },
+    "max_eeg": {
+      "type": "integer"
+    },
+    "min_eeg": {
+      "type": "integer"
+    },
+    "features": {
+      "type": "object",
+      "properties": {
+        "headset": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "wave": {
+                  "type": "string"
+                },
+                "start_frequency": {
+                  "type": "number"
+                },
+                "end_frequency": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "wave",
+                "start_frequency",
+                "end_frequency"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "wave": {
+                  "type": "string"
+                },
+                "start_frequency": {
+                  "type": "integer"
+                },
+                "end_frequency": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "wave",
+                "start_frequency",
+                "end_frequency"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "wave": {
+                  "type": "string"
+                },
+                "start_frequency": {
+                  "type": "integer"
+                },
+                "end_frequency": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "wave",
+                "start_frequency",
+                "end_frequency"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "wave": {
+                  "type": "string"
+                },
+                "start_frequency": {
+                  "type": "integer"
+                },
+                "end_frequency": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "wave",
+                "start_frequency",
+                "end_frequency"
+              ]
+            },
+            {
+              "type": "object",
+              "properties": {
+                "wave": {
+                  "type": "string"
+                },
+                "start_frequency": {
+                  "type": "integer"
+                },
+                "end_frequency": {
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "wave",
+                "start_frequency",
+                "end_frequency"
+              ]
+            }
+          ]
+        },
+        "calendar": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "environment": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "headset",
+        "calendar",
+        "environment"
+      ]
+    }
+  },
+  "required": [
+    "operative_mode",
+    "segregation_endpoint_IP",
+    "segregation_endpoint_port",
+    "execution_endpoint_IP",
+    "execution_endpoint_port",
+    "max_eeg",
+    "min_eeg",
+    "features"
+  ]
+}
