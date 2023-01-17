@@ -22,18 +22,12 @@
         },
         {
           "type": "integer"
-        },
-        {
-          "type": "integer"
         }
       ]
     },
     "number_of_hidden_neurons_range": {
       "type": "array",
       "items": [
-        {
-          "type": "integer"
-        },
         {
           "type": "integer"
         },
