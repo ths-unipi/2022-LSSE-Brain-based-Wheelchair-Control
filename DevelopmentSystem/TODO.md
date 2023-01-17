@@ -1,0 +1,1 @@
+[ ] Spostare il numero di generazioni in un file apposito
