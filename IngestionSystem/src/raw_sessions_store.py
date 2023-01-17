@@ -109,6 +109,7 @@ class RawSessionsStore:
         return True
 
     def generate_query_parameters(self, record: dict, record_type: str) -> tuple:
+
         parameters = {
             'UUID': record['UUID'],
             'CALENDAR': None,
@@ -124,9 +125,9 @@ class RawSessionsStore:
             parameters[record_type] = json.dumps(record)
 
         values = list(parameters.values())
-        list_parameters = values[0:-1] + values[-1]
+        query_parameters = values[0:-1] + values[-1]
 
-        return tuple(list_parameters)
+        return tuple(query_parameters)
 
     def update_record(self, record: dict, column_to_set: str) -> bool:
         try:
@@ -204,7 +205,9 @@ class RawSessionsStore:
 
         return True
 
-    def get_row(self, uuid: str):
+    def load_raw_session(self, uuid: str) -> None:
+        self.check_connection()
+
         try:
             query = 'SELECT * FROM raw_session WHERE uuid = ?'
             cursor = self._conn.cursor()
@@ -212,52 +215,58 @@ class RawSessionsStore:
             self._conn.commit()
 
             result = cursor.fetchone()
-            return result
+            if result is None:
+                return None
+
+            uuid = result[0]
+            calendar = json.loads(result[1])['CALENDAR']
+            labels = json.loads(result[2])['LABELS']
+            settings = json.loads(result[3])['SETTINGS']
+            headset = list()
+
+            for channel in result[4:]:
+                if channel is not None:
+                    channel_json = json.loads(channel)
+                    headset_eeg_data = list(channel_json.values())
+                    headset.append(headset_eeg_data[3:])
+
+            raw_session = RawSession(uuid=uuid, calendar=calendar, command_thought=labels, environment=settings,
+                                     headset=headset)
+            print(raw_session)
+            # return raw_session
 
         except sqlite3.Error as e:
             print(f'[-] sqlite3 "load_raw_session" error [{e}]')
             return None
 
-    def load_raw_session(self, uuid: str) -> None:
+    def is_session_complete(self, uuid: str, operative_mode: str) -> bool:
         self.check_connection()
 
-        result = self.get_row(uuid)
+        try:
+            query = 'SELECT * FROM raw_session WHERE uuid = ?'
+            cursor = self._conn.cursor()
+            cursor.execute(query, (uuid,))
+            self._conn.commit()
 
-        if result is None:
-            return None
+            result = cursor.fetchone()
+            column_names = [description[0] for description in cursor.description]
+            res = dict(zip(column_names, result))
+            print(res)
 
-        uuid = result[0]
-        calendar = json.loads(result[1])['CALENDAR']
-        labels = json.loads(result[2])['LABELS']
-        settings = json.loads(result[3])['SETTINGS']
-        headset = list()
+            if operative_mode == 'development':
+                for column_name in res.keys():
+                    if res.get(column_name) is None:
+                        print(str(column_name) + ' - ' + str(res.get(column_name)))
+                        return False
 
-        for channel in result[4:]:
-            if channel is not None:
-                channel_json = json.loads(channel)
-                headset_eeg_data = list(channel_json.values())
-                headset.append(headset_eeg_data[3:])
+            else:
+                for column_name in res.keys():
+                    if res.get(column_name) is None and column_name != 'LABELS':
+                        print(str(column_name) + ' - ' + str(res.get(column_name)))
+                        return False
 
-        raw_session = RawSession(uuid=uuid, calendar=calendar, command_thought=labels, environment=settings,
-                                 headset=headset)
-        print(raw_session)
-        # return raw_session
+            return True
 
-    def is_session_complete(self, uuid: str, operative_mode: str) -> bool:
-
-        # TODO
-
-        result = self.get_row(uuid)
-        for column in result:
-            if column is None:
-                print(result)
-
-        if operative_mode == 'development':
-            print('DEVELOPMENT MODE')
-        elif operative_mode == 'execution':
-            print('EXECUTION MODE')
-        else:
-            print('OPERATIVE MODE NOT VALID')
-            exit(-1)
-
-        return True
+        except sqlite3.Error as e:
+            print(f'[-] sqlite3 "is_session_complete" error [{e}]')
+            return False

@@ -148,7 +148,11 @@ class IngestionSystem:
         raw_sessions_store.store_record(record=rec)
 
         raw_sessions_store.load_raw_session(rec['UUID'])
-        raw_sessions_store.is_session_complete(rec['UUID'], self.ingestion_system_config['operative_mode'])
+        if raw_sessions_store.is_session_complete(rec['UUID'], self.ingestion_system_config['operative_mode']):
+            print(f'[{self.ingestion_system_config["operative_mode"]}] SESSION IS COMPLETE')
+        else:
+            print(f'[{self.ingestion_system_config["operative_mode"]}] SESSION IS NOT COMPLETE')
+
         #if raw_sessions_store.delete_raw_session(uuid=rec['UUID']):
         #    print(f'[+] {rec["UUID"]} deleted from the store')
 

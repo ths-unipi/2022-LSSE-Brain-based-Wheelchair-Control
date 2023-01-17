@@ -22,3 +22,6 @@ class RawSession:
         self.headset = headset
         self.command_thought = command_thought
         self.environment = environment
+
+    def get_headset(self) -> list:
+        return self.headset

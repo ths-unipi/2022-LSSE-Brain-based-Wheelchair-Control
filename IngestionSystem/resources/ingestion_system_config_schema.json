@@ -2,7 +2,8 @@
   "type": "object",
   "properties": {
     "operative_mode": {
-      "type": "string"
+      "type": "string",
+      "enum": ["development", "execution"]
     },
     "endpoint_ip": {
       "type": "string"
