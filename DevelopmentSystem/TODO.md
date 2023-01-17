@@ -1,1 +1,2 @@
-[ ] Spostare il numero di generazioni in un file apposito
+[ ] Invalid operational mode
+[ ] Datastore

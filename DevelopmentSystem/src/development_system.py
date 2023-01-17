@@ -16,7 +16,7 @@ class DevelopmentSystem:
         with open(os.path.join(os.path.abspath('..'), 'development_system_config.json')) as f:
             self.config = json.load(f)
 
-        # validate the schema
+        # validate the config
         try:
             validate(self.config, config_schema)
         except ValidationError:
@@ -26,7 +26,7 @@ class DevelopmentSystem:
         self.mental_command_classifier = None
 
     def run(self):
-        print('[+] Development System thread started')
+        print('[+] Development System started on main thread')
 
         # start the rest server in a new thread as daemon
         run_thread = Thread(target=JsonIO.get_instance().listen, args=('0.0.0.0', 5000))
@@ -40,6 +40,10 @@ class DevelopmentSystem:
             if self.config['operational_mode'] == 'waiting_for_dataset':
                 # get new received learning set
                 learning_session_set = JsonIO.get_instance().get_queue().get(block=True)
+
+                # create JSON file containing the number of generations
+                with open(os.path.join(os.path.abspath('..'), 'data', 'number_of_generations.json'), "w") as f:
+                    json.dump({'number_of_generations': self.config['initial_number_of_generations']}, f, indent=4)
 
                 # save to database and change operational mode
                 # TODO: database
@@ -56,7 +60,6 @@ class DevelopmentSystem:
 
                 # start the early training controller
                 EarlyTrainingController(mental_command_classifier=self.mental_command_classifier,
-                                        number_of_generations=self.config['initial_number_of_generations'],
                                         number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
                                         number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range'])\
                     .run(self.config['operational_mode'], training_dataset)
