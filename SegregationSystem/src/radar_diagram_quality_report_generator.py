@@ -41,22 +41,22 @@ class RadarDiagramQualityReportGenerator:
         alpha_df = pd.DataFrame(dict(r=alpha, theta=labels))
         fig = px.line_polar(alpha_df, r='r', theta='theta', line_close=True, title="Alpha Radar Diagram")
         fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'alpha_radar_diagram.png'))
+        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'alpha_radar_diagram.png'))
 
         beta_df = pd.DataFrame(dict(r=beta, theta=labels))
         fig = px.line_polar(beta_df, r='r', theta='theta', line_close=True, title="Beta Radar Diagram")
         fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'beta_radar_diagram.png'))
+        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'beta_radar_diagram.png'))
 
         delta_df = pd.DataFrame(dict(r=delta, theta=labels))
         fig = px.line_polar(delta_df, r='r', theta='theta', line_close=True, title="Delta Radar Diagram")
         fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'delta_radar_diagram.png'))
+        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'delta_radar_diagram.png'))
 
         theta_df = pd.DataFrame(dict(r=theta, theta=labels))
         fig = px.line_polar(theta_df, r='r', theta='theta', line_close=True, title="Theta Radar Diagram")
         fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'theta_radar_diagram.png'))
+        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'theta_radar_diagram.png'))
 
         info = dict()
         info['alpha'] = alpha
@@ -69,14 +69,14 @@ class RadarDiagramQualityReportGenerator:
     def generate_quality_report(self, info):
 
         info['evaluation'] = ''
-        report_path = os.path.join(os.path.abspath('..'), 'data', 'quality_report.json')
+        report_path = os.path.join(os.path.abspath('..'), 'data', 'quality', 'quality_report.json')
         with open(report_path, "w") as file:
             json.dump(info, file, indent=4)
         pass
 
     def check_quality_evaluation_from_report(self):
 
-        report_path = os.path.join(os.path.abspath('..'), 'data', 'quality_report.json')
+        report_path = os.path.join(os.path.abspath('..'), 'data', 'quality', 'quality_report.json')
         schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'quality_report_schema.json')
 
         try:

@@ -41,20 +41,20 @@ class BalanceBarChartReportGenerator:
         info['right'] = values[2]
         info['stop'] = values[3]
 
-        chart_path = os.path.join(os.path.abspath('..'), 'data', 'balance_bar_chart.png')
+        chart_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balance_bar_chart.png')
         plt.savefig(chart_path)
         return info
 
     def generate_balancing_report(self, info):
 
         info['evaluation'] = ''
-        report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing_report.json')
+        report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balancing_report.json')
         with open(report_path, "w") as file:
             json.dump(info, file, indent=4)
 
     def check_balancing_evaluation_from_report(self):
 
-        report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing_report.json')
+        report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balancing_report.json')
         schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'balancing_report_schema.json')
 
         try:
