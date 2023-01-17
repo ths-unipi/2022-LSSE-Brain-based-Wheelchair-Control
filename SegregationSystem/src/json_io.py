@@ -18,7 +18,7 @@ class JsonIO:
         return JsonIO._instance
 
     def listener(self, ip, port):
-        self._app.run(host=ip, port=port, debug=True)
+        self._app.run(host=ip, port=port, debug=False)
 
     def get_app(self):
         return self._app

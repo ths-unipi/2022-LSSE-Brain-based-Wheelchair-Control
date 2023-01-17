@@ -1,1 +1,12 @@
-{"operative_mode": "collecting_op_mode", "user_id": 1, "testing_mode": false, "endpoint_ip": "127.0.0.1", "endpoint_port": "5000", "db_name": "segregation.db", "collecting_threshold": 10, "training_set_size": 0.75, "validation_set_size": 0.15, "testing_set_size": 0.1}
+{
+    "operative_mode": "splitting_op_mode",
+    "user_id": 0,
+    "testing_mode": false,
+    "endpoint_ip": "127.0.0.1",
+    "endpoint_port": "5000",
+    "db_name": "segregation.db",
+    "collecting_threshold": 10,
+    "training_set_size": 0.75,
+    "validation_set_size": 0.15,
+    "testing_set_size": 0.1
+}

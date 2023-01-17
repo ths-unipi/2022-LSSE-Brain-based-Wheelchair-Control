@@ -109,7 +109,7 @@ class PreparedSessionCollector:
             return None
         dataset = []
         for p_session in res:
-            dataset.append(p_session[2])
+            dataset.append(json.loads(p_session[2]))
         return dataset
 
     def store_prepared_session(self, p_session):

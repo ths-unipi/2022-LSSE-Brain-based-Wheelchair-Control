@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "Up": {"type": "integer"},
+    "Left": {"type": "integer"},
+    "Right": {"type": "integer"},
+    "Down": {"type": "integer"},
+    "Evaluation": {"type": "string"}
+  },
+  "required": ["Up", "Left", "Right", "Down", "Evaluation"]
+}

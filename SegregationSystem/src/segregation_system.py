@@ -47,7 +47,7 @@ class SegregationSystem:
     def _save_config(self):
         config_path = os.path.join(os.path.abspath('..'), 'segregation_system_config.json')
         with open(config_path, "w") as file:
-            json.dump(self.segregation_system_config, file)
+            json.dump(self.segregation_system_config, file, indent=4)
 
     def run(self):
         self._import_config()
@@ -73,6 +73,14 @@ class SegregationSystem:
                 if collector.check_collecting_threshold() is False:
                     continue
 
+                self.segregation_system_config['operative_mode'] = 'balancing_op_mode'
+                self._save_config()
+                continue
+
+            # ---------------- BALANCING OP MODE -----------------------
+
+            elif op_mode == 'balancing_op_mode':
+
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
                     print("Load database error")
@@ -82,12 +90,29 @@ class SegregationSystem:
                 info = b_generator.generate_balance_bar_chart(dataset)
                 b_generator.generate_balancing_report(info)
 
-                self.segregation_system_config['operative_mode'] = 'balancing_op_mode'
+                self.segregation_system_config['operative_mode'] = 'quality_op_mode'
                 self._save_config()
                 exit(0)
 
-            # ---------------- BALANCING OP MODE -----------------------
-            elif op_mode == 'balancing_op_mode':
+            # ---------------- QUALITY OP MODE -----------------------
+
+            elif op_mode == 'quality_op_mode':
+
+                b_generator = BalanceBarChartReportGenerator()
+                evaluation = b_generator.check_balancing_evaluation_from_report()
+                if evaluation is None:
+                    print("Load balancing evaluation failed")
+                    exit(1)
+                elif evaluation == 'not balanced':
+                    print("Dataset not balanced")
+                    # TODO
+                    # define state error
+                    exit(1)
+                elif evaluation == 'balanced':
+                    print("Dataset balanced")
+                else:
+                    print("Invalid balancing evaluation")
+                    exit(1)
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
@@ -98,13 +123,13 @@ class SegregationSystem:
                 info = q_generator.generate_radar_diagram(dataset)
                 q_generator.generate_quality_report(info)
 
-                self.segregation_system_config['operative_mode'] = 'quality_op_mode'
+                self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
                 self._save_config()
                 exit(0)
 
-            # ---------------- QUALITY OP MODE -----------------------
+            # ---------------- SPLITTING OP MODE -----------------------
 
-            elif op_mode == 'quality_op_mode':
+            elif op_mode == 'splitting_op_mode':
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
                 splitted_dataset = splitter.generate_training_validation_testing_set(dataset)
@@ -115,7 +140,6 @@ class SegregationSystem:
                 self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                 self.segregation_system_config['user_id'] += 1
                 self._save_config()
-                exit(0)
 
             else:
                 print('Invalid operative mode')
