@@ -6,7 +6,8 @@
       "type": "string"
     },
     "label": {
-      "type": "integer"
+      "type": "string",
+      "enum" : ["stop" ,"move" ,"right" , "left"]
     }
   },
   "required": [

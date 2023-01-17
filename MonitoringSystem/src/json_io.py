@@ -1,10 +1,12 @@
-from flask import Flask, send_file
+from flask import Flask, request
 from requests import post,get
+from threading import Thread
+
 import queue
 
 
 #to test receive method
-connection_string = f'http://10.102.25.52:5000' + '/'
+connection_string = 'http://192.168.178.22:5000' + '/'
 
 class JsonIO:
 
@@ -24,14 +26,14 @@ class JsonIO:
     def listener(self, ip, port):
         self._app.run(host=ip, port=port, debug=False)
 
-    def get_app(self):
+    def get_app(self) -> Flask:
         return self._app
 
 
-    def receive(self, received_json):
+    def receive(self, received_json) -> None:
         self.queue.put(received_json, block=True)
 
-    def get_queue(self):
+    def get_queue(self) -> queue:
         return self.queue
 
     #to test the receive() method
@@ -41,3 +43,19 @@ class JsonIO:
             return False
 
         return True
+
+
+
+app = JsonIO().get_instance().get_app()
+
+@app.post('/json')
+def post_json():
+    if request.json is None:
+        return {'error': 'No JSON received'}, 500
+
+    received_json = request.json
+
+    new_thread = Thread(target= JsonIO.get_instance().receive, args=(received_json,))
+    new_thread.start()
+
+    return {}, 200
