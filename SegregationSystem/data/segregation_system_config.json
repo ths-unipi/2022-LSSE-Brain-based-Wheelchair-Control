@@ -1,5 +1,5 @@
 {
-    "operative_mode": "collecting_op_mode",
+    "operative_mode": "quality_op_mode",
     "user_id": 2,
     "testing_mode": false,
     "endpoint_ip": "127.0.0.1",

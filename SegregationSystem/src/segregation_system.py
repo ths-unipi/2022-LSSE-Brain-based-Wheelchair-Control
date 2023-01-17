@@ -93,17 +93,22 @@ class SegregationSystem:
 
                 self.segregation_system_config['operative_mode'] = 'quality_op_mode'
                 self._save_config()
-                exit(0)
+
+                if self.segregation_system_config['testing_mode'] is False:
+                    exit(0)
+                else:
+                    continue
 
             # ---------------- QUALITY OP MODE -----------------------
 
             elif op_mode == 'quality_op_mode':
 
                 b_generator = BalanceBarChartReportGenerator()
-                if b_generator.check_balancing_evaluation_from_report() is True:
-                    pass
-                else:
-                    exit(1)
+                if self.segregation_system_config['testing_mode'] is False:
+                    if b_generator.check_balancing_evaluation_from_report() is True:
+                        pass
+                    else:
+                        exit(1)
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
@@ -116,16 +121,22 @@ class SegregationSystem:
 
                 self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
                 self._save_config()
-                exit(0)
+
+                if self.segregation_system_config['testing_mode'] is False:
+                    exit(0)
+                else:
+                    continue
 
             # ---------------- SPLITTING OP MODE -----------------------
 
             elif op_mode == 'splitting_op_mode':
+
                 q_generator = RadarDiagramQualityReportGenerator()
-                if q_generator.check_quality_evaluation_from_report() is True:
-                    pass
-                else:
-                    exit(1)
+                if self.segregation_system_config['testing_mode'] is False:
+                    if q_generator.check_quality_evaluation_from_report() is True:
+                        pass
+                    else:
+                        exit(1)
 
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
