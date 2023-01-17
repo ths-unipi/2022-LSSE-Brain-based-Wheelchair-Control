@@ -1,58 +1,51 @@
 from jsonschema import validate, ValidationError
 from src.json_io import JsonIO
-from flask import request
 from threading import Thread
 
 import json
 import os
+import pickle
 
-json_io_instance = JsonIO()
-app = json_io_instance.app
 
-@app.post('/json')
-def post_json():
-    if request.json is None:
-        return {'error': 'No JSON received'}, 500
+def validate_configuration():
+    try:
+        # load configuration file
+        with open(os.path.join(os.path.abspath('..'), 'configurationExecutionSystem.json')) as configuration_file:
+            configuration = json.load(configuration_file)
 
-    received_json = request.json
+        # load validator file
+        with open( os.path.join(os.path.abspath('..'),'configurationExecutionSystemValidator.json')) \
+                as configuration_validator:
+            validator_schema = json.load(configuration_validator)
 
-    thread_receive = Thread(target=json_io_instance.receive, args=(received_json,))
-    thread_receive.start()
+        # validate json
+        validate(configuration, validator_schema)
+        print("Validation complete")
 
-    return {}, 200
+    except FileNotFoundError:
+        print('Failed to open file')
+        exit(1)
+
+    except ValidationError:
+        print('Config validation failed')
+        exit(1)
+
 
 class ExecutionSystem:
 
     def __init__(self):
-        try:
-            # load configuration file
-            with open(os.path.join(os.path.abspath('..'), 'configurationExecutionSystem.json')) as configuration_file:
-                self._configuration_execution_system = json.load(configuration_file)
-
-            # load validator file
-            with open( os.path.join(os.path.abspath('..'),'configurationExecutionSystemValidator.json')) \
-                    as configuration_validator:
-                validator_schema = json.load(configuration_validator)
-
-            # validate json
-            validate(self._configuration_execution_system, validator_schema)
-            print("Validation complete")
-
-
-
-        except FileNotFoundError:
-            print('Failed to open file')
-            exit(1)
-
-        except ValidationError:
-            print('Config validation failed')
-            exit(1)
+        self.__configuration_execution_system = validate_configuration()
 
     def run(self):
         operating_mode = self._configuration_execution_system['operating_mode']
         while(True):
-            json_file = json_io_instance._received_json_queue.get(block=True)
-            print(json_file)
+            json_file = JsonIO.get_instance().get_received_json()
+            # if operating_mode == 'execution':
+            #     with open('mental_command_session_classifier.json') as f:
+            #         classifier = json.load(f)
+            #         mlp_classifier = pickle.loads(classifier['classifier'].encode('ISO-8859-1'))
+            #         # prediction = mlp_classifier.predict(session)
+
 
 
 if __name__ == '__main__':
@@ -61,4 +54,4 @@ if __name__ == '__main__':
     execution_thread.start()
 
     # rest server in main thread
-    json_io_instance.listener('0.0.0.0', 5000)
+    JsonIO.get_instance().listener('0.0.0.0', 5000)
