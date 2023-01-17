@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "operating_mode": {
+      "type": "string",
+      "enum": ["development", "execution"]
+    },
+    "threshold_value": {
+      "type": "integer"
+    },
+    "endpoint_IP": {
+      "type": "string"
+    },
+    "endpoint_port": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "operating_mode",
+    "threshold_value",
+    "endpoint_IP",
+    "endpoint_port"
+  ]
+}
