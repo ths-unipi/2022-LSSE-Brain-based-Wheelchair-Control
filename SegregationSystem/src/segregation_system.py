@@ -45,11 +45,13 @@ class SegregationSystem:
     def run(self):
 
         listener = Thread(target=JsonIO.get_instance().listener, args=("0.0.0.0", "5000"))
+        listener.setDaemon(True)
         listener.start()
 
         self._import_config()
         collector = PreparedSessionCollector(self.segregation_system_config)
         collector.segregation_system_config = self.segregation_system_config
+        collector.retrive_counter()
 
         while True:
             op_mode = self.segregation_system_config['operative_mode']
@@ -119,6 +121,12 @@ class SegregationSystem:
             # ---------------- SPLITTING OP MODE -----------------------
 
             elif op_mode == 'splitting_op_mode':
+                q_generator = RadarDiagramQualityReportGenerator()
+                if q_generator.check_quality_evaluation_from_report() is True:
+                    pass
+                else:
+                    exit(1)
+
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
                 splitted_dataset = splitter.generate_training_validation_testing_set(dataset)
@@ -129,6 +137,7 @@ class SegregationSystem:
                 self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                 self.segregation_system_config['user_id'] += 1
                 self._save_config()
+                collector.retrive_counter()
 
             else:
                 print('Invalid operative mode')

@@ -10,7 +10,6 @@ class BalanceBarChartReportGenerator:
     def __init__(self):
         pass
 
-
     def generate_balance_bar_chart(self, dataset):
 
         labels = ['move', 'left', 'right', 'stop']

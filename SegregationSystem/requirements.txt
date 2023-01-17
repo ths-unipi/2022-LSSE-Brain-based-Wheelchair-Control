@@ -6,4 +6,4 @@ pytest
 matplotlib
 plotly
 sklearn
-
+kaleido

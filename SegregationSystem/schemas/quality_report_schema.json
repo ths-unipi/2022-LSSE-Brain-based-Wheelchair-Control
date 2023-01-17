@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "alpha": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+    },
+    "beta": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "delta": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "theta": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "evaluation": {
+      "type": "string",
+      "enum": ["good quality", "bad quality"]
+    }
+  },
+  "required": ["alpha", "beta", "delta", "theta", "evaluation"]
+}

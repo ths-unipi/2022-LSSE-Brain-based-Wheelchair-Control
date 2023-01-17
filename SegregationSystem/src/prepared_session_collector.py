@@ -8,7 +8,7 @@ class PreparedSessionCollector:
 
     def __init__(self, config):
         self.segregation_system_config = config
-        self._prepared_session_counter = self._set_counter()
+        self._prepared_session_counter = 0
         self._conn = None
 
     def _open_connection(self):
@@ -37,7 +37,7 @@ class PreparedSessionCollector:
 
         return True
 
-    def _set_counter(self):
+    def retrive_counter(self):
 
         if not self._open_connection():
             return None
@@ -54,9 +54,9 @@ class PreparedSessionCollector:
 
         res = cursor.fetchone()  # fetchall for more results
         if res is None:
-            return 0
+            self._prepared_session_counter = 0
         else:
-            return res[0] + 1
+            self._prepared_session_counter = res[0] + 1
 
     def _validate_prepared_session(self, p_session):
 
@@ -120,6 +120,7 @@ class PreparedSessionCollector:
 
         user_id = self.segregation_system_config['user_id']
         session_id = self._prepared_session_counter
+        print(f"user_id: {user_id} session_id: {session_id}")
 
         if not self._open_connection():
             return False
