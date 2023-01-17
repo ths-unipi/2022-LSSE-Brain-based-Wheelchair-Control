@@ -4,6 +4,7 @@ import json
 from jsonschema import validate, ValidationError
 import matplotlib.pyplot as plt
 
+
 class BalanceBarChartReportGenerator:
 
     def __init__(self):
@@ -68,11 +69,20 @@ class BalanceBarChartReportGenerator:
 
         except FileNotFoundError:
             print(f'Failed to open balancing_report.json')
-            return None
+            return False
 
         except ValidationError:
             print('Balancing Report has invalid schema')
-            return None
+            return False
 
         evaluation = report['Evaluation']
-        return evaluation
+
+        if evaluation == 'not balanced':
+            print("Dataset not balanced")
+            return False
+        elif evaluation == 'balanced':
+            print("Dataset balanced")
+            return True
+        else:
+            print("Invalid balancing evaluation")
+            return False

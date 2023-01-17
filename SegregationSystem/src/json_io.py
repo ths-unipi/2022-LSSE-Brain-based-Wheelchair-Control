@@ -24,7 +24,7 @@ class JsonIO:
         return self._app
 
     def get_received_json(self):
-        return self._received_json_queue.get()
+        return self._received_json_queue.get(block=True)
 
     def receive(self, received_json):
         # if the queue is full the thread is blocked

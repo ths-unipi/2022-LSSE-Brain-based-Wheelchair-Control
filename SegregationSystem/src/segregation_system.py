@@ -22,8 +22,8 @@ class SegregationSystem:
         return SegregationSystem._instance
 
     def _import_config(self):
-        config_path = os.path.join(os.path.abspath('..'), 'segregation_system_config.json')
-        schema_path = os.path.join(os.path.abspath('..'), 'segregation_system_config_schema.json')
+        config_path = os.path.join(os.path.abspath('..'), 'data', 'segregation_system_config.json')
+        schema_path = os.path.join(os.path.abspath('..'), 'data', 'segregation_system_config_schema.json')
 
         try:
             with open(config_path) as file:
@@ -45,7 +45,7 @@ class SegregationSystem:
         self.segregation_system_config = segregation_system_config
 
     def _save_config(self):
-        config_path = os.path.join(os.path.abspath('..'), 'segregation_system_config.json')
+        config_path = os.path.join(os.path.abspath('..'), 'data', 'segregation_system_config.json')
         with open(config_path, "w") as file:
             json.dump(self.segregation_system_config, file, indent=4)
 
@@ -57,6 +57,8 @@ class SegregationSystem:
         while True:
             op_mode = self.segregation_system_config['operative_mode']
 
+            print(f"Mode: {op_mode}")
+            
             # --------------- COLLECTING OP MODE -------------------
 
             if op_mode == 'collecting_op_mode':
@@ -99,19 +101,9 @@ class SegregationSystem:
             elif op_mode == 'quality_op_mode':
 
                 b_generator = BalanceBarChartReportGenerator()
-                evaluation = b_generator.check_balancing_evaluation_from_report()
-                if evaluation is None:
-                    print("Load balancing evaluation failed")
-                    exit(1)
-                elif evaluation == 'not balanced':
-                    print("Dataset not balanced")
-                    # TODO
-                    # define state error
-                    exit(1)
-                elif evaluation == 'balanced':
-                    print("Dataset balanced")
+                if b_generator.check_balancing_evaluation_from_report() is True:
+                    pass
                 else:
-                    print("Invalid balancing evaluation")
                     exit(1)
 
                 dataset = collector.load_learning_session_set()
