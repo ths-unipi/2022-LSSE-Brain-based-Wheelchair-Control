@@ -14,8 +14,9 @@ class IngestionSystem:
 
     def __init__(self) -> None:
         loaded_config = self.load_json(json_path=CONFIG_PATH)
+        loaded_schema = self.load_json(json_path=CONFIG_SCHEMA_PATH)
 
-        if self.validate_schema(loaded_json=loaded_config):
+        if self.validate_schema(loaded_json=loaded_config, schema=loaded_schema):
             print('[+] Configuration loaded')
             self.ingestion_system_config = loaded_config
         else:
@@ -32,11 +33,9 @@ class IngestionSystem:
             print(f'[-] Failed to open {json_path}')
             exit(-1)
 
-    def validate_schema(self, loaded_json: dict) -> bool:
+    def validate_schema(self, loaded_json: dict, schema: dict) -> bool:
         try:
-            loaded_schema = self.load_json(json_path=CONFIG_SCHEMA_PATH)
-            validate(instance=loaded_json, schema=loaded_schema)
-
+            validate(instance=loaded_json, schema=schema)
         except ValidationError:
             print('[-] Configuration validation failed')
             return False
