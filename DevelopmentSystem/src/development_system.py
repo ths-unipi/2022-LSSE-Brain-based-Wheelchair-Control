@@ -1,6 +1,5 @@
 import json
 import os.path
-import signal
 from threading import Thread
 from jsonschema import validate, ValidationError
 
@@ -28,6 +27,11 @@ class DevelopmentSystem:
 
     def run(self):
         print('[+] Development System thread started')
+
+        # start the rest server in a new thread as daemon
+        run_thread = Thread(target=JsonIO.get_instance().listen, args=('0.0.0.0', 5000))
+        run_thread.setDaemon(True)
+        run_thread.start()
 
         # main cycle
         while True:
@@ -59,8 +63,7 @@ class DevelopmentSystem:
 
                 # change operational mode and stop
                 self.change_operational_mode('check_early_training_report')
-                # exit(0)
-                os.kill(os.getpid(), signal.SIGINT)
+                break
 
             # ====================== Early training Report Evaluation ======================
 
@@ -73,6 +76,14 @@ class DevelopmentSystem:
                 else:
                     self.change_operational_mode('early_training')
                     print('[+] The Number of Generations has changed, restart from Early Training')
+
+            # ====================== Grid search =======================
+
+            if self.config['operational_mode'] == 'grid_search':
+                break
+
+        # close all threads
+        exit(0)
 
     def change_operational_mode(self, new_mode: str):
         self.config['operational_mode'] = new_mode
