@@ -15,6 +15,7 @@ class GradientDescentPlotGenerator:
 
         # save plot as PNG
         plt.savefig(self.image_path, dpi=300)
+        print('[+] Gradient Descent Plot exported')
 
         # show the plot
-        plt.show()
+        # plt.show()
