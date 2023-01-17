@@ -1,5 +1,7 @@
 import queue
-from flask import Flask
+from threading import Thread
+
+from flask import Flask, request
 from requests import post
 
 
@@ -39,3 +41,19 @@ class JsonIO:
         if JsonIO.json_io_instance is None:
             JsonIO.json_io_instance = JsonIO()
         return JsonIO.json_io_instance
+
+
+app = JsonIO.get_instance().get_app()
+
+
+@app.post('/json')
+def post_json():
+    if request.json is None:
+        return {'error': 'No JSON received'}, 500
+
+    received_json = request.json
+
+    receive_thread = Thread(target=JsonIO.get_instance().receive, args=(received_json,))
+    receive_thread.start()
+
+    return {}, 200
