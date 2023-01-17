@@ -56,7 +56,7 @@ class BalanceBarChartReportGenerator:
     def check_balancing_evaluation_from_report(self):
 
         report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing_report.json')
-        schema_path = os.path.join(os.path.abspath('..'), 'data', 'balancing_report_schema.json')
+        schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'balancing_report_schema.json')
 
         try:
             with open(report_path) as file:

@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, request
+from threading import Thread
 from requests import post
 import queue
 
@@ -29,9 +30,11 @@ class JsonIO:
     def receive(self, received_json):
         # if the queue is full the thread is blocked
         try:
-            self._received_json_queue.put(received_json, timeout=5)
+            self._received_json_queue.put(received_json, timeout=10)
         except queue.Full:
             print("Full queue exception")
+            return False
+        return True
 
     def send(self, port, ip, data):
         connection_string = f'http://{ip}:{port}/json'
@@ -43,3 +46,18 @@ class JsonIO:
             return False
 
         return True
+
+
+app = JsonIO.get_instance().get_app()
+
+
+@app.post('/json')
+def post_json():
+    if request.json is None:
+        return {'error': 'No JSON received'}, 500
+
+    received_json = request.json
+    new_thread = Thread(target=JsonIO.get_instance().receive, args=(received_json,))
+    new_thread.start()
+
+    return {}, 200

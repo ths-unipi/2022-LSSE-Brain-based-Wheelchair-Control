@@ -23,7 +23,7 @@ class SegregationSystem:
 
     def _import_config(self):
         config_path = os.path.join(os.path.abspath('..'), 'data', 'segregation_system_config.json')
-        schema_path = os.path.join(os.path.abspath('..'), 'data', 'segregation_system_config_schema.json')
+        schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'segregation_system_config_schema.json')
 
         try:
             with open(config_path) as file:
@@ -58,7 +58,7 @@ class SegregationSystem:
             op_mode = self.segregation_system_config['operative_mode']
 
             print(f"Mode: {op_mode}")
-            
+
             # --------------- COLLECTING OP MODE -------------------
 
             if op_mode == 'collecting_op_mode':

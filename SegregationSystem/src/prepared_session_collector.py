@@ -60,7 +60,7 @@ class PreparedSessionCollector:
 
     def _validate_prepared_session(self, p_session):
 
-        schema_path = os.path.join(os.path.abspath('..'), 'data', 'p_session_schema.json')
+        schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'p_session_schema.json')
         try:
 
             with open(schema_path) as file:
