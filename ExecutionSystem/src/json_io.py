@@ -11,7 +11,6 @@ class JsonIO:
     def __init__(self):
         self.app = Flask(__name__)
         self._received_json_queue = queue.Queue()
-        self.json_io_instance = JsonIO()
 
     @staticmethod
     def get_instance():

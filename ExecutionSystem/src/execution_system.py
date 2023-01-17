@@ -21,6 +21,7 @@ def validate_configuration():
         # validate json
         validate(configuration, validator_schema)
         print("Validation complete")
+        return configuration
 
     except FileNotFoundError:
         print('Failed to open file')
@@ -34,7 +35,7 @@ def validate_configuration():
 class ExecutionSystem:
 
     def __init__(self):
-        self.__configuration_execution_system = validate_configuration()
+        self._configuration_execution_system = validate_configuration()
 
     def run(self):
         operating_mode = self._configuration_execution_system['operating_mode']
