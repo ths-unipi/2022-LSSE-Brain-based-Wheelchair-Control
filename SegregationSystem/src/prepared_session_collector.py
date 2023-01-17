@@ -2,7 +2,7 @@ import sqlite3
 import os
 import json
 from jsonschema import validate, ValidationError
-import pandas
+
 
 class PreparedSessionCollector:
 

@@ -7,6 +7,7 @@ from src.balance_bar_chart_report_generator import BalanceBarChartReportGenerato
 from src.radar_diagram_quality_report_generator import RadarDiagramQualityReportGenerator
 from src.learning_session_set_splitter import LearningSessionSetSplitter
 
+
 class SegregationSystem:
 
     _instance = None
@@ -107,6 +108,7 @@ class SegregationSystem:
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
                 splitted_dataset = splitter.generate_training_validation_testing_set(dataset)
+                print(splitted_dataset)
 
                 # JsonIO.send(self.segregation_system_config['port'], self.segregation_system_config['ip'], splitted_dataset)
 
