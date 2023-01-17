@@ -9,7 +9,7 @@ class MentalCommandClassifier:
     def __init__(self, uuid: int, training_parameters: dict) -> None:
         self.uuid = uuid
         self.classifier = MLPClassifier(max_iter=training_parameters['number_of_generations'],
-                                        hidden_layer_sizes=training_parameters['hidden_layer_size'])
+                                        hidden_layer_sizes=training_parameters['hidden_layer_sizes'])
 
     def __int__(self, file_name: str) -> None:
         self.uuid = int(file_name.split('.')[0])        # get uuid from the file name (es. 1.sav)
@@ -40,4 +40,4 @@ class MentalCommandClassifier:
         else:
             self.uuid = uuid
         self.classifier = MLPClassifier(max_iter=training_parameters['number_of_generations'],
-                                        hidden_layer_sizes=training_parameters['hidden_layer_size'])
+                                        hidden_layer_sizes=training_parameters['hidden_layer_sizes'])
