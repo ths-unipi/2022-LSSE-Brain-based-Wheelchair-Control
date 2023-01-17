@@ -1,10 +1,10 @@
 from flask import Flask, send_file
 from requests import post,get
-
+import queue
 
 
 #to test receive method
-connection_string = f'http://127.0.0.1:5000/'
+connection_string = f'http://10.102.25.52:5000' + '/'
 
 class JsonIO:
 
@@ -19,21 +19,24 @@ class JsonIO:
 
     def __init__(self):
         self._app = Flask(__name__)
+        self.queue = queue.Queue()
 
     def listener(self, ip, port):
-        self._app.run(host=ip, port=port, debug=True)
+        self._app.run(host=ip, port=port, debug=False)
 
     def get_app(self):
         return self._app
 
-    def receive(self, json_received):
-        print(f'Received JSON : {json_received}')
 
+    def receive(self, received_json):
+        self.queue.put(received_json, block=True)
 
-    #to test the receive method
+    def get_queue(self):
+        return self.queue
+
+    #to test the receive() method
     def send(self, json_to_send):
         response = post(connection_string + 'json', json=json_to_send)
-
         if response.status_code != 200:
             return False
 
