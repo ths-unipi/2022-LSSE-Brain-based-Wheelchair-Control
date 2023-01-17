@@ -6,20 +6,13 @@ from src.prepared_session_collector import PreparedSessionCollector
 from src.balance_bar_chart_report_generator import BalanceBarChartReportGenerator
 from src.radar_diagram_quality_report_generator import RadarDiagramQualityReportGenerator
 from src.learning_session_set_splitter import LearningSessionSetSplitter
+from threading import Thread
 
 
 class SegregationSystem:
 
-    _instance = None
-
     def __init__(self):
         self.segregation_system_config = None
-
-    @staticmethod
-    def get_instance():
-        if SegregationSystem._instance is None:
-            SegregationSystem._instance = SegregationSystem()
-        return SegregationSystem._instance
 
     def _import_config(self):
         config_path = os.path.join(os.path.abspath('..'), 'data', 'segregation_system_config.json')
@@ -50,6 +43,10 @@ class SegregationSystem:
             json.dump(self.segregation_system_config, file, indent=4)
 
     def run(self):
+
+        listener = Thread(target=JsonIO.get_instance().listener, args=("0.0.0.0", "5000"))
+        listener.start()
+
         self._import_config()
         collector = PreparedSessionCollector(self.segregation_system_config)
         collector.segregation_system_config = self.segregation_system_config
