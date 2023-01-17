@@ -1,9 +1,9 @@
 {
-    "operative_mode": "quality_op_mode",
-    "user_id": 2,
+    "operative_mode": "collecting_op_mode",
+    "user_id": 6,
     "testing_mode": false,
     "endpoint_ip": "127.0.0.1",
-    "endpoint_port": "5000",
+    "endpoint_port": "4000",
     "db_name": "segregation.db",
     "collecting_threshold": 10,
     "training_set_size": 0.7,

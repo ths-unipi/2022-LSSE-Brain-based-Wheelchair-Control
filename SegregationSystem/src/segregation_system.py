@@ -71,7 +71,7 @@ class SegregationSystem:
                 else:
                     continue
 
-                if collector.check_collecting_threshold() is False:
+                if not collector.check_collecting_threshold():
                     continue
 
                 self.segregation_system_config['operative_mode'] = 'balancing_op_mode'
@@ -89,12 +89,13 @@ class SegregationSystem:
 
                 b_generator = BalanceBarChartReportGenerator()
                 info = b_generator.generate_balance_bar_chart(dataset)
-                b_generator.generate_balancing_report(info)
+                testing_mode = self.segregation_system_config['testing_mode']
+                b_generator.generate_balancing_report(info, testing_mode)
 
                 self.segregation_system_config['operative_mode'] = 'quality_op_mode'
                 self._save_config()
 
-                if self.segregation_system_config['testing_mode'] is False:
+                if not self.segregation_system_config['testing_mode']:
                     exit(0)
                 else:
                     continue
@@ -104,11 +105,10 @@ class SegregationSystem:
             elif op_mode == 'quality_op_mode':
 
                 b_generator = BalanceBarChartReportGenerator()
-                if self.segregation_system_config['testing_mode'] is False:
-                    if b_generator.check_balancing_evaluation_from_report() is True:
-                        pass
-                    else:
-                        exit(1)
+                if b_generator.check_balancing_evaluation_from_report():
+                    pass
+                else:
+                    exit(1)
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
@@ -117,12 +117,13 @@ class SegregationSystem:
 
                 q_generator = RadarDiagramQualityReportGenerator()
                 info = q_generator.generate_radar_diagram(dataset)
-                q_generator.generate_quality_report(info)
+                testing_mode = self.segregation_system_config['testing_mode']
+                q_generator.generate_quality_report(info, testing_mode)
 
                 self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
                 self._save_config()
 
-                if self.segregation_system_config['testing_mode'] is False:
+                if not self.segregation_system_config['testing_mode']:
                     exit(0)
                 else:
                     continue
@@ -132,18 +133,20 @@ class SegregationSystem:
             elif op_mode == 'splitting_op_mode':
 
                 q_generator = RadarDiagramQualityReportGenerator()
-                if self.segregation_system_config['testing_mode'] is False:
-                    if q_generator.check_quality_evaluation_from_report() is True:
-                        pass
-                    else:
-                        exit(1)
+                if q_generator.check_quality_evaluation_from_report():
+                    pass
+                else:
+                    exit(1)
 
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
                 splitted_dataset = splitter.generate_training_validation_testing_set(dataset)
                 print(splitted_dataset)
 
-                # JsonIO.send(self.segregation_system_config['port'], self.segregation_system_config['ip'], splitted_dataset)
+                ip = self.segregation_system_config['endpoint_ip']
+                port = self.segregation_system_config['endpoint_port']
+                if not JsonIO.get_instance().send(ip, port, splitted_dataset):
+                    exit(1)
 
                 self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                 self.segregation_system_config['user_id'] += 1

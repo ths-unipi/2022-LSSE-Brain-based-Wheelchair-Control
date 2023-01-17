@@ -36,13 +36,16 @@ class JsonIO:
             return False
         return True
 
-    def send(self, port, ip, data):
+    def send(self, ip, port, data):
         connection_string = f'http://{ip}:{port}/json'
         response = post(connection_string, json=data)
 
         if response.status_code != 200:
-            error_message = response.json()['error']
-            print(f'[-] Error: {error_message}')
+            res = response.json()
+            error_message = "unknown"
+            if 'error' in res:
+                error_message = res['error']
+            print(f"[-] Sending Error: {error_message}")
             return False
 
         return True
