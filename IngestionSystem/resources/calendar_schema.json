@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "CALENDAR": {
+      "type": "string"
+    },
+    "TIMESTAMP": {
+      "type": "string"
+    },
+    "UUID": {
+      "type": "string"
+    }
+  },
+  "required": ["CALENDAR", "TIMESTAMP", "UUID"]
+}

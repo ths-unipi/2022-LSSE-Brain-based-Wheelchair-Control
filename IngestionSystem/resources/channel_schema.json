@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "CHANNEL": {
+      "type": "integer"
+    },
+    "TIMESTAMP": {
+      "type": "string"
+    },
+    "UUID": {
+      "type": "string"
+    }
+  },
+  "required": ["CHANNEL", "TIMESTAMP", "UUID"]
+}

@@ -13,5 +13,6 @@
     "missing_samples_threshold": {
       "type": "integer"
     }
-  }
+  },
+  "required": ["operative_mode", "endpoint_ip", "endpoint_port", "missing_samples_threshold"]
 }
