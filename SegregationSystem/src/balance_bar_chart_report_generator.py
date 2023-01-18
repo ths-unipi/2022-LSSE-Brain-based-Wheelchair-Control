@@ -1,4 +1,3 @@
-import numpy as np
 import os
 import json
 from jsonschema import validate, ValidationError
@@ -42,7 +41,13 @@ class BalanceBarChartReportGenerator:
         info['stop'] = values[3]
 
         chart_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balance_bar_chart.png')
-        plt.savefig(chart_path)
+        try:
+            plt.savefig(chart_path)
+        except:
+            print('[-] Failure to save the balance bar chart')
+            return None
+
+        print('[+] Balance bar chart generated')
         return info
 
     def generate_balancing_report(self, info, testing_mode):
@@ -52,8 +57,15 @@ class BalanceBarChartReportGenerator:
         else:
             info['evaluation'] = ''
         report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balancing_report.json')
-        with open(report_path, "w") as file:
-            json.dump(info, file, indent=4)
+        try:
+            with open(report_path, "w") as file:
+                json.dump(info, file, indent=4)
+        except:
+            print(f'[-] Failure to save balancing_report.json')
+            return False
+
+        print('[+] Balancing report generated')
+        return True
 
     def check_balancing_evaluation_from_report(self):
 
@@ -70,18 +82,21 @@ class BalanceBarChartReportGenerator:
             validate(report, report_schema)
 
         except FileNotFoundError:
-            print(f'Failed to open balancing_report.json')
+            print(f'[-] Failure to open balancing_report.json')
             return False
 
         except ValidationError:
-            print('Balancing Report has invalid schema')
+            print('[-] Balancing Report has invalid schema')
             return False
 
         evaluation = report['evaluation']
 
         if evaluation == 'not balanced':
-            print("Dataset not balanced")
+            print("[-] Balancing evaluation: Dataset not balanced")
             return False
         elif evaluation == 'balanced':
-            print("Dataset balanced")
+            print("[+] Balancing evaluation: Dataset balanced")
             return True
+        else:
+            print("[!] Balancing evaluation not done")
+            return False

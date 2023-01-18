@@ -15,12 +15,12 @@ class PreparedSessionCollector:
         db_name = self.segregation_system_config['db_name']
         db_path = os.path.join(os.path.abspath('..'), 'data', db_name)
         if not os.path.exists(db_path):
-            print("Sqlite db doesn't exist, the db will be created")
+            print("[-] Sqlite db doesn't exist, the db will be created")
             return False
         try:
             self._conn = sqlite3.connect(db_path)
         except sqlite3.Error as e:
-            print(f"Sqlite Connection Error [{e}]")
+            print(f'[-] Sqlite Connection Error [{e}]')
             return False
 
         return True
@@ -32,7 +32,27 @@ class PreparedSessionCollector:
             self._conn.close()
             self._conn = None
         except sqlite3.Error as e:
-            print(f"Close Connection Error [{e}]")
+            print(f"[-] Close Connection Error [{e}]")
+            return False
+
+        return True
+
+    def _validate_prepared_session(self, p_session):
+
+        schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'p_session_schema.json')
+        try:
+
+            with open(schema_path) as file:
+                p_session_schema = json.load(file)
+
+            validate(p_session, p_session_schema)
+
+        except FileNotFoundError:
+            print(f'[-] Failure to open p_session_schema.json')
+            return False
+
+        except ValidationError:
+            print('[-] Prepared Session validation failed')
             return False
 
         return True
@@ -49,7 +69,7 @@ class PreparedSessionCollector:
         try:
             cursor.execute(query, (user_id,))
         except sqlite3.Error as e:
-            print(f"Sqlite Execution Error [{e}]")
+            print(f'[-] Sqlite Execution Error [{e}]')
             return None
 
         res = cursor.fetchone()  # fetchall for more results
@@ -57,26 +77,6 @@ class PreparedSessionCollector:
             self._prepared_session_counter = 0
         else:
             self._prepared_session_counter = res[0] + 1
-
-    def _validate_prepared_session(self, p_session):
-
-        schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'p_session_schema.json')
-        try:
-
-            with open(schema_path) as file:
-                p_session_schema = json.load(file)
-
-            validate(p_session, p_session_schema)
-
-        except FileNotFoundError:
-            print(f'Failed to open p_session_schema.json')
-            return False
-
-        except ValidationError:
-            print('Prepared Session validation failed')
-            return False
-
-        return True
 
     def increment_prepared_session_counter(self):
         self._prepared_session_counter += 1
@@ -101,7 +101,7 @@ class PreparedSessionCollector:
         try:
             cursor.execute(query, (user_id,))
         except sqlite3.Error as e:
-            print(f"Sqlite Execution Error [{e}]")
+            print(f'[-] Sqlite Execution Error [{e}]')
             return None
 
         res = cursor.fetchall()  # fetchall for more results
@@ -115,12 +115,11 @@ class PreparedSessionCollector:
     def store_prepared_session(self, p_session):
 
         if not self._validate_prepared_session(p_session):
-            print("Invalid data")
+            print("[-] Invalid data")
             return False
 
         user_id = self.segregation_system_config['user_id']
         session_id = self._prepared_session_counter
-        print(f"user_id: {user_id} session_id: {session_id}")
 
         if not self._open_connection():
             return False
@@ -133,9 +132,10 @@ class PreparedSessionCollector:
             cursor.execute(query, (user_id, session_id, json.dumps(p_session)))
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f"Sqlite Execution Error [{e}]")
+            print(f"[-] Sqlite Execution Error [{e}]")
             self._close_connection()
             return False
 
+        print(f"[+] Stored new prepared session (user_id: {user_id} session_id: {session_id})")
         self._close_connection()
         return True

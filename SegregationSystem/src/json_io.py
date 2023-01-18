@@ -32,7 +32,7 @@ class JsonIO:
         try:
             self._received_json_queue.put(received_json, timeout=10)
         except queue.Full:
-            print("Full queue exception")
+            print('[-] Full queue exception')
             return False
         return True
 
@@ -42,10 +42,10 @@ class JsonIO:
 
         if response.status_code != 200:
             res = response.json()
-            error_message = "unknown"
+            error_message = 'unknown'
             if 'error' in res:
                 error_message = res['error']
-            print(f"[-] Sending Error: {error_message}")
+            print(f'[-] Sending Error: {error_message}')
             return False
 
         return True

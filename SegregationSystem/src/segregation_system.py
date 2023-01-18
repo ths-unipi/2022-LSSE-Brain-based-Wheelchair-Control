@@ -28,19 +28,26 @@ class SegregationSystem:
             validate(segregation_system_config, segregation_system_config_schema)
 
         except FileNotFoundError:
-            print(f'Failed to open segregation_system_config.json')
+            print(f'[-] Failed to open segregation_system_config.json')
+            print('[!] Shutdown')
             exit(1)
 
         except ValidationError:
-            print('Config validation failed')
+            print('[-] Config validation failed')
+            print('[!] Shutdown')
             exit(1)
 
         self.segregation_system_config = segregation_system_config
 
     def _save_config(self):
         config_path = os.path.join(os.path.abspath('..'), 'data', 'segregation_system_config.json')
-        with open(config_path, "w") as file:
-            json.dump(self.segregation_system_config, file, indent=4)
+        try:
+            with open(config_path, "w") as file:
+                json.dump(self.segregation_system_config, file, indent=4)
+        except:
+            print('[-] Failure to save segregation_system_config.json')
+            return False
+        return True
 
     def run(self):
 
@@ -55,8 +62,10 @@ class SegregationSystem:
 
         while True:
             op_mode = self.segregation_system_config['operative_mode']
+            testing_mode = self.segregation_system_config['testing_mode']
 
-            print(f"Mode: {op_mode}")
+            print(f"[!] Mode: {op_mode}")
+            print(f"[!] Testing mode: {testing_mode}")
 
             # --------------- COLLECTING OP MODE -------------------
 
@@ -64,7 +73,7 @@ class SegregationSystem:
                 # if the queue is empty the thread is blocked
                 received_json = JsonIO.get_instance().get_received_json()
 
-                print(f"Received Json: {received_json}")
+                print(f"[+] Received Json: {received_json}")
 
                 if collector.store_prepared_session(received_json):
                     collector.increment_prepared_session_counter()
@@ -84,18 +93,18 @@ class SegregationSystem:
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
-                    print("Load database error")
+                    print("[-] Load database error")
                     continue
 
                 b_generator = BalanceBarChartReportGenerator()
                 info = b_generator.generate_balance_bar_chart(dataset)
-                testing_mode = self.segregation_system_config['testing_mode']
                 b_generator.generate_balancing_report(info, testing_mode)
 
                 self.segregation_system_config['operative_mode'] = 'quality_op_mode'
                 self._save_config()
 
                 if not self.segregation_system_config['testing_mode']:
+                    print('[!] Shutdown')
                     exit(0)
                 else:
                     continue
@@ -108,22 +117,23 @@ class SegregationSystem:
                 if b_generator.check_balancing_evaluation_from_report():
                     pass
                 else:
+                    print('[!] Shutdown')
                     exit(1)
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
-                    print("Load database error")
+                    print("[-] Load database error")
                     continue
 
                 q_generator = RadarDiagramQualityReportGenerator()
                 info = q_generator.generate_radar_diagram(dataset)
-                testing_mode = self.segregation_system_config['testing_mode']
                 q_generator.generate_quality_report(info, testing_mode)
 
                 self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
                 self._save_config()
 
                 if not self.segregation_system_config['testing_mode']:
+                    print('[!] Shutdown')
                     exit(0)
                 else:
                     continue
@@ -136,6 +146,7 @@ class SegregationSystem:
                 if q_generator.check_quality_evaluation_from_report():
                     pass
                 else:
+                    print('[!] Shutdown')
                     exit(1)
 
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
@@ -146,6 +157,7 @@ class SegregationSystem:
                 ip = self.segregation_system_config['endpoint_ip']
                 port = self.segregation_system_config['endpoint_port']
                 if not JsonIO.get_instance().send(ip, port, splitted_dataset):
+                    print('[!] Shutdown')
                     exit(1)
 
                 self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
@@ -154,7 +166,8 @@ class SegregationSystem:
                 collector.retrive_counter()
 
             else:
-                print('Invalid operative mode')
+                print('[-] Invalid operative mode')
+                print('[!] Shutdown')
                 exit(1)
 
 

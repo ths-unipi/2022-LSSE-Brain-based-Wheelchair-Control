@@ -27,7 +27,7 @@
     },
     "evaluation": {
       "type": "string",
-      "enum": ["good quality", "bad quality"]
+      "enum": ["good quality", "bad quality", ""]
     }
   },
   "required": ["alpha", "beta", "delta", "theta", "evaluation"]

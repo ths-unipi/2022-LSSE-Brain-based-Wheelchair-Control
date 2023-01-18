@@ -11,6 +11,20 @@ class RadarDiagramQualityReportGenerator:
     def __init__(self):
         pass
 
+    def _save_radar_diagram(self, data, labels, title, file_name):
+
+        df = pd.DataFrame(dict(r=data, theta=labels))
+        fig = px.line_polar(df, r='r', theta='theta', line_close=True, title=title)
+        fig.update_traces(fill='toself')
+        try:
+            pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', file_name))
+        except:
+            print(f'[-] Failure to save {file_name}')
+            return False
+
+        print(f'[+] {title} generated')
+        return True
+
     def generate_radar_diagram(self, dataset):
 
         channels = len(dataset[0]['features']['alpha'])
@@ -38,6 +52,11 @@ class RadarDiagramQualityReportGenerator:
             theta[i] = theta[i] / len(dataset)
             i += 1
 
+        self._save_radar_diagram(alpha, labels, 'Alpha Radar Diagram', 'alpha_radar_diagram.png')
+        self._save_radar_diagram(beta, labels, 'Beta Radar Diagram', 'beta_radar_diagram.png')
+        self._save_radar_diagram(delta, labels, 'Delta Radar Diagram', 'delta_radar_diagram.png')
+        self._save_radar_diagram(theta, labels, 'Theta Radar Diagram', 'theta_radar_diagram.png')
+        '''
         alpha_df = pd.DataFrame(dict(r=alpha, theta=labels))
         fig = px.line_polar(alpha_df, r='r', theta='theta', line_close=True, title="Alpha Radar Diagram")
         fig.update_traces(fill='toself')
@@ -57,6 +76,7 @@ class RadarDiagramQualityReportGenerator:
         fig = px.line_polar(theta_df, r='r', theta='theta', line_close=True, title="Theta Radar Diagram")
         fig.update_traces(fill='toself')
         pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'theta_radar_diagram.png'))
+        '''
 
         info = dict()
         info['alpha'] = alpha
@@ -73,9 +93,13 @@ class RadarDiagramQualityReportGenerator:
         else:
             info['evaluation'] = ''
         report_path = os.path.join(os.path.abspath('..'), 'data', 'quality', 'quality_report.json')
-        with open(report_path, "w") as file:
-            json.dump(info, file, indent=4)
-        pass
+        try:
+            with open(report_path, "w") as file:
+                json.dump(info, file, indent=4)
+        except:
+            print("[-] Failure to save quality_report.json")
+            return False
+        return True
 
     def check_quality_evaluation_from_report(self):
 
@@ -92,18 +116,21 @@ class RadarDiagramQualityReportGenerator:
             validate(report, report_schema)
 
         except FileNotFoundError:
-            print(f'Failed to open quality_report.json')
+            print(f'[-] Failure to open quality_report.json')
             return False
 
         except ValidationError:
-            print('Quality Report has invalid schema')
+            print('[-] Quality Report has invalid schema')
             return False
 
         evaluation = report['evaluation']
 
         if evaluation == 'bad quality':
-            print("Dataset bad quality")
+            print("[-] Quality evaluation: Dataset bad quality")
             return False
         elif evaluation == 'good quality':
-            print("Dataset good quality")
+            print("[+] Quality evaluation: Dataset good quality")
             return True
+        else:
+            print("[!] Quality evaluation non done")
+            return False
