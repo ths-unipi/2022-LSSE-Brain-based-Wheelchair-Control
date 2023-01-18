@@ -36,6 +36,12 @@
         }
       ]
     },
+    "validation_error_threshold": {
+      "type": "number"
+    },
+    "test_error_threshold": {
+      "type": "number"
+    },
     "testing_mode": {
       "type": "boolean"
     }

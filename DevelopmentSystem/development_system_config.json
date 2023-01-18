@@ -11,5 +11,7 @@
         1,
         64
     ],
+    "validation_error_threshold": 0.3,
+    "test_error_threshold": 0.3,
     "testing_mode": false
 }
