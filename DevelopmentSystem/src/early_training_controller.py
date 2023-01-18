@@ -15,7 +15,7 @@ class EarlyTrainingController:
         self.number_of_hidden_layers_range = number_of_hidden_layers_range
         self.number_of_hidden_neurons_range = number_of_hidden_neurons_range
 
-    def run(self, operational_mode: str, training_dataset: dict = None) -> bool:
+    def run(self, operational_mode: str, testing: bool = False, training_dataset: dict = None) -> bool:
         if operational_mode == 'early_training':
             # get the average number of hidden layer
             training_parameters = self.generate_training_parameters()
@@ -31,7 +31,7 @@ class EarlyTrainingController:
             # generate the report
             training_error = self.mental_command_classifier.get_error(
                 training_dataset['training_data'], training_dataset['training_labels'])
-            EarlyTrainingReportGenerator().generate_report(training_parameters, training_error)
+            EarlyTrainingReportGenerator().generate_report(training_parameters, training_error, testing)
 
             # generate the gradient descent plot
             GradientDescentPlotGenerator().generate_plot(self.mental_command_classifier.get_losses())

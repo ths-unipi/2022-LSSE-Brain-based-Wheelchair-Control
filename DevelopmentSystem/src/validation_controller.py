@@ -16,7 +16,8 @@ class ValidationController:
         self._number_of_hidden_layers_range = number_of_hidden_layers_range
         self._number_of_hidden_neurons_range = number_of_hidden_neurons_range
 
-    def run(self, operational_mode: str, dataset: dict = None, validation_error_threshold: float = None):
+    def run(self, operational_mode: str, testing: bool = False, dataset: dict = None,
+            validation_error_threshold: float = None):
         if operational_mode == 'grid_search':
             top_five_classifiers_evaluator = TopFiveClassifierEvaluators(dataset)
             self._mental_command_classifier = MentalCommandClassifier()
@@ -40,8 +41,9 @@ class ValidationController:
                 print(f'[+] {round((counter / number_of_combinations) * 100)}% of Grid Search completed')
 
             # generate the report
-            TopFiveClassifiersReportGenerator().generate_report(top_five_classifiers_evaluator.get_top_classifiers(
-                number_of_generations, validation_error_threshold))
+            TopFiveClassifiersReportGenerator().generate_report(
+                top_five_classifiers=top_five_classifiers_evaluator.get_top_classifiers(
+                    number_of_generations, validation_error_threshold), testing=testing)
 
         elif operational_mode == 'check_top_five_classifiers_report':
             return TopFiveClassifiersReportGenerator().evaluate_report()

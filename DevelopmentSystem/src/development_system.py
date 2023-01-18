@@ -64,11 +64,14 @@ class DevelopmentSystem:
                 EarlyTrainingController(mental_command_classifier=self.mental_command_classifier,
                                         number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
                                         number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
-                    .run(self.config['operational_mode'], training_dataset)
+                    .run(self.config['operational_mode'], self.config['testing_mode'], training_dataset)
 
-                # change operational mode and stop
+                # change operational mode and stop (if testing mode instead continue)
                 self.change_operational_mode('check_early_training_report')
-                break
+                if self.config['testing_mode'] is False:
+                    break
+                else:
+                    continue
 
             # ====================== Early training Report Evaluation ======================
 
@@ -99,11 +102,15 @@ class DevelopmentSystem:
                 ValidationController(mental_command_classifier=self.mental_command_classifier,
                                      number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
                                      number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
-                    .run(self.config['operational_mode'], dataset, self.config['validation_error_threshold'])
+                    .run(self.config['operational_mode'], self.config['testing_mode'],
+                         dataset, self.config['validation_error_threshold'])
 
-                # change operational mode and stop
+                # change operational mode and stop (if testing mode instead continue)
                 self.change_operational_mode('check_top_five_classifiers_report')
-                break
+                if self.config['testing_mode'] is False:
+                    break
+                else:
+                    continue
 
             # ====================== Top Five Classifiers Report Evaluation ======================
 
@@ -148,12 +155,16 @@ class DevelopmentSystem:
                 }
 
                 # start test controller
-                TestController(self.mental_command_classifier)\
-                    .run(self.config['operational_mode'], dataset, self.config['test_error_threshold'])
+                TestController(self.mental_command_classifier).run(self.config['operational_mode'],
+                                                                   self.config['testing_mode'], dataset,
+                                                                   self.config['test_error_threshold'])
 
-                # change operational mode and stop
+                # change operational mode and stop (if testing mode instead continue)
                 self.change_operational_mode('check_test_report')
-                break
+                if self.config['testing_mode'] is False:
+                    break
+                else:
+                    continue
 
             # ====================== Test Report Evaluation ======================
 

@@ -1,5 +1,7 @@
 import json
 import os
+from random import random, choice
+
 from jsonschema import validate, ValidationError
 
 
@@ -8,7 +10,14 @@ class TopFiveClassifiersReportGenerator:
     def __init__(self) -> None:
         self._json_path = os.path.join(os.path.abspath('..'), 'data', 'top_five_classifiers_report.json')
 
-    def generate_report(self, top_five_classifiers: dict) -> None:
+    def generate_report(self, top_five_classifiers: dict, testing: bool) -> None:
+        # if testing mode randomically generate the answers (there is one actual_best with the 80% of probability)
+        if testing is True:
+            if random() < 0.8:
+                # randomically select the actual best
+                best = choice(top_five_classifiers['classifiers'])
+                best['actual_best'] = True
+
         # save the report in a JSON file
         with open(self._json_path, "w") as f:
             json.dump(top_five_classifiers, f, indent=4)

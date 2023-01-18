@@ -1,5 +1,7 @@
 import json
 import os
+from random import random
+
 from jsonschema import validate, ValidationError
 
 
@@ -8,7 +10,7 @@ class EarlyTrainingReportGenerator:
     def __init__(self) -> None:
         self.json_path = os.path.join(os.path.abspath('..'), 'data', 'early_training_report.json')
 
-    def generate_report(self, training_parameter: dict, training_error: float) -> None:
+    def generate_report(self, training_parameter: dict, training_error: float, testing: bool) -> None:
         # create the model
         early_training_report = {
             'number_of_generations':  training_parameter['number_of_generations'],
@@ -16,6 +18,13 @@ class EarlyTrainingReportGenerator:
             'training_error': training_error,
             'valid_generations': None
         }
+
+        # if testing mode randomically generate the answers (True with the 80% of probability)
+        if testing is True:
+            if random() < 0.8:
+                early_training_report['valid_generations'] = True
+            else:
+                early_training_report['valid_generations'] = False
 
         # save the report in a JSON file
         with open(self.json_path, "w") as f:
