@@ -37,8 +37,14 @@ class RadarDiagramQualityReportGenerator:
             ))
 
         fig.update_layout(showlegend=False, title=title)
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', file_name))
+        try:
+            pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', file_name))
+        except:
+            print(f'[-] Failure to save {file_name}')
+            return False
 
+        print(f'[+] {title} generated')
+        return True
 
 
     def generate_radar_diagram(self, dataset):

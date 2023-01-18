@@ -2,6 +2,7 @@ import os
 import json
 from jsonschema import validate, ValidationError
 import matplotlib.pyplot as plt
+import random
 
 
 class BalanceBarChartReportGenerator:

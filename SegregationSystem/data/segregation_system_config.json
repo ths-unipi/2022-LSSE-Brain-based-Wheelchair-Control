@@ -1,7 +1,7 @@
 {
     "operative_mode": "collecting_op_mode",
     "user_id": 11,
-    "testing_mode": true,
+    "testing_mode": false,
     "endpoint_ip": "127.0.0.1",
     "endpoint_port": "4000",
     "db_name": "segregation.db",

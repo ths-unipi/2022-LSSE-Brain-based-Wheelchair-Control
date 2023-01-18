@@ -117,8 +117,10 @@ class SegregationSystem:
                 if b_generator.check_balancing_evaluation_from_report():
                     pass
                 else:
-                    print('[!] Shutdown')
-                    exit(1)
+                    self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
+                    self.segregation_system_config['user_id'] += 1
+                    self._save_config()
+                    continue
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
@@ -146,8 +148,10 @@ class SegregationSystem:
                 if q_generator.check_quality_evaluation_from_report():
                     pass
                 else:
-                    print('[!] Shutdown')
-                    exit(1)
+                    self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
+                    self.segregation_system_config['user_id'] += 1
+                    self._save_config()
+                    continue
 
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
