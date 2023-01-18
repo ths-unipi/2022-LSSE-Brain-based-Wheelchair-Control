@@ -15,7 +15,7 @@ class EarlyTrainingController:
         self.number_of_hidden_layers_range = number_of_hidden_layers_range
         self.number_of_hidden_neurons_range = number_of_hidden_neurons_range
 
-    def run(self, operational_mode: str, training_dataset: list = None) -> bool:
+    def run(self, operational_mode: str, training_dataset: dict = None) -> bool:
         if operational_mode == 'early_training':
             # get the average number of hidden layer
             training_parameters = self.generate_training_parameters()
