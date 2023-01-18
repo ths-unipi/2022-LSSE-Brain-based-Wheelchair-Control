@@ -1,4 +1,6 @@
 import os.path
+import pickle
+
 import joblib
 from pandas import DataFrame
 from sklearn.neural_network import MLPClassifier
@@ -32,11 +34,19 @@ class MentalCommandClassifier:
     def get_uuid(self) -> int:
         return self.uuid
 
+    def get_number_of_generations(self) -> int:
+        return self.classifier.get_params()['max_iter']
+
     def get_hidden_layer_sizes(self) -> list:
         return list(self.classifier.get_params()['hidden_layer_sizes'])
 
     def load(self, file_name: str) -> None:
-        self.uuid = int(file_name.split('.')[0])        # get uuid from the file name (es. 1.sav)
+        # if possible extract the uuid from the name
+        try:
+            self.uuid = int(file_name.split('.')[0])            # get uuid from the file name (es. 1.sav)
+        except ValueError:
+            pass
+
         file_path = os.path.join(os.path.abspath('..'), 'data', file_name)
         self.classifier = joblib.load(file_path)
 
@@ -50,3 +60,8 @@ class MentalCommandClassifier:
         else:
             self.uuid = uuid
         self.classifier = MLPClassifier(training_parameters)
+
+    def serialize(self, file_name: str) -> dict:
+        # convert to string and insert in a dictionary
+        serialized_classifier = pickle.dumps(self.classifier).decode('ISO-8859-1')
+        return {'classifier': serialized_classifier}

@@ -7,6 +7,7 @@ from sklearn.datasets import make_classification  # TODO: toglilo
 from src.early_training_controller import EarlyTrainingController
 from src.json_io import JsonIO
 from src.mental_command_classifier import MentalCommandClassifier
+from src.test_controller import TestController
 from src.validation_controller import ValidationController
 
 
@@ -94,7 +95,7 @@ class DevelopmentSystem:
                     'validation_labels': n
                 }
 
-                # start the validation contoller
+                # start the validation controller
                 ValidationController(mental_command_classifier=self.mental_command_classifier,
                                      number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
                                      number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
@@ -117,15 +118,68 @@ class DevelopmentSystem:
                     print(f'[+] Best Classifier found with UUID:({best_classifier_uuid}), Validation Phase ended')
                     self.change_operational_mode('test_best_classifier')
 
+                    # rename classifier on disk (for easier recovery in the future)
+                    old_name = os.path.join(os.path.abspath('..'), 'data', f'{best_classifier_uuid}.sav')
+                    new_name = os.path.join(os.path.abspath('..'), 'data', 'best_classifier.sav')
+                    try:
+                        os.rename(old_name, new_name)
+                    except FileExistsError:
+                        os.remove(new_name)
+                        os.rename(old_name, new_name)
+
                     # load from disk the best classifier
-                    print(f'Loading: \'{best_classifier_uuid}.sav\'')
-                    self.mental_command_classifier = MentalCommandClassifier(file_name=f'{best_classifier_uuid}.sav')
+                    self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
 
             # ====================== Test Best Classifier =======================
 
             if self.config['operational_mode'] == 'test_best_classifier':
-                print(f'Test phase for classifier {self.mental_command_classifier.get_uuid()}')
+                # load the classifier from disk if None (recovery from crash during test)
+                if self.mental_command_classifier is None:
+                    self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
+
+                # TODO: get dataset from database if not loaded
+                x, y = make_classification(n_features=(22 * 4), n_redundant=0)
+                z, n = make_classification(n_features=(22 * 4), n_redundant=0)
+                dataset = {
+                    'training_data': x,
+                    'training_labels': y,
+                    'test_data': z,
+                    'test_labels': n
+                }
+
+                # start test controller
+                TestController(self.mental_command_classifier)\
+                    .run(self.config['operational_mode'], dataset, self.config['test_error_threshold'])
+
+                # change operational mode and stop
+                self.change_operational_mode('check_test_report')
                 break
+
+            # ====================== Test Report Evaluation ======================
+
+            if self.config['operational_mode'] == 'check_test_report':
+                # load the classifier from disk
+                self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
+
+                # the test controller will return the ML Engineer evaluation
+                report_evaluation = TestController(self.mental_command_classifier).run(self.config['operational_mode'])
+                if report_evaluation is True:
+                    print('[+] The Best Classifier is valid, can be sent to Execution System')
+
+                    # request comunication to execution system
+                    endpoint = f'http://{self.config["ip_endpoint"]}:{self.config["port_endpoint"]}'
+                    serialized_classifier = self.mental_command_classifier.serialize('best_classifier.sav')
+
+                    # TODO: move to JsonIO
+                    with open(os.path.join(os.path.abspath('..'), 'final_classifier.json'), "w") as f:
+                        json.dump(serialized_classifier, f, indent=4)
+                    # JsonIO.get_instance().send(endpoint, serialized_classifier)
+
+                    # restart workflow
+                    self.change_operational_mode('waiting_for_dataset')
+                else:
+                    print('[+] The Best Classifier isn\'t valid, Reconfiguration of the Systems are needed')
+                    self.change_operational_mode('waiting_for_dataset')
 
         # close all threads
         exit(0)
