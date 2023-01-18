@@ -128,8 +128,8 @@ class SegregationSystem:
                     continue
 
                 q_generator = RadarDiagramQualityReportGenerator()
-                info = q_generator.generate_radar_diagram(dataset)
-                q_generator.generate_quality_report(info, testing_mode)
+                q_generator.generate_radar_diagram(dataset)
+                q_generator.generate_quality_report(testing_mode)
 
                 self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
                 self._save_config()
@@ -160,6 +160,7 @@ class SegregationSystem:
 
                 ip = self.segregation_system_config['endpoint_ip']
                 port = self.segregation_system_config['endpoint_port']
+
                 if not JsonIO.get_instance().send(ip, port, splitted_dataset):
                     print('[!] Shutdown')
                     exit(1)

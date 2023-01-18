@@ -54,7 +54,10 @@ class BalanceBarChartReportGenerator:
     def generate_balancing_report(self, info, testing_mode):
 
         if testing_mode:
-            info['evaluation'] = 'balanced'
+            if random.randint(1, 5) == 1:
+                info['evaluation'] = 'not balanced'
+            else:
+                info['evaluation'] = 'balanced'
         else:
             info['evaluation'] = ''
         report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balancing_report.json')

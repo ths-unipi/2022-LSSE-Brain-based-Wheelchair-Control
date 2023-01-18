@@ -1,5 +1,5 @@
 # TODO
 
-* [ ] write testing mode
+* [x] write testing mode
 * [ ] check the correctness of radar diagram data
-* [ ] test send dataset to development
+* [x] test send dataset to development
