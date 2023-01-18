@@ -6,10 +6,13 @@ from sklearn.neural_network import MLPClassifier
 
 class MentalCommandClassifier:
 
-    def __init__(self, uuid: int, training_parameters: dict) -> None:
+    def __init__(self, uuid: int = 0, training_parameters: dict = None) -> None:
         self.uuid = uuid
-        self.classifier = MLPClassifier(max_iter=training_parameters['number_of_generations'],
-                                        hidden_layer_sizes=training_parameters['hidden_layer_sizes'])
+        if training_parameters is None:
+            self.classifier = None
+        else:
+            self.classifier = MLPClassifier(max_iter=training_parameters['number_of_generations'],
+                                            hidden_layer_sizes=training_parameters['hidden_layer_sizes'])
 
     def __int__(self, file_name: str) -> None:
         self.uuid = int(file_name.split('.')[0])        # get uuid from the file name (es. 1.sav)
@@ -26,6 +29,12 @@ class MentalCommandClassifier:
     def get_losses(self) -> list:
         return self.classifier.loss_curve_
 
+    def get_uuid(self) -> int:
+        return self.uuid
+
+    def get_hidden_layer_sizes(self) -> list:
+        return list(self.classifier.get_params()['hidden_layer_sizes'])
+
     def load(self, file_name: str) -> None:
         self.uuid = int(file_name.split('.')[0])        # get uuid from the file name (es. 1.sav)
         self.classifier = joblib.load(file_name)
@@ -39,5 +48,4 @@ class MentalCommandClassifier:
             self.uuid += 1                              # autoincrement useful during the grid search
         else:
             self.uuid = uuid
-        self.classifier = MLPClassifier(max_iter=training_parameters['number_of_generations'],
-                                        hidden_layer_sizes=training_parameters['hidden_layer_sizes'])
+        self.classifier = MLPClassifier(training_parameters)

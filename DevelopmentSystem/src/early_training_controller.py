@@ -1,10 +1,8 @@
 import json
 import math
 import os
-
 from jsonschema import validate, ValidationError
-
-from src.early_trainin_report_generator import EarlyTrainingReportGenerator
+from src.early_training_report_generator import EarlyTrainingReportGenerator
 from src.gradient_descent_plot_generator import GradientDescentPlotGenerator
 from src.mental_command_classifier import MentalCommandClassifier
 

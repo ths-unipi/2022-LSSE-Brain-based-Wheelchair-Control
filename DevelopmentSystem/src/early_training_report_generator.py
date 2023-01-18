@@ -6,7 +6,7 @@ from jsonschema import validate, ValidationError
 class EarlyTrainingReportGenerator:
 
     def __init__(self) -> None:
-        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'early_trainin_report.json')
+        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'early_training_report.json')
 
     def generate_report(self, training_parameter: dict, training_error: float) -> None:
         # create the model
