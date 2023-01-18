@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.express as px
 import plotly.io as pio
+import plotly.graph_objects as go
 import os
 import json
 from jsonschema import validate, ValidationError
@@ -11,8 +12,9 @@ class RadarDiagramQualityReportGenerator:
     def __init__(self):
         pass
 
-    def _save_radar_diagram(self, data, labels, title, file_name):
+    def _save_radar_diagram(self, data, band, labels, title, file_name):
 
+        '''
         df = pd.DataFrame(dict(r=data, theta=labels))
         fig = px.line_polar(df, r='r', theta='theta', line_close=True, title=title)
         fig.update_traces(fill='toself')
@@ -24,9 +26,24 @@ class RadarDiagramQualityReportGenerator:
 
         print(f'[+] {title} generated')
         return True
+        '''
+        fig = go.Figure()
+        for session in data:
+            fig.add_trace(go.Scatterpolar(
+                    r=session['features'][band],
+                    theta=labels,
+                    fill='toself',
+                    name=f"uuid: {session['uuid']} ",
+            ))
+
+        fig.update_layout(showlegend=False, title=title)
+        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', file_name))
+
+
 
     def generate_radar_diagram(self, dataset):
 
+        '''
         channels = len(dataset[0]['features']['alpha'])
         alpha = [0 for _ in range(channels)]
         beta = [0 for _ in range(channels)]
@@ -56,33 +73,27 @@ class RadarDiagramQualityReportGenerator:
         self._save_radar_diagram(beta, labels, 'Beta Radar Diagram', 'beta_radar_diagram.png')
         self._save_radar_diagram(delta, labels, 'Delta Radar Diagram', 'delta_radar_diagram.png')
         self._save_radar_diagram(theta, labels, 'Theta Radar Diagram', 'theta_radar_diagram.png')
-        '''
-        alpha_df = pd.DataFrame(dict(r=alpha, theta=labels))
-        fig = px.line_polar(alpha_df, r='r', theta='theta', line_close=True, title="Alpha Radar Diagram")
-        fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'alpha_radar_diagram.png'))
-
-        beta_df = pd.DataFrame(dict(r=beta, theta=labels))
-        fig = px.line_polar(beta_df, r='r', theta='theta', line_close=True, title="Beta Radar Diagram")
-        fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'beta_radar_diagram.png'))
-
-        delta_df = pd.DataFrame(dict(r=delta, theta=labels))
-        fig = px.line_polar(delta_df, r='r', theta='theta', line_close=True, title="Delta Radar Diagram")
-        fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'delta_radar_diagram.png'))
-
-        theta_df = pd.DataFrame(dict(r=theta, theta=labels))
-        fig = px.line_polar(theta_df, r='r', theta='theta', line_close=True, title="Theta Radar Diagram")
-        fig.update_traces(fill='toself')
-        pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', 'theta_radar_diagram.png'))
-        '''
 
         info = dict()
         info['alpha'] = alpha
         info['beta'] = beta
         info['delta'] = delta
         info['theta'] = theta
+        '''
+
+        channels = len(dataset[0]['features']['alpha'])
+        labels = [f'ch{i + 1}' for i in range(channels)]
+
+        self._save_radar_diagram(dataset, 'alpha', labels, 'Alpha Radar Diagram', 'alpha_radar_diagram.png')
+        self._save_radar_diagram(dataset, 'beta', labels, 'Beta Radar Diagram', 'beta_radar_diagram.png')
+        self._save_radar_diagram(dataset, 'delta', labels, 'Delta Radar Diagram', 'delta_radar_diagram.png')
+        self._save_radar_diagram(dataset, 'theta', labels, 'Theta Radar Diagram', 'theta_radar_diagram.png')
+
+        info = dict()
+        info['alpha'] = []
+        info['beta'] = []
+        info['delta'] = []
+        info['theta'] = []
 
         return info
 
