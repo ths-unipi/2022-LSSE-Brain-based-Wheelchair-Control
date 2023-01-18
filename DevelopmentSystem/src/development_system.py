@@ -166,14 +166,10 @@ class DevelopmentSystem:
                 if report_evaluation is True:
                     print('[+] The Best Classifier is valid, can be sent to Execution System')
 
-                    # request comunication to execution system
+                    # send serialized classifier to execution system
                     endpoint = f'http://{self.config["ip_endpoint"]}:{self.config["port_endpoint"]}'
                     serialized_classifier = self.mental_command_classifier.serialize('best_classifier.sav')
-
-                    # TODO: move to JsonIO
-                    with open(os.path.join(os.path.abspath('..'), 'final_classifier.json'), "w") as f:
-                        json.dump(serialized_classifier, f, indent=4)
-                    # JsonIO.get_instance().send(endpoint, serialized_classifier)
+                    JsonIO.get_instance().send(endpoint, serialized_classifier)
 
                     # restart workflow
                     self.change_operational_mode('waiting_for_dataset')
