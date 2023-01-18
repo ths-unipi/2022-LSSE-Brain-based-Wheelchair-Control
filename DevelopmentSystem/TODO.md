@@ -1,3 +1,4 @@
 [ ] Invalid operational mode
 [ ] Datastore
-[ ] Recovery da test_best_classifier
+[ ] _ ai privati
+[ ] eliminare i file alla fine
