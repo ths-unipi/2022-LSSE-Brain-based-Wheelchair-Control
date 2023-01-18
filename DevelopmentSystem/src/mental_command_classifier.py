@@ -11,57 +11,57 @@ class MentalCommandClassifier:
     def __init__(self, uuid: int = 0, training_parameters: dict = None, file_name: str = None) -> None:
         # if file_name isn't given create it
         if file_name is None:
-            self.uuid = uuid
+            self._uuid = uuid
             if training_parameters is None:
-                self.classifier = None
+                self._classifier = None
             else:
-                self.classifier = MLPClassifier(max_iter=training_parameters['number_of_generations'],
-                                                hidden_layer_sizes=training_parameters['hidden_layer_sizes'])
+                self._classifier = MLPClassifier(max_iter=training_parameters['number_of_generations'],
+                                                 hidden_layer_sizes=training_parameters['hidden_layer_sizes'])
 
         # file_name is given load it from disk
         else:
             self.load(file_name)
 
     def train_classifier(self, training_data: DataFrame, training_labels: DataFrame) -> None:
-        self.classifier.fit(training_data, training_labels)
+        self._classifier.fit(training_data, training_labels)
 
     def get_error(self, data: DataFrame, label: DataFrame) -> float:
-        return self.classifier.score(data, label)
+        return self._classifier.score(data, label)
 
     def get_losses(self) -> list:
-        return self.classifier.loss_curve_
+        return self._classifier.loss_curve_
 
     def get_uuid(self) -> int:
-        return self.uuid
+        return self._uuid
 
     def get_number_of_generations(self) -> int:
-        return self.classifier.get_params()['max_iter']
+        return self._classifier.get_params()['max_iter']
 
     def get_hidden_layer_sizes(self) -> list:
-        return list(self.classifier.get_params()['hidden_layer_sizes'])
+        return list(self._classifier.get_params()['hidden_layer_sizes'])
 
     def load(self, file_name: str) -> None:
         # if possible extract the uuid from the name
         try:
-            self.uuid = int(file_name.split('.')[0])            # get uuid from the file name (es. 1.sav)
+            self._uuid = int(file_name.split('.')[0])            # get uuid from the file name (es. 1.sav)
         except ValueError:
             pass
 
         file_path = os.path.join(os.path.abspath('..'), 'data', file_name)
-        self.classifier = joblib.load(file_path)
+        self._classifier = joblib.load(file_path)
 
     def store(self) -> None:
-        file_path = os.path.join(os.path.abspath('..'), 'data', f'{self.uuid}.sav')
-        joblib.dump(self.classifier, file_path)
+        file_path = os.path.join(os.path.abspath('..'), 'data', f'{self._uuid}.sav')
+        joblib.dump(self._classifier, file_path)
 
     def rebuild(self, training_parameters: dict, uuid: int = None) -> None:
         if uuid is None:
-            self.uuid += 1                              # autoincrement useful during the grid search
+            self._uuid += 1                              # autoincrement useful during the grid search
         else:
-            self.uuid = uuid
-        self.classifier = MLPClassifier(training_parameters)
+            self._uuid = uuid
+        self._classifier = MLPClassifier(training_parameters)
 
     def serialize(self, file_name: str) -> dict:
         # convert to string and insert in a dictionary
-        serialized_classifier = pickle.dumps(self.classifier).decode('ISO-8859-1')
+        serialized_classifier = pickle.dumps(self._classifier).decode('ISO-8859-1')
         return {'classifier': serialized_classifier}

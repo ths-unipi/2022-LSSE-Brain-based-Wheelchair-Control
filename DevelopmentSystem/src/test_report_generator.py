@@ -6,7 +6,7 @@ from jsonschema import validate, ValidationError
 class TestReportGenerator:
 
     def __init__(self) -> None:
-        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'test_best_classifier_report.json')
+        self._json_path = os.path.join(os.path.abspath('..'), 'data', 'test_best_classifier_report.json')
 
     def generate_report(self, training_parameter: dict, errors: dict, test_error_threshold: float) -> None:
         # create the model
@@ -20,7 +20,7 @@ class TestReportGenerator:
         }
 
         # save the report in a JSON file
-        with open(self.json_path, "w") as f:
+        with open(self._json_path, "w") as f:
             json.dump(test_report, f, indent=4)
         print('[+] Test Best Classifier Report exported')
 
@@ -28,7 +28,7 @@ class TestReportGenerator:
         # open report and schema
         with open(os.path.join(os.path.abspath('..'), 'resources', 'test_best_classifier_report_schema.json')) as f:
             report_schema = json.load(f)
-        with open(self.json_path) as f:
+        with open(self._json_path) as f:
             report = json.load(f)
 
         # validate the schema

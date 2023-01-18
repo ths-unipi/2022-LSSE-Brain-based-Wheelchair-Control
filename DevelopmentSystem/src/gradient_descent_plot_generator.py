@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 class GradientDescentPlotGenerator:
 
     def __init__(self):
-        self.image_path = os.path.join(os.path.abspath('..'), 'data', 'gradient_descent_plot.png')
+        self._image_path = os.path.join(os.path.abspath('..'), 'data', 'gradient_descent_plot.png')
 
     def generate_plot(self, losses: list):
         # plot
@@ -14,7 +14,7 @@ class GradientDescentPlotGenerator:
         plt.ylabel('Loss Function')
 
         # save plot as PNG
-        plt.savefig(self.image_path, dpi=300)
+        plt.savefig(self._image_path, dpi=300)
         print('[+] Gradient Descent Plot exported')
 
         # show the plot

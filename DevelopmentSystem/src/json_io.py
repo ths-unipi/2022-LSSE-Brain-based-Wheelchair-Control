@@ -10,11 +10,11 @@ class JsonIO:
     json_io_instance = None
 
     def __init__(self):
-        self.app = Flask(__name__)
-        self.queue = queue.Queue()
+        self._app = Flask(__name__)
+        self._queue = queue.Queue()
 
     def receive(self, learning_session_set: dict) -> None:
-        self.queue.put(learning_session_set, block=True)
+        self._queue.put(learning_session_set, block=True)
         print('[+] New Dataset received')
 
     def send(self, endpoint: str, classifier: dict) -> bool:
@@ -30,13 +30,13 @@ class JsonIO:
 
     def listen(self, ip, port):
         print('[+] Start Rest Server thread')
-        self.app.run(host=ip, port=port, debug=False)
+        self._app.run(host=ip, port=port, debug=False)
 
     def get_app(self) -> Flask:
-        return self.app
+        return self._app
 
     def get_queue(self) -> queue:
-        return self.queue
+        return self._queue
 
     @staticmethod
     def get_instance():
