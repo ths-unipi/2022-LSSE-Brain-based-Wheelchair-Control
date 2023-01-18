@@ -16,31 +16,35 @@ class ValidationController:
         self.number_of_hidden_layers_range = number_of_hidden_layers_range
         self.number_of_hidden_neurons_range = number_of_hidden_neurons_range
 
-    def run(self, dataset: dict, validation_error_threshold: float):
-        top_five_classifiers_evaluator = TopFiveClassifierEvaluators(dataset)
-        self.mental_command_classifier = MentalCommandClassifier()
+    def run(self, operational_mode: str, dataset: dict = None, validation_error_threshold: float = None):
+        if operational_mode == 'grid_search':
+            top_five_classifiers_evaluator = TopFiveClassifierEvaluators(dataset)
+            self.mental_command_classifier = MentalCommandClassifier()
 
-        # prepare the combinations of parameters
-        number_of_generations, training_parameters_combinations = self.generate_training_parameters_combinations()
-        number_of_combinations = len(training_parameters_combinations)
-        print(f'[+] Grid Search with {number_of_combinations} combinations of parameters')
-        counter = 0
+            # prepare the combinations of parameters
+            number_of_generations, training_parameters_combinations = self.generate_training_parameters_combinations()
+            number_of_combinations = len(training_parameters_combinations)
+            print(f'[+] Grid Search with {number_of_combinations} combinations of parameters')
+            counter = 0
 
-        # grid search
-        for parameters in training_parameters_combinations:
-            # create and train a classifier with the new parameters
-            self.mental_command_classifier.rebuild(parameters)
-            self.mental_command_classifier.train_classifier(dataset['training_data'], dataset['training_labels'])
+            # grid search
+            for parameters in training_parameters_combinations:
+                # create and train a classifier with the new parameters
+                self.mental_command_classifier.rebuild(parameters)
+                self.mental_command_classifier.train_classifier(dataset['training_data'], dataset['training_labels'])
 
-            # evaluate if is one of the top five
-            top_five_classifiers_evaluator.evaluate_new_classifier(self.mental_command_classifier)
+                # evaluate if is one of the top five
+                top_five_classifiers_evaluator.evaluate_new_classifier(self.mental_command_classifier)
 
-            counter += 1
-            print(f'[+] {round((counter / number_of_combinations) * 100)}% of Grid Search completed')
+                counter += 1
+                print(f'[+] {round((counter / number_of_combinations) * 100)}% of Grid Search completed')
 
-        # generate the report
-        TopFiveClassifiersReportGenerator().generate_report(top_five_classifiers_evaluator.get_top_classifiers(
-            number_of_generations, validation_error_threshold))
+            # generate the report
+            TopFiveClassifiersReportGenerator().generate_report(top_five_classifiers_evaluator.get_top_classifiers(
+                number_of_generations, validation_error_threshold))
+
+        elif operational_mode == 'check_top_five_classifiers_report':
+            return TopFiveClassifiersReportGenerator().evaluate_report()
 
     def generate_training_parameters_combinations(self) -> list:
         # load number of generations file and schema

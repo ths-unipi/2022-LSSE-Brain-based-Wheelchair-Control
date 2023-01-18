@@ -1,3 +1,3 @@
 [ ] Invalid operational mode
 [ ] Datastore
-[ ] Fix Top five classifiers evaluator
+[ ] Recovery da test_best_classifier

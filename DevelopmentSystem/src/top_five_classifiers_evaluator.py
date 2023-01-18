@@ -48,12 +48,6 @@ class TopFiveClassifierEvaluators:
             # save classifier to disk
             new_classifier.store()
 
-        # debug
-        deh = []
-        for classifier in self.top_five_classifiers:
-            deh.append(classifier)
-        print(deh)
-
     def get_top_classifiers(self, number_of_generations: int, validation_error_threshold: float) -> dict:
         # structure of the report
         top_five_classifiers = {

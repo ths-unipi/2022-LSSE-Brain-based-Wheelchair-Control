@@ -6,6 +6,7 @@ from sklearn.datasets import make_classification  # TODO: toglilo
 
 from src.early_training_controller import EarlyTrainingController
 from src.json_io import JsonIO
+from src.mental_command_classifier import MentalCommandClassifier
 from src.validation_controller import ValidationController
 
 
@@ -28,7 +29,7 @@ class DevelopmentSystem:
         self.mental_command_classifier = None
 
     def run(self):
-        print('[+] Development System started on main thread')
+        print(f'[+] Development System started on main thread in \'{self.config["operational_mode"]}\' mode')
 
         # start the rest server in a new thread as daemon
         run_thread = Thread(target=JsonIO.get_instance().listen, args=('0.0.0.0', 5000))
@@ -71,14 +72,14 @@ class DevelopmentSystem:
             # ====================== Early training Report Evaluation ======================
 
             if self.config['operational_mode'] == 'check_early_training_report':
-                # the Early Training Controller will return the ML Engineer evaluation
+                # the early training controller will return the ML Engineer evaluation
                 report_evaluation = EarlyTrainingController().run(self.config['operational_mode'])
                 if report_evaluation is True:
-                    self.change_operational_mode('grid_search')
                     print('[+] The Number of Generations is good, Early Training ended')
+                    self.change_operational_mode('grid_search')
                 else:
-                    self.change_operational_mode('early_training')
                     print('[+] The Number of Generations has changed, restart from Early Training')
+                    self.change_operational_mode('early_training')
 
             # ====================== Grid search =======================
 
@@ -97,7 +98,7 @@ class DevelopmentSystem:
                 ValidationController(mental_command_classifier=self.mental_command_classifier,
                                      number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
                                      number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
-                    .run(dataset, self.config['validation_error_threshold'])
+                    .run(self.config['operational_mode'], dataset, self.config['validation_error_threshold'])
 
                 # change operational mode and stop
                 self.change_operational_mode('check_top_five_classifiers_report')
@@ -106,7 +107,24 @@ class DevelopmentSystem:
             # ====================== Top Five Classifiers Report Evaluation ======================
 
             if self.config['operational_mode'] == 'check_top_five_classifiers_report':
-                print('fine')
+                # the validation controller will return the uuid of the best classifier (-1 if there isn't)
+                best_classifier_uuid = ValidationController().run(self.config['operational_mode'])
+                if best_classifier_uuid == -1:
+                    print('[+] No valid Best Classifier found, restart from Early Training with new Number of '
+                          'Generations')
+                    self.change_operational_mode('early_training')
+                else:
+                    print(f'[+] Best Classifier found with UUID:({best_classifier_uuid}), Validation Phase ended')
+                    self.change_operational_mode('test_best_classifier')
+
+                    # load from disk the best classifier
+                    print(f'Loading: \'{best_classifier_uuid}.sav\'')
+                    self.mental_command_classifier = MentalCommandClassifier(file_name=f'{best_classifier_uuid}.sav')
+
+            # ====================== Test Best Classifier =======================
+
+            if self.config['operational_mode'] == 'test_best_classifier':
+                print(f'Test phase for classifier {self.mental_command_classifier.get_uuid()}')
                 break
 
         # close all threads
