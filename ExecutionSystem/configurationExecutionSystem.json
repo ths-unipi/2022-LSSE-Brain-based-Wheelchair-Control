@@ -1,5 +1,5 @@
 {
-  "operating_mode": "execution",
+  "operating_mode": "development",
   "threshold_value": 100,
   "endpoint_IP": "127.0.0.1",
   "endpoint_port": 5000

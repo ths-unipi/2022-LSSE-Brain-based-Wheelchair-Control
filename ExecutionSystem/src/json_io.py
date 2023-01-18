@@ -29,7 +29,7 @@ class JsonIO:
     def receive(self, received_json):
         # if the queue is full the thread is blocked
         try:
-            self._received_json_queue.put(received_json, block=True)
+            self._received_json_queue.put(received_json,block=True)
         except queue.Full:
             print("Full queue exception")
     # -------- CLIENT REQUEST --------
