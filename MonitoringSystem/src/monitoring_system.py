@@ -2,8 +2,10 @@ import json
 import os
 
 from jsonschema import validate, ValidationError
-from src.json_io import JsonIO
 from threading import Thread
+
+from src.json_io import JsonIO
+from src.labels_store import LabelsStore
 
 
 MONITORING_SYSTEM_CONFIG_PATH = os.path.join(os.path.abspath('..'), 'monitoring_system_config.json')
@@ -38,6 +40,8 @@ class MonitoringSystem:
             exit(1)
 
 
+
+
     def run(self) -> None:
         print("[+] Starting Monitoring System \n")
 
@@ -46,28 +50,33 @@ class MonitoringSystem:
 
         #monitoring system operations
         while True:
-            #receive label
-            try:
-                session_label = JsonIO.get_instance().get_queue().get(block=True, timeout=None)
-                print("[+]MonitoringSystem - Received label :", session_label)
-                with open(SESSION_LABEL_SCHEMA) as f:
-                    _label_schema = json.load(f)
-                validate(session_label, _label_schema)
+            _labels_store = LabelsStore()
+            #---------------- RECEIVE LABELS (EXECUTION AND EXPERT) ----------------#
+            session_label = JsonIO.get_instance().get_queue().get(block=True, timeout=None)
+            print("[+]MonitoringSystem - Received label :", session_label)
+            with open(SESSION_LABEL_SCHEMA) as f:
+                _label_schema = json.load(f)
+            validate(session_label, _label_schema)
 
 
-                #store label
+            #---------------------- STORE LABEL ----------------------#
+            _labels_store.store_session_label(session_label)
 
 
-                #check threshold
-                _labels_threshold = self._monitoring_system_config['labels_threshold']
-                print("[+]MonitoringSystem - labels threshold: ", _labels_threshold)
+
+            #----------------- CHECK LABELS THRESHOLD -----------------#
+            #si devono controllare sia quelle dell'execution che quelle dell'esperto,
+            #se una delle due non supera la soglia non si può creare il report
+            _labels_threshold = self._monitoring_system_config['labels_threshold']
+            print("[+]MonitoringSystem - labels threshold: ", _labels_threshold)
 
 
-                #if threshold exceeded, produce accuracy report
+                #-------------- GENERATE ACCURACY REPORT --------------#
+                # ------------------ LOAD ALL LABELS ------------------#
+            labels = _labels_store.load_labels()
 
 
-            except FileNotFoundError as error:
-                print("[-]MonitoringSystem - File not found error: ", error)
-            except ValidationError as error:
-                print("[-]Validation Error : ", error)
+
+            # -------------- TESTING MODE --------------#
+
 
