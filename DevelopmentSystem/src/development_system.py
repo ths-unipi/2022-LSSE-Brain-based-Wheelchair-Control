@@ -2,9 +2,11 @@ import json
 import os.path
 from threading import Thread
 from jsonschema import validate, ValidationError
+from sklearn.datasets import make_classification  # TODO: toglilo
 
 from src.early_training_controller import EarlyTrainingController
 from src.json_io import JsonIO
+from src.validation_controller import ValidationController
 
 
 class DevelopmentSystem:
@@ -53,15 +55,13 @@ class DevelopmentSystem:
 
             if self.config['operational_mode'] == 'early_training':
                 # TODO: get dataset from database if not loaded
-                training_dataset = {
-                    'training_data': [[2, 3, 4, 5], [6, 7, 8, 9], [2, 3, 4, 5], [10, 13, 14, 15]],
-                    'training_labels': [1, 2, 1, 3]
-                }
+                x, y = make_classification(n_features=(22 * 4), n_redundant=0)
+                training_dataset = {'training_data': x, 'training_labels': y}
 
                 # start the early training controller
                 EarlyTrainingController(mental_command_classifier=self.mental_command_classifier,
                                         number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
-                                        number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range'])\
+                                        number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
                     .run(self.config['operational_mode'], training_dataset)
 
                 # change operational mode and stop
@@ -83,6 +83,30 @@ class DevelopmentSystem:
             # ====================== Grid search =======================
 
             if self.config['operational_mode'] == 'grid_search':
+                # TODO: get dataset from database if not loaded
+                x, y = make_classification(n_features=(22 * 4), n_redundant=0)
+                z, n = make_classification(n_features=(22 * 4), n_redundant=0)
+                dataset = {
+                    'training_data': x,
+                    'training_labels': y,
+                    'validation_data': z,
+                    'validation_labels': n
+                }
+
+                # start the validation contoller
+                ValidationController(mental_command_classifier=self.mental_command_classifier,
+                                     number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
+                                     number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
+                    .run(dataset, self.config['validation_error_threshold'])
+
+                # change operational mode and stop
+                self.change_operational_mode('check_top_five_classifiers_report')
+                break
+
+            # ====================== Top Five Classifiers Report Evaluation ======================
+
+            if self.config['operational_mode'] == 'check_top_five_classifiers_report':
+                print('fine')
                 break
 
         # close all threads
