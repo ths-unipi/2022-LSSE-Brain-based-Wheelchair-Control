@@ -4,6 +4,7 @@ import os
 import json
 from jsonschema import validate, ValidationError
 import random
+from PIL import Image
 
 
 class RadarDiagramQualityReportGenerator:
@@ -17,7 +18,7 @@ class RadarDiagramQualityReportGenerator:
         labels = [f'ch{i + 1}' for i in range(channels)]
         bands = ['alpha', 'beta', 'delta', 'theta']
         titles = ['Alpha Radar Diagram', 'Beta Radar Diagram', 'Delta Radar Diagram', 'Theta Radar Diagram']
-        file_names = [ 'alpha_radar_diagram.png', 'beta_radar_diagram.png', 'delta_radar_diagram.png', 'theta_radar_diagram.png']
+        file_names = ['alpha_radar_diagram.png', 'beta_radar_diagram.png', 'delta_radar_diagram.png', 'theta_radar_diagram.png']
 
         i = 0
         for _ in bands:
@@ -34,13 +35,33 @@ class RadarDiagramQualityReportGenerator:
                 ))
 
             fig.update_layout(showlegend=False, title=title)
+
+            file_path = os.path.join(os.path.abspath('..'), 'data', 'quality', file_name)
             try:
-                pio.write_image(fig, os.path.join(os.path.abspath('..'), 'data', 'quality', file_name))
+                pio.write_image(fig, file_path)
             except:
                 print(f'[-] Failure to save {file_name}')
                 return False
             print(f'[+] {title} generated')
+
             i += 1
+
+        alpha_image = Image.open(os.path.join(os.path.abspath('..'), 'data', 'quality', file_names[0]))
+        beta_image = Image.open(os.path.join(os.path.abspath('..'), 'data', 'quality', file_names[1]))
+        delta_image = Image.open(os.path.join(os.path.abspath('..'), 'data', 'quality', file_names[2]))
+        theta_image = Image.open(os.path.join(os.path.abspath('..'), 'data', 'quality', file_names[3]))
+
+        image = Image.new("RGB", (
+            alpha_image.width + beta_image.width, alpha_image.height + delta_image.height))
+        image.paste(alpha_image, (0, 0))
+        image.paste(beta_image, (alpha_image.width, 0))
+        image.paste(delta_image, (0, alpha_image.height))
+        image.paste(theta_image, (alpha_image.width, alpha_image.height))
+
+        image.save(os.path.join(os.path.abspath('..'), 'data', 'quality', "radar_diagram.png"))
+
+        for file_name in file_names:
+            os.remove(os.path.join(os.path.abspath('..'), 'data', 'quality', file_name))
 
         return True
 
