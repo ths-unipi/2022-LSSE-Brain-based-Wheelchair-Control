@@ -71,7 +71,7 @@ class SegregationSystem:
 
             if op_mode == 'collecting_op_mode':
                 # if the queue is empty the thread is blocked
-                received_json = JsonIO.get_instance().get_received_json()
+                received_json = JsonIO.get_instance().receive()
 
                 print(f"[+] Received Json: {received_json}")
 
@@ -114,13 +114,18 @@ class SegregationSystem:
             elif op_mode == 'quality_op_mode':
 
                 b_generator = BalanceBarChartReportGenerator()
-                if b_generator.check_balancing_evaluation_from_report():
+                res = b_generator.check_balancing_evaluation_from_report()
+                if res == 0:
                     pass
-                else:
+                elif res == -1:
                     self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                     self.segregation_system_config['user_id'] += 1
                     self._save_config()
+                    collector.retrive_counter()
                     continue
+                else:
+                    print('[!] Shutdown')
+                    exit(0)
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
@@ -145,13 +150,18 @@ class SegregationSystem:
             elif op_mode == 'splitting_op_mode':
 
                 q_generator = RadarDiagramQualityReportGenerator()
-                if q_generator.check_quality_evaluation_from_report():
+                res = q_generator.check_quality_evaluation_from_report()
+                if res == 0:
                     pass
-                else:
+                elif res == -1:
                     self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                     self.segregation_system_config['user_id'] += 1
                     self._save_config()
+                    collector.retrive_counter()
                     continue
+                else:
+                    print('[!] Shutdown')
+                    exit(0)
 
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()

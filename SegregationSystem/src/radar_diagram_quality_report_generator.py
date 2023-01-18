@@ -11,7 +11,6 @@ class RadarDiagramQualityReportGenerator:
     def __init__(self):
         pass
 
-
     def generate_radar_diagram(self, dataset):
 
         channels = len(dataset[0]['features']['alpha'])
@@ -80,20 +79,20 @@ class RadarDiagramQualityReportGenerator:
 
         except FileNotFoundError:
             print(f'[-] Failure to open quality_report.json')
-            return False
+            return -2
 
         except ValidationError:
             print('[-] Quality Report has invalid schema')
-            return False
+            return -2
 
         evaluation = report['evaluation']
 
         if evaluation == 'bad quality':
             print("[-] Quality evaluation: Dataset bad quality")
-            return False
+            return -1
         elif evaluation == 'good quality':
             print("[+] Quality evaluation: Dataset good quality")
-            return True
+            return 0
         else:
             print("[!] Quality evaluation non done")
-            return False
+            return -2

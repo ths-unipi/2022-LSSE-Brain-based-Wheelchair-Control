@@ -87,20 +87,20 @@ class BalanceBarChartReportGenerator:
 
         except FileNotFoundError:
             print(f'[-] Failure to open balancing_report.json')
-            return False
+            return -2
 
         except ValidationError:
             print('[-] Balancing Report has invalid schema')
-            return False
+            return -2
 
         evaluation = report['evaluation']
 
         if evaluation == 'not balanced':
             print("[-] Balancing evaluation: Dataset not balanced")
-            return False
+            return -1
         elif evaluation == 'balanced':
             print("[+] Balancing evaluation: Dataset balanced")
-            return True
+            return 0
         else:
             print("[!] Balancing evaluation not done")
-            return False
+            return -2
