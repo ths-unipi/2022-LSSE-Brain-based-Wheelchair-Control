@@ -1,6 +1,8 @@
 {
   "operative_mode" : "development",
-  "endpoint_ip" : "172.16.0.20",
-  "endpoint_port" : 5000,
-  "missing_samples_threshold" : 50
+  "preparation_system_ip" : "172.16.0.10",
+  "preparation_system_port" : 5000,
+  "monitoring_system_ip": "172.16.0.20",
+  "monitoring_system_port": 5000,
+  "missing_samples_threshold" : 1
 }

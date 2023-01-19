@@ -65,16 +65,16 @@ class JsonIO:
             return False
         return True
 
-    def send(self, endpoint_ip: str, endpoint_port: int, raw_session: dict) -> bool:
+    def send(self, endpoint_ip: str, endpoint_port: int, data: dict) -> bool:
         """
         Sends a Raw Session to the Preparation System
         :param endpoint_ip: IP of the Preparation System
         :param endpoint_port: Port of the Preparation System
-        :param raw_session: Raw Session represented as a dictionary
+        :param data: dictionary containing the data to send
         :return: True if the 'send' is successful. False otherwise.
         """
         connection_string = f'http://{endpoint_ip}:{endpoint_port}/json'
-        response = post(connection_string, json=raw_session)
+        response = post(connection_string, json=data)
 
         if response.status_code != 200:
             error_message = response.json()['error']

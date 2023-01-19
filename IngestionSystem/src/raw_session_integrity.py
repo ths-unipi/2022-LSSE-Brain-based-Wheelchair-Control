@@ -1,10 +1,18 @@
 class RawSessionIntegrity:
 
-    def __init__(self) -> None:
-        self.missing_samples = None
+    def mark_missing_samples(self, headset_eeg: list, threshold: int) -> bool:
+        """
+        Detects and marks the missing headset EEG data in a Raw Session.
+        :param headset_eeg: list of EEG data (represented as list of integers)
+        :param threshold: maximum threshold of missing samples tolerated
+        :return: True if the number of missing samples detected meets the requirements. False otherwise.
+        """
 
-    def get_missing_samples(self) -> int:
-        return self.missing_samples
+        missing_samples = 0
+        for i in range(0, len(headset_eeg)):
+            if not headset_eeg[i]:
+                print(f'[!] [CHANNEL {i+1}] EEG Data not found')
+                missing_samples += 1
 
-    def mark_missing_samples(self, headset_eeg: list, threshold: int) -> None:
-        self.missing_samples = 3
+        print(f'[!] Missing samples detected: {missing_samples}')
+        return missing_samples <= threshold

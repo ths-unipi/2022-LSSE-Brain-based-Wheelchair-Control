@@ -83,6 +83,14 @@ class IngestionSystem:
             received_record = JsonIO.get_instance().get_received_record()
             # print(f'[+] Received record: {received_record}')
 
+            # Sending Label to Monitoring System if the system is in execution mode
+            if operative_mode == 'execution' and 'LABELS' in received_record.keys():
+                print(f'\n[+] LABEL {received_record["LABELS"]}: sending to the Monitoring System\n')
+                # JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['monitoring_system_ip'],
+                #                           endpoint_port=self.ingestion_system_config['monitoring_system_port'],
+                #                           data=received_record["LABELS"])
+                continue
+
             last_missing_sample = False
             if raw_sessions_store.store_record(record=received_record):
                 if self.last_uuid_received is not None:
@@ -92,7 +100,6 @@ class IngestionSystem:
                                                                                   operative_mode=operative_mode,
                                                                                   last_missing_sample=False)
                         uuid = received_record['UUID']
-
                     else:
                         # Check on the previous session because of a missing sample
                         print(f'[!] Missing sample detected: SESSION {self.last_uuid_received}')
@@ -107,7 +114,8 @@ class IngestionSystem:
                         # If the session is complete there no need for the next record to test "is_session_complete"
                         self.last_uuid_received = None
 
-                        print(f'[+] SESSION {uuid} IS COMPLETE')
+                        print(f'=========== ANALYZING SESSION {uuid} ===========')
+                        print(f'[+] Session complete')
 
                         # Load Raw Session from the Data Store
                         raw_session = raw_sessions_store.load_raw_session(uuid=uuid)
@@ -115,39 +123,32 @@ class IngestionSystem:
                         if raw_session['UUID'] is None:
                             continue
 
-                        # TODO: Mark missing samples
-                        threshold = self.ingestion_system_config['missing_samples_threshold']
-                        raw_session_integrity = RawSessionIntegrity()
-                        raw_session_integrity.mark_missing_samples(headset_eeg=raw_session['headset'],
-                                                                   threshold=threshold)
-
                         # Delete Raw Session from the Data Store
                         if raw_sessions_store.delete_raw_session(uuid=uuid):
-                            print(f'[+] SESSION {uuid} DELETED SUCCESSFULLY')
+                            print(f'[+] Session deleted successfully')
 
                         # Check Raw Session integrity
-                        if raw_session_integrity.get_missing_samples() < self.ingestion_system_config[
-                            'missing_samples_threshold']:
-                            print(f'[+] SESSION {uuid}: SENDING TO THE PREPARATION SYSTEM')
+                        threshold = self.ingestion_system_config['missing_samples_threshold']
+                        raw_session_integrity = RawSessionIntegrity()
+                        good_session = raw_session_integrity.mark_missing_samples(headset_eeg=raw_session['headset'],
+                                                                                  threshold=threshold)
+
+                        if good_session:
+                            print(f'[+] Sending raw session to the Preparation System')
                             # Send Raw Session to the Preparation System
-                            # res = JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['endpoint_ip'],
-                            #                                 endpoint_port=self.ingestion_system_config['endpoint_port'],
-                            #                                 raw_session=raw_session)
-
-                            # TODO: Send Label to the Monitoring System
-                            # res = JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['monitoring_endpoint_ip'],
-                            #                                 endpoint_port=self.ingestion_system_config['monitoring_endpoint_port'],
-                            #                                 raw_session=raw_session)
-
-                            # if res:
-                            #    print(f'[+] SESSION {uuid} SENT')
-                            # else:
-                            #    print(f'[-] SESSION {uuid} NOT SENT')
+                            # JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['preparation_system_ip'],
+                            #                            endpoint_port=self.ingestion_system_config['preparation_system_port'],
+                            #                            data=raw_session)
+                        else:
+                            print(f'[-] Threshold not satisfied: session discarded')
+                        print(f'=============== END ===============')
                     else:
                         if last_missing_sample:
-                            print(f'[+] SESSION {uuid} IS NOT COMPLETE (it is no possible to recover it)')
-                        else:
-                            print(f'[+] SESSION {uuid} IS NOT COMPLETE (it is still possible to recover it)')
+                            print(f'[+] Session not complete (no recovery possible)')
+                            # Session not complete (meaning that some required record is missing)
+                            # Moreover, being last_missing_samples equal to True,
+                            # the system will not receive any other record related to this session (session is lost)
+                            # TODO: Should I delete it from the data store?
                 else:
                     self.last_uuid_received = received_record['UUID']
         # =======================================================================

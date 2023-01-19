@@ -1,5 +1,6 @@
 import os
 import random
+import time
 
 from pandas import read_csv
 from requests import post
@@ -55,7 +56,7 @@ if __name__ == '__main__':
 
                     record = headset_channels.pop(0)
                     # Sending a record with a probability of 0.2
-                    if random.random() < 0.1 and record["CHANNEL"] in MISSING_SAMPLES:
+                    if random.random() < 0.2 and record["CHANNEL"] in MISSING_SAMPLES:
                         print(f'Generating a missing sample: {record["UUID"]},{record["CHANNEL"]}')
                     else:
                         print(f'Sending set headset: {record["UUID"]},{record["CHANNEL"]}')
@@ -63,13 +64,14 @@ if __name__ == '__main__':
 
             else:
                 record = sets[i]['records'].loc[0].to_dict()
+                sets[i]['records'].drop(0, inplace=True)
+                sets[i]['records'].reset_index(drop=True, inplace=True)
+
                 if random.random() < 0.01:
                     print(f'Generating a missing sample from the set: {sets[i]["name"]}')
                 else:
-                    print(f'Sending set: {sets[i]["name"]}')
-                    record = sets[i]['records'].loc[0].to_dict()
+                    print(f'Sending set: {sets[i]["name"]} | RECORD : {record["UUID"]}')
                     response = post(connection_string, json=record)
-                    sets[i]['records'].drop(0, inplace=True)
-                    sets[i]['records'].reset_index(drop=True, inplace=True)
-
+        # Data sources send records every 3 seconds
+        time.sleep(3)
         print('============== END SESSION ==============\n')

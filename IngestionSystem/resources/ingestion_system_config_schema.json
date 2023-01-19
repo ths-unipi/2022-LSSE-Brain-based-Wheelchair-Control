@@ -5,15 +5,27 @@
       "type": "string",
       "enum": ["development", "execution"]
     },
-    "endpoint_ip": {
+    "preparation_system_ip": {
       "type": "string"
     },
-    "endpoint_port": {
+    "preparation_system_port": {
+      "type": "integer"
+    },
+    "monitoring_system_ip": {
+      "type": "string"
+    },
+    "monitoring_system_port": {
       "type": "integer"
     },
     "missing_samples_threshold": {
       "type": "integer"
     }
   },
-  "required": ["operative_mode", "endpoint_ip", "endpoint_port", "missing_samples_threshold"]
+  "required": [
+    "operative_mode",
+    "preparation_system_ip",
+    "preparation_system_port",
+    "monitoring_system_ip",
+    "monitoring_system_port",
+    "missing_samples_threshold"]
 }
