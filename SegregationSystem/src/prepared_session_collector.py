@@ -9,33 +9,17 @@ class PreparedSessionCollector:
     def __init__(self, config):
         self.segregation_system_config = config
         self._prepared_session_counter = 0
-        self._conn = None
 
-    def _open_connection(self):
-        db_name = self.segregation_system_config['db_name']
+        db_name = config['db_name']
         db_path = os.path.join(os.path.abspath('..'), 'data', db_name)
         if not os.path.exists(db_path):
-            print("[-] Sqlite db doesn't exist, the db will be created")
-            return False
+            print("[-] Sqlite db doesn't exist")
+            exit(1)
         try:
             self._conn = sqlite3.connect(db_path)
         except sqlite3.Error as e:
             print(f'[-] Sqlite Connection Error [{e}]')
-            return False
-
-        return True
-
-    def _close_connection(self):
-        if self._conn is None:
-            return True
-        try:
-            self._conn.close()
-            self._conn = None
-        except sqlite3.Error as e:
-            print(f"[-] Close Connection Error [{e}]")
-            return False
-
-        return True
+            exit(1)
 
     def _validate_prepared_session(self, p_session):
 
@@ -58,9 +42,6 @@ class PreparedSessionCollector:
         return True
 
     def retrive_counter(self):
-
-        if not self._open_connection():
-            return None
 
         user_id = self.segregation_system_config['user_id']
 
@@ -93,9 +74,6 @@ class PreparedSessionCollector:
     def load_learning_session_set(self):
         user_id = self.segregation_system_config['user_id']
 
-        if not self._open_connection():
-            return None
-
         query = "SELECT * FROM p_session WHERE user_id = ? "
         cursor = self._conn.cursor()
         try:
@@ -104,7 +82,7 @@ class PreparedSessionCollector:
             print(f'[-] Sqlite Execution Error [{e}]')
             return None
 
-        res = cursor.fetchall()  # fetchall for more results
+        res = cursor.fetchall()
         if res is None:
             return None
         dataset = []
@@ -121,9 +99,6 @@ class PreparedSessionCollector:
         user_id = self.segregation_system_config['user_id']
         session_id = self._prepared_session_counter
 
-        if not self._open_connection():
-            return False
-
         query = "INSERT INTO p_session (user_id, session_id, json) \
                         VALUES(?, ?, ?) "
         cursor = self._conn.cursor()
@@ -133,9 +108,7 @@ class PreparedSessionCollector:
             self._conn.commit()
         except sqlite3.Error as e:
             print(f"[-] Sqlite Execution Error [{e}]")
-            self._close_connection()
             return False
 
         print(f"[+] Stored new prepared session (user_id: {user_id} session_id: {session_id})")
-        self._close_connection()
         return True

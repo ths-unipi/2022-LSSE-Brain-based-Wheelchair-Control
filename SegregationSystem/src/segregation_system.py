@@ -60,12 +60,13 @@ class SegregationSystem:
         collector.segregation_system_config = self.segregation_system_config
         collector.retrive_counter()
 
+        testing_mode = self.segregation_system_config['testing_mode']
+        print(f"[!] Testing mode: {testing_mode}")
+
         while True:
             op_mode = self.segregation_system_config['operative_mode']
-            testing_mode = self.segregation_system_config['testing_mode']
 
             print(f"[!] Mode: {op_mode}")
-            print(f"[!] Testing mode: {testing_mode}")
 
             # --------------- COLLECTING OP MODE -------------------
 

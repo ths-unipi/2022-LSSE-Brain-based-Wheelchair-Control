@@ -1,7 +1,6 @@
 from requests import post
 import random
 import json
-import time
 
 if __name__ == '__main__':
     sessions = 100
