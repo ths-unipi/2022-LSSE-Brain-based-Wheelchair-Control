@@ -35,15 +35,15 @@ class AccuracyReportGenerator:
             'max_errors_tolerated' : max_errors_tolerated,
             'errors' : _errors,
             'accuracy' : _accuracy,
-            'classifier_accepted' : None
+            'classifier_accepted' : ""
         }
 
         # -------------- TESTING MODE --------------#
         if testing_mode:
             if accuracy_report['accuracy'] >= expected_accuracy:
-                accuracy_report['classifier_accepted'] = True
+                accuracy_report['classifier_accepted'] = "Yes"
             else:
-                accuracy_report['classifier_accepted'] = False
+                accuracy_report['classifier_accepted'] = "No"
 
         #save report as a Json file
         with open(self.json_path, "w") as f:

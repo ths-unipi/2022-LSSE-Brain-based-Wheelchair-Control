@@ -11,6 +11,9 @@ from src.accuracy_report_generator import AccuracyReportGenerator
 
 
 MONITORING_SYSTEM_CONFIG_PATH = os.path.join(os.path.abspath('..'), 'monitoring_system_config.json')
+ACCURACY_REPORT_PATH = os.path.join(os.path.abspath('..'),'data', 'accuracy_report.json')
+
+ACCURACY_REPORT_SCHEMA = os.path.join(os.path.abspath('..'), 'resources', 'accuracy_report_schema.json')
 MONITORING_SYSTEM_CONFIG_SCHEMA_PATH = os.path.join(os.path.abspath('..'), 'resources', 'monitoring_system_config_schema.json')
 SESSION_LABEL_SCHEMA = os.path.join(os.path.abspath('..'), 'resources', 'session_label_schema.json')
 
@@ -29,22 +32,20 @@ class MonitoringSystem:
             with open(MONITORING_SYSTEM_CONFIG_PATH) as f:
                 self._monitoring_system_config = json.load(f)
 
-            with open(MONITORING_SYSTEM_CONFIG_SCHEMA_PATH) as f:
-                _config_schema = json.load(f)
+            MonitoringSystem._validate_schema(self, self._monitoring_system_config, MONITORING_SYSTEM_CONFIG_SCHEMA_PATH)
 
-            validate(self._monitoring_system_config,_config_schema)
+        except FileNotFoundError as err:
+            print("[-] File not found: ", err)
 
-        except FileNotFoundError:
-            print("[-] File not found")
+    def _validate_schema(self,file_to_validate,schema_path):
+        try:
+            with open(schema_path) as f:
+                _schema = json.load(f)
+            validate(file_to_validate, _schema)
 
-        except ValidationError:
-            print('[-] Config validation failed')
+        except ValidationError as err:
+            print('[-] Config validation failed: ',err)
             exit(1)
-
-    def _validate_schema(self,session_label,schema):
-        with open(schema) as f:
-            _label_schema = json.load(f)
-        validate(session_label, _label_schema)
 
 
 
@@ -54,7 +55,7 @@ class MonitoringSystem:
         new_thread = Thread(target=JsonIO.get_instance().listener, args=("0.0.0.0","5000"), daemon=True)
         new_thread.start()
 
-        # load monitoring system configuration parameters
+        # load labels_threshold from configuration
         _labels_threshold = self._monitoring_system_config['labels_threshold']
 
         # class objects
@@ -65,17 +66,17 @@ class MonitoringSystem:
 
         while True:
             #---------------- RECEIVE LABELS (EXECUTION AND EXPERT) ----------------#
-            session_label = JsonIO.get_instance().get_queue().get(block=True, timeout=None)
-            print("[+]MonitoringSystem - Received label :", session_label)
-            MonitoringSystem._validate_schema(self, session_label,SESSION_LABEL_SCHEMA)
+            _received_label = JsonIO.get_instance().get_queue().get(block=True, timeout=None)
+            print("[+]MonitoringSystem - Received label :", _received_label)
+            MonitoringSystem._validate_schema(self, _received_label,SESSION_LABEL_SCHEMA)
 
 
             #---------------------- STORE LABEL ----------------------#
-            _labels_store.store_session_label(session_label)
+            _labels_store.store_session_label(_received_label)
 
 
             #----------------- CHECK LABELS THRESHOLD -----------------#
-            _increment = _labels_store.row_label_complete(session_label['uuid'])
+            _increment = _labels_store.row_label_complete(_received_label['uuid'])
             if _increment is True:
                 _collecting_phase.increment_counter()
                 _increment = False
@@ -87,14 +88,15 @@ class MonitoringSystem:
                 #load all labels
                 _labels = _labels_store.load_labels()
 
-                #parameters to create the accuracy report
+                #metrics used to create the accuracy report
                 _max_errors_tolerated = self._monitoring_system_config['max_errors_tolerated']
                 _expected_accuracy = self._monitoring_system_config['expected_accuracy']
                 _testing_mode = self._monitoring_system_config['testing_mode']
 
                 # create accuracy report
                 _accuracy_report = _accuracy_report_generator.generate_accuracy_report(_labels, _max_errors_tolerated, _testing_mode, _expected_accuracy)
-
+                #validate accuracy report created
+                MonitoringSystem._validate_schema(self,_accuracy_report, ACCURACY_REPORT_SCHEMA)
                 print(f"[+] MonitoringSystem - Accuracy Report Generated, with Accuracy :  {_accuracy_report['accuracy']*100} % \n")
 
 

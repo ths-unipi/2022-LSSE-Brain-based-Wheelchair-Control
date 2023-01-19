@@ -15,13 +15,13 @@
       "type": "number"
     },
     "classifier_accepted": {
-      "type": "boolean"
+      "type": "string"
     }
   },
   "required": [
     "evaluated_labels",
     "max_errors_tolerated",
     "errors",
-    "classifier_accuracy"
+    "accuracy"
   ]
 }

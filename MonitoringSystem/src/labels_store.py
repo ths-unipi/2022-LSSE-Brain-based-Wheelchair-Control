@@ -144,7 +144,7 @@ class LabelsStore:
             return None
 
         cursor = self._conn.cursor()
-        query = "SELECT * FROM session_labels"
+        query = "SELECT * FROM session_labels WHERE (label1 IS NOT NULL AND label2 IS NOT NULL)"
 
         try:
             cursor.execute(query)
@@ -176,7 +176,7 @@ class LabelsStore:
 
         try:
             cursor = self._conn.cursor()
-            query = "DELETE FROM session_labels;"
+            query = "DELETE FROM session_labels WHERE (label1 IS NOT NULL AND label2 IS NOT NULL)"
 
             cursor.execute(query)
 
