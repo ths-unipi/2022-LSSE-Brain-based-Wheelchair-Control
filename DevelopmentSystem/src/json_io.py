@@ -19,7 +19,7 @@ class JsonIO:
 
     def send(self, ip_endpoint: str, port_endpoint: int, classifier: dict) -> bool:
         url = f'http://{ip_endpoint}:{port_endpoint}/json'
-        print(url)
+        print(f'[+] send to: {url}')
         response = post(url=url, json=classifier)
 
         if response.status_code != 200:
