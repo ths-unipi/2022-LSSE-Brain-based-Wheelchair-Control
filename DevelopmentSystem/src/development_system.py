@@ -187,9 +187,10 @@ class DevelopmentSystem:
                     print('[+] The Best Classifier is valid, can be sent to Execution System')
 
                     # send serialized classifier to execution system
-                    endpoint = f'http://{self.config["ip_endpoint"]}:{self.config["port_endpoint"]}'
                     serialized_classifier = self.mental_command_classifier.serialize('best_classifier.sav')
-                    JsonIO.get_instance().send(endpoint, serialized_classifier)
+                    JsonIO.get_instance().send(ip_endpoint=self.config['ip_endpoint'],
+                                               port_endpoint=self.config['port_endpoint'],
+                                               classifier=serialized_classifier)
 
                     # restart workflow
                     self.change_operational_mode('waiting_for_dataset')

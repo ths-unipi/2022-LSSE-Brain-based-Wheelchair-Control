@@ -17,12 +17,13 @@ class JsonIO:
         self._queue.put(learning_session_set, block=True)
         print('[+] New Dataset received')
 
-    def send(self, endpoint: str, classifier: dict) -> bool:
-        response = post(endpoint + '/classifier', json=classifier)
+    def send(self, ip_endpoint: str, port_endpoint: int, classifier: dict) -> bool:
+        url = f'http://{ip_endpoint}:{port_endpoint}/json'
+        print(url)
+        response = post(url=url, json=classifier)
 
         if response.status_code != 200:
-            error_message = response.json()['error']
-            print(f'[-] Failed to send Classifier\n\t-> Error: {error_message}')
+            print(f'[-] Failed to send Classifier\n\t-> Response Code: {response.status_code}')
             return False
 
         print(f'[+] Classifier sent to Execution System')
