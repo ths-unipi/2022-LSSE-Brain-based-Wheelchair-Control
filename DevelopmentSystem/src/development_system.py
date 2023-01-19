@@ -2,17 +2,17 @@ import json
 import os.path
 from threading import Thread
 from jsonschema import validate, ValidationError
-from sklearn.datasets import make_classification  # TODO: toglilo
 
 from src.early_training_controller import EarlyTrainingController
 from src.json_io import JsonIO
+from src.learning_session_store import LearningSessionStore
 from src.mental_command_classifier import MentalCommandClassifier
 from src.test_controller import TestController
 from src.validation_controller import ValidationController
 
-
 ACCEPTED_OPERATIONAL_MODES = ['waiting_for_dataset', 'early_training', 'check_early_training_report', 'grid_search',
                               'check_top_five_classifiers_report', 'test_best_classifier', 'check_test_report']
+
 
 class DevelopmentSystem:
 
@@ -31,6 +31,7 @@ class DevelopmentSystem:
             exit(1)
 
         self.mental_command_classifier = None
+        self._learning_session_store = LearningSessionStore()
 
     def run(self):
         # check if operational mode is valid
@@ -50,23 +51,22 @@ class DevelopmentSystem:
             # ====================== Receive dataset ======================
 
             if self.config['operational_mode'] == 'waiting_for_dataset':
-                # get new received learning set
+                # get new received learning set and save in the learning session store
                 learning_session_set = JsonIO.get_instance().get_queue().get(block=True)
+                self._learning_session_store.store_dataset(learning_session_set)
 
                 # create JSON file containing the number of generations
                 with open(os.path.join(os.path.abspath('..'), 'data', 'number_of_generations.json'), "w") as f:
                     json.dump({'number_of_generations': self.config['initial_number_of_generations']}, f, indent=4)
 
-                # save to database and change operational mode
-                # TODO: database
+                # change operational mode to early training
                 self.change_operational_mode('early_training')
 
             # ====================== Early training =======================
 
             if self.config['operational_mode'] == 'early_training':
-                # TODO: get dataset from database if not loaded
-                x, y = make_classification(n_features=(22 * 4), n_redundant=0)
-                training_dataset = {'training_data': x, 'training_labels': y}
+                # get dataset from learning session store
+                training_dataset = self._learning_session_store.get_training_set()
 
                 # start the early training controller
                 EarlyTrainingController(mental_command_classifier=self.mental_command_classifier,
@@ -96,22 +96,18 @@ class DevelopmentSystem:
             # ====================== Grid search =======================
 
             if self.config['operational_mode'] == 'grid_search':
-                # TODO: get dataset from database if not loaded
-                x, y = make_classification(n_features=(22 * 4), n_redundant=0)
-                z, n = make_classification(n_features=(22 * 4), n_redundant=0)
-                dataset = {
-                    'training_data': x,
-                    'training_labels': y,
-                    'validation_data': z,
-                    'validation_labels': n
-                }
+                # get training and validation sets from database
+                training_dataset = self._learning_session_store.get_training_set()
+                validation_dataset = self._learning_session_store.get_validation_set()
 
                 # start the validation controller
                 ValidationController(mental_command_classifier=self.mental_command_classifier,
                                      number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
                                      number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
-                    .run(self.config['operational_mode'], self.config['testing_mode'],
-                         dataset, self.config['validation_error_threshold'])
+                    .run(operational_mode=self.config['operational_mode'],
+                         testing=self.config['testing_mode'],
+                         dataset=training_dataset | validation_dataset,
+                         validation_error_threshold=self.config['validation_error_threshold'])
 
                 # change operational mode and stop (if testing mode instead continue)
                 self.change_operational_mode('check_top_five_classifiers_report')
@@ -124,7 +120,7 @@ class DevelopmentSystem:
 
             if self.config['operational_mode'] == 'check_top_five_classifiers_report':
                 # the validation controller will return the uuid of the best classifier (-1 if there isn't)
-                best_classifier_uuid = ValidationController().run(self.config['operational_mode'])
+                best_classifier_uuid = ValidationController().run(operational_mode=self.config['operational_mode'])
                 if best_classifier_uuid == -1:
                     print('[+] No valid Best Classifier found, restart from Early Training with new Number of '
                           'Generations')
@@ -155,20 +151,19 @@ class DevelopmentSystem:
                 if self.mental_command_classifier is None:
                     self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
 
-                # TODO: get dataset from database if not loaded
-                x, y = make_classification(n_features=(22 * 4), n_redundant=0)
-                z, n = make_classification(n_features=(22 * 4), n_redundant=0)
-                dataset = {
-                    'training_data': x,
-                    'training_labels': y,
-                    'test_data': z,
-                    'test_labels': n
-                }
+                # get training and test sets from database
+                training_dataset = self._learning_session_store.get_training_set()
+                test_dataset = self._learning_session_store.get_test_set()
 
                 # start test controller
-                TestController(self.mental_command_classifier).run(self.config['operational_mode'],
-                                                                   self.config['testing_mode'], dataset,
-                                                                   self.config['test_error_threshold'])
+                TestController(self.mental_command_classifier) \
+                    .run(operational_mode=self.config['operational_mode'],
+                         testing=self.config['testing_mode'],
+                         dataset=training_dataset | test_dataset,
+                         test_error_threshold=self.config['test_error_threshold'])
+
+                # remove training, validation and test sets from learning session store
+                self._learning_session_store.delete_dataset()
 
                 # change operational mode and stop (if testing mode instead continue)
                 self.change_operational_mode('check_test_report')
@@ -199,7 +194,8 @@ class DevelopmentSystem:
                     print('[+] The Best Classifier isn\'t valid, Reconfiguration of the Systems are needed')
                     self.change_operational_mode('waiting_for_dataset')
 
-        # close all threads
+        # close db connections and all threads
+        self._learning_session_store.close_connection()
         exit(0)
 
     def change_operational_mode(self, new_mode: str):
