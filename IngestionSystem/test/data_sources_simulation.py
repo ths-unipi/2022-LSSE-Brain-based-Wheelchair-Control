@@ -15,6 +15,7 @@ if __name__ == '__main__':
     headset = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_headset.csv'))
     settings = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_setting.csv'))
     labels = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_labels.csv'))
+    label = labels[['LABELS', 'UUID']].rename(columns={'LABELS': 'label', 'UUID': 'uuid'})
 
     sets = [
         {
@@ -25,7 +26,7 @@ if __name__ == '__main__':
             'records': headset,
         }, {
             'name': 'labels',
-            'records': labels
+            'records': label
         }, {
             'name': 'settings',
             'records': settings
@@ -70,8 +71,12 @@ if __name__ == '__main__':
                 if random.random() < 0.01:
                     print(f'Generating a missing sample from the set: {sets[i]["name"]}')
                 else:
-                    print(f'Sending set: {sets[i]["name"]} | RECORD : {record["UUID"]}')
+                    if sets[i]["name"] == 'labels':
+                        print(f'Sending set: {sets[i]["name"]} | RECORD : {record["uuid"]}')
+                    else:
+                        print(f'Sending set: {sets[i]["name"]} | RECORD : {record["UUID"]}')
                     response = post(connection_string, json=record)
+
         # Data sources send records every 3 seconds
-        time.sleep(3)
+        # time.sleep(3)
         print('============== END SESSION ==============\n')

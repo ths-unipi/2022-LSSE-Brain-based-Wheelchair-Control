@@ -1,8 +1,8 @@
 {
-  "operative_mode" : "development",
-  "preparation_system_ip" : "172.16.0.10",
+  "operative_mode" : "execution",
+  "preparation_system_ip" : "172.16.0.14",
   "preparation_system_port" : 5000,
-  "monitoring_system_ip": "172.16.0.20",
+  "monitoring_system_ip": "172.16.0.15",
   "monitoring_system_port": 5000,
-  "missing_samples_threshold" : 1
+  "missing_samples_threshold": 1
 }

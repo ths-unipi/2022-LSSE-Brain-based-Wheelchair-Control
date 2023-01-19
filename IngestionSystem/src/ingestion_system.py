@@ -84,11 +84,11 @@ class IngestionSystem:
             # print(f'[+] Received record: {received_record}')
 
             # Sending Label to Monitoring System if the system is in execution mode
-            if operative_mode == 'execution' and 'LABELS' in received_record.keys():
-                print(f'\n[+] LABEL {received_record["LABELS"]}: sending to the Monitoring System\n')
-                # JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['monitoring_system_ip'],
-                #                           endpoint_port=self.ingestion_system_config['monitoring_system_port'],
-                #                           data=received_record["LABELS"])
+            if operative_mode == 'execution' and 'label' in received_record.keys():
+                print(f'\n[+] LABEL {received_record["label"]}: sending to the Monitoring System\n')
+                JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['monitoring_system_ip'],
+                                           endpoint_port=self.ingestion_system_config['monitoring_system_port'],
+                                           data=received_record)
                 continue
 
             last_missing_sample = False
@@ -136,9 +136,10 @@ class IngestionSystem:
                         if good_session:
                             print(f'[+] Sending raw session to the Preparation System')
                             # Send Raw Session to the Preparation System
-                            # JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['preparation_system_ip'],
-                            #                            endpoint_port=self.ingestion_system_config['preparation_system_port'],
-                            #                            data=raw_session)
+                            JsonIO.get_instance() \
+                                .send(endpoint_ip=self.ingestion_system_config['preparation_system_ip'],
+                                      endpoint_port=self.ingestion_system_config['preparation_system_port'],
+                                      data=raw_session)
                         else:
                             print(f'[-] Threshold not satisfied: session discarded')
                         print(f'=============== END ===============')

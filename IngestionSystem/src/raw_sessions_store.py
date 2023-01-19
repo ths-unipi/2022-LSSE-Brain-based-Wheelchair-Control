@@ -4,7 +4,7 @@ import json
 from jsonschema import validate, ValidationError
 
 DB_NAME = 'RawSessionsStore.db'
-RECORD_TYPE = ['CALENDAR', 'LABELS', 'SETTINGS', 'CHANNEL']
+RECORD_TYPE = ['CALENDAR', 'LABEL', 'SETTINGS', 'CHANNEL']
 NUM_CHANNELS = 22
 
 
@@ -131,7 +131,7 @@ class RawSessionsStore:
         parameters = {
             'UUID': record['UUID'],
             'CALENDAR': None,
-            'LABELS': None,
+            'LABEL': None,
             'SETTINGS': None,
             'CHANNELS': [None] * NUM_CHANNELS
         }
@@ -208,7 +208,7 @@ class RawSessionsStore:
         :return: True if the insert is successful. False otherwise.
         """
         try:
-            query = 'INSERT INTO raw_session (uuid, calendar, labels, settings, ' \
+            query = 'INSERT INTO raw_session (uuid, calendar, label, settings, ' \
                     'channel_1, channel_2, channel_3, channel_4, channel_5, channel_6, channel_7, channel_8, ' \
                     'channel_9, channel_10, channel_11, channel_12, channel_13, channel_14, channel_15, channel_16, ' \
                     'channel_17, channel_18, channel_19, channel_20, channel_21, channel_22 ) ' \
@@ -270,7 +270,7 @@ class RawSessionsStore:
 
             # Handling missing label
             if result[2] is not None:
-                raw_session['commandThought'] = json.loads(result[2])['LABELS']
+                raw_session['commandThought'] = json.loads(result[2])['LABEL']
 
             # Handling missing channels eeg data
             for channel in result[4:]:
@@ -316,7 +316,7 @@ class RawSessionsStore:
         else:
             # In execution mode the 'label' is not required
             for column_name in query_result.keys():
-                if query_result.get(column_name) is None and column_name != 'LABELS':
+                if query_result.get(column_name) is None and column_name != 'LABEL':
                     return False
         return True
 
@@ -345,7 +345,7 @@ class RawSessionsStore:
                 # So the task to check if the session is good or not is shifted to the RawSessionIntegrity class
                 # Here the only important thing is to check if the required fields are not missing
                 column_names = [description[0] for description in cursor.description][0:len(RECORD_TYPE)]
-                # res contains only the following (required) fields: ['CALENDAR, 'LABELS', 'SETTINGS']
+                # res contains only the following (required) fields: ['CALENDAR, 'LABEL', 'SETTINGS']
                 res = dict(zip(column_names, result[0:len(RECORD_TYPE)]))
                 return self.check_required_fields(query_result=res, operative_mode=operative_mode)
             else:
@@ -353,7 +353,7 @@ class RawSessionsStore:
                 # So it is necessary to check all the possible fields (except for the labels during the execution mode)
                 # If all the records exist, the session can be labeled as 'fully complete'
                 column_names = [description[0] for description in cursor.description]
-                # res has all the possible fields: ['CALENDAR, 'LABELS', 'SETTINGS', 'CHANNELS_1', ETC..]
+                # res has all the possible fields: ['CALENDAR, 'LABEL', 'SETTINGS', 'CHANNELS_1', ETC..]
                 res = dict(zip(column_names, result))
                 return self.check_required_fields(query_result=res, operative_mode=operative_mode)
 

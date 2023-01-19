@@ -1,16 +1,13 @@
 {
   "type": "object",
   "properties": {
-    "LABELS": {
+    "label": {
       "type": "string",
       "enum": ["left", "right", "move", "stop"]
     },
-    "TIMESTAMP": {
-      "type": "string"
-    },
-    "UUID": {
+    "uuid": {
       "type": "string"
     }
   },
-  "required": ["LABELS", "TIMESTAMP", "UUID"]
+  "required": ["label", "uuid"]
 }
