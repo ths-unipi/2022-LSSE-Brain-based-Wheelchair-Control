@@ -6,31 +6,70 @@ from requests import post
 
 INGESTION_SYSTEM_IP = 'localhost'
 INGESTION_SYSTEM_PORT = 5000
-OPERATIVE_MODE = 'development'
+MISSING_SAMPLES = [9, 10, 11]
 
 if __name__ == '__main__':
+    # Read records from the sample dataset
     calendar = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_calendar.csv'))
     headset = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_headset.csv'))
     settings = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_setting.csv'))
+    labels = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_labels.csv'))
 
-    # Labels are sent only in development operative mode
-    if OPERATIVE_MODE == 'development':
-        labels = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_labels.csv'))
-        sets = [calendar, headset, labels, settings]
-    else:
-        sets = [calendar, headset, settings]
+    sets = [
+        {
+            'name': 'calendar',
+            'records': calendar
+        }, {
+            'name': 'headset',
+            'records': headset,
+        }, {
+            'name': 'labels',
+            'records': labels
+        }, {
+            'name': 'settings',
+            'records': settings
+        }]
+    connection_string = f'http://{INGESTION_SYSTEM_IP}:{INGESTION_SYSTEM_PORT}/record'
 
-    while len(sets) > 0:
-        set_index = random.randint(0, (len(sets) - 1))
+    stop_sending = False
+    while not stop_sending:
 
-        # Send record to Ingestion System
-        connection_string = f'http://{INGESTION_SYSTEM_IP}:{INGESTION_SYSTEM_PORT}/record'
-        record = sets[set_index].loc[0].to_dict()
-        response = post(connection_string, json=record)
+        # Shuffle in order to create non-synchronized records
+        random.shuffle(sets)
 
-        sets[set_index].drop(0, inplace=True)
-        sets[set_index].reset_index(drop=True, inplace=True)
+        print('============= START SESSION =============')
+        for i in range(0, len(sets)):
 
-        if sets[set_index].empty:
-            print(f'set index {set_index} | {sets[set_index].empty}')
-            sets.pop(set_index)
+            if sets[i]['records'].empty:
+                stop_sending = True
+                break
+
+            if sets[i]['name'] == 'headset':
+                headset_channels = sets[i]['records'].iloc[:22, :].to_dict('records')
+                sets[i]['records'].drop(sets[i]['records'].index[:22], inplace=True)
+                sets[i]['records'].reset_index(drop=True, inplace=True)
+
+                while headset_channels:
+                    # Shuffle the headset eeg data
+                    random.shuffle(headset_channels)
+
+                    record = headset_channels.pop(0)
+                    # Sending a record with a probability of 0.2
+                    if random.random() < 0.1 and record["CHANNEL"] in MISSING_SAMPLES:
+                        print(f'Generating a missing sample: {record["UUID"]},{record["CHANNEL"]}')
+                    else:
+                        print(f'Sending set headset: {record["UUID"]},{record["CHANNEL"]}')
+                        response = post(connection_string, json=record)
+
+            else:
+                record = sets[i]['records'].loc[0].to_dict()
+                if random.random() < 0.01:
+                    print(f'Generating a missing sample from the set: {sets[i]["name"]}')
+                else:
+                    print(f'Sending set: {sets[i]["name"]}')
+                    record = sets[i]['records'].loc[0].to_dict()
+                    response = post(connection_string, json=record)
+                    sets[i]['records'].drop(0, inplace=True)
+                    sets[i]['records'].reset_index(drop=True, inplace=True)
+
+        print('============== END SESSION ==============\n')

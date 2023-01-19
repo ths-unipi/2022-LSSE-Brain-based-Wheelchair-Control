@@ -1,7 +1,10 @@
 class RawSessionIntegrity:
 
     def __init__(self) -> None:
-        pass
+        self.missing_samples = None
 
-    def mark_missing_samples(self, headset_eeg: list, threshold: int) -> bool:
-        pass
+    def get_missing_samples(self) -> int:
+        return self.missing_samples
+
+    def mark_missing_samples(self, headset_eeg: list, threshold: int) -> None:
+        self.missing_samples = 3
