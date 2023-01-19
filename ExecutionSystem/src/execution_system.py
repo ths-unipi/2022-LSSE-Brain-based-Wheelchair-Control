@@ -2,6 +2,7 @@ from jsonschema import validate, ValidationError
 from src.json_io import JsonIO
 from threading import Thread
 from src.mental_command_classifier import MentalCommandClassifier
+from src.monitoring_phase import MonitoringPhase
 
 import json
 import os
@@ -50,8 +51,8 @@ class ExecutionSystem:
 
         operating_mode = self._configuration_execution_system['operating_mode']
         while(True):
-            json_file = JsonIO.get_instance().get_received_json()
             if operating_mode == 'development':
+                json_file = JsonIO.get_instance().get_received_json()
                 # if we are in the development flow, we receive the best classifier and save it on a file
                 if (MentalCommandClassifier().deploy_classifier(json_file)):
                     print("Deployment completed successfully")
@@ -59,9 +60,13 @@ class ExecutionSystem:
                 print("Classifier not loaded correctly")
             else:
                 # if we are in the execution flow:
+                # we receive the prepared session
+                MentalCommandClassifier()._prepared_session = JsonIO.get_instance().get_received_json()
+                # we increment the counter of the Monitoring Phase
+                MonitoringPhase().increment_session_counter()
                 # we load the best classifier from the .json file
-                    classifier = open_json_file(os.path.join(os.path.abspath('..'), 'mental_command_classifier.json'))
-                    mlp_classifier = pickle.loads(classifier['classifier'].encode('ISO-8859-1'))
+                #     classifier = open_json_file(os.path.join(os.path.abspath('..'), 'mental_command_classifier.json'))
+                #     mlp_classifier = pickle.loads(classifier['classifier'].encode('ISO-8859-1'))
 
                    # prediction = mlp_classifier.predict(session)
 
