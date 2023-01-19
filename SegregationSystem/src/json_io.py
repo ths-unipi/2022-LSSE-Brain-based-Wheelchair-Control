@@ -8,7 +8,9 @@ class JsonIO:
     _instance = None
 
     def __init__(self):
+        # Flask instance to receive data
         self._app = Flask(__name__)
+        # a thread-safe queue to buffer the received json message
         self._received_json_queue = queue.Queue()
 
     @staticmethod
@@ -18,15 +20,19 @@ class JsonIO:
         return JsonIO._instance
 
     def listener(self, ip, port):
+        # execute the listening server, for each message received, it will be handled by a thread
         self._app.run(host=ip, port=port, debug=False, threaded=True)
 
     def get_app(self):
         return self._app
 
     def receive(self):
+        # get json message from the queue
+        # if the queue is empty the thread is blocked
         return self._received_json_queue.get(block=True)
 
     def put_json_into_queue(self, received_json):
+        # save received message into queue
         self._received_json_queue.put(received_json)
 
     def send(self, ip, port, data):

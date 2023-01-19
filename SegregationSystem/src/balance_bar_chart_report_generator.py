@@ -15,6 +15,7 @@ class BalanceBarChartReportGenerator:
         labels = ['move', 'left', 'right', 'stop']
         values = [0, 0, 0, 0]
 
+        # prepare data to build the bar chart
         for p_session in dataset:
             ct = p_session['commandThought']
             index = None
@@ -35,12 +36,14 @@ class BalanceBarChartReportGenerator:
         plt.title(f'Histogram of Command Thoughts')
         plt.grid(True)
 
+        # save data just calculated in a dict
         info = dict()
         info['move'] = values[0]
         info['left'] = values[1]
         info['right'] = values[2]
         info['stop'] = values[3]
 
+        # save bar chart in a png image
         chart_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balance_bar_chart.png')
         try:
             plt.savefig(chart_path)
@@ -53,6 +56,8 @@ class BalanceBarChartReportGenerator:
 
     def generate_balancing_report(self, info, testing_mode):
 
+        # if testing_mode is true the human evaluation in the report has to be simulated,
+        # otherwise the evaluation has to be empty
         if testing_mode:
             if random.randint(1, 5) == 1:
                 info['evaluation'] = 'not balanced'
@@ -60,6 +65,8 @@ class BalanceBarChartReportGenerator:
                 info['evaluation'] = 'balanced'
         else:
             info['evaluation'] = ''
+
+        # save the report in a json file
         report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balancing_report.json')
         try:
             with open(report_path, "w") as file:
@@ -76,6 +83,7 @@ class BalanceBarChartReportGenerator:
         report_path = os.path.join(os.path.abspath('..'), 'data', 'balancing', 'balancing_report.json')
         schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'balancing_report_schema.json')
 
+        # open bar chart report and validate it
         try:
             with open(report_path) as file:
                 report = json.load(file)
@@ -93,6 +101,7 @@ class BalanceBarChartReportGenerator:
             print('[-] Balancing Report has invalid schema')
             return -2
 
+        # get the evaluation from loaded report
         evaluation = report['evaluation']
 
         if evaluation == 'not balanced':

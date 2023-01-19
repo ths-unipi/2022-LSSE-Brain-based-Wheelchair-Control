@@ -7,6 +7,8 @@ class LearningSessionSetSplitter:
         self.segregation_system_config = config
 
     def generate_training_validation_testing_set(self, dataset):
+        # train_test_split function can split the dataset only in two part, so it's needed to execute it
+        # again to obtain three sets
         training_size = self.segregation_system_config['training_set_size']
         validation_size = self.segregation_system_config['validation_set_size']
         testing_size = self.segregation_system_config['testing_set_size']
@@ -20,4 +22,5 @@ class LearningSessionSetSplitter:
         else:
             validation, testing = train_test_split(res, train_size=validation_size, test_size=testing_size)
 
+        # return the final dataset composed by the splitted dataset
         return {'training': training, 'validation': validation, 'testing': testing}

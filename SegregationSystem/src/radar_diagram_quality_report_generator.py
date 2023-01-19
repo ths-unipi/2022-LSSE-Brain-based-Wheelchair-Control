@@ -14,6 +14,7 @@ class RadarDiagramQualityReportGenerator:
 
     def generate_radar_diagram(self, dataset):
 
+        # create and save radar diagram for each eeg band (alpha, beta, delta, theta) using data into dataset.
         channels = len(dataset[0]['features']['alpha'])
         labels = [f'ch{i + 1}' for i in range(channels)]
         bands = ['alpha', 'beta', 'delta', 'theta']
@@ -46,6 +47,7 @@ class RadarDiagramQualityReportGenerator:
 
             i += 1
 
+        # create one image composed of all previously created radar diagrams
         alpha_image = Image.open(os.path.join(os.path.abspath('..'), 'data', 'quality', file_names[0]))
         beta_image = Image.open(os.path.join(os.path.abspath('..'), 'data', 'quality', file_names[1]))
         delta_image = Image.open(os.path.join(os.path.abspath('..'), 'data', 'quality', file_names[2]))
@@ -60,6 +62,7 @@ class RadarDiagramQualityReportGenerator:
 
         image.save(os.path.join(os.path.abspath('..'), 'data', 'quality', "radar_diagram.png"))
 
+        # remove the radar diagrams used to compose the last image
         for file_name in file_names:
             os.remove(os.path.join(os.path.abspath('..'), 'data', 'quality', file_name))
 
@@ -67,6 +70,7 @@ class RadarDiagramQualityReportGenerator:
 
     def generate_quality_report(self, testing_mode):
 
+        # if the testing_mode is true the human evaluation has to be simualated
         info = dict()
         if testing_mode:
             if random.randint(1, 5) == 1:
@@ -75,6 +79,8 @@ class RadarDiagramQualityReportGenerator:
                 info['evaluation'] = 'good quality'
         else:
             info['evaluation'] = ''
+
+        # save a report with the evaluation that a human will make
         report_path = os.path.join(os.path.abspath('..'), 'data', 'quality', 'quality_report.json')
         try:
             with open(report_path, "w") as file:
@@ -89,6 +95,7 @@ class RadarDiagramQualityReportGenerator:
         report_path = os.path.join(os.path.abspath('..'), 'data', 'quality', 'quality_report.json')
         schema_path = os.path.join(os.path.abspath('..'), 'schemas', 'quality_report_schema.json')
 
+        # open the report file and validate it
         try:
             with open(report_path) as file:
                 report = json.load(file)
@@ -106,6 +113,7 @@ class RadarDiagramQualityReportGenerator:
             print('[-] Quality Report has invalid schema')
             return -2
 
+        # get the evaluation from the loaded report
         evaluation = report['evaluation']
 
         if evaluation == 'bad quality':

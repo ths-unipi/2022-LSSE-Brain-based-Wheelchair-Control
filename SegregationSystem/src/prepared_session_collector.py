@@ -41,8 +41,9 @@ class PreparedSessionCollector:
 
         return True
 
-    def retrive_counter(self):
+    def retrieve_counter(self):
 
+        # get the last session_id used whit the actual user_id from the database
         user_id = self.segregation_system_config['user_id']
 
         query = "SELECT session_id FROM p_session WHERE user_id = ? ORDER BY session_id DESC LIMIT 1"
@@ -53,6 +54,7 @@ class PreparedSessionCollector:
             print(f'[-] Sqlite Execution Error [{e}]')
             return None
 
+        # use the last session_id user to set the prepared_session_counter
         res = cursor.fetchone()  # fetchall for more results
         if res is None:
             self._prepared_session_counter = 0
@@ -64,6 +66,7 @@ class PreparedSessionCollector:
 
     def check_collecting_threshold(self):
 
+        # if the prepared_session_counter it's big enough a learning session set is completed
         threshold = self.segregation_system_config['collecting_threshold']
         if self._prepared_session_counter > threshold:
             self._prepared_session_counter = 0
@@ -72,6 +75,7 @@ class PreparedSessionCollector:
             return False
 
     def load_learning_session_set(self):
+        # load all prepared sessions of a learning session set
         user_id = self.segregation_system_config['user_id']
 
         query = "SELECT * FROM p_session WHERE user_id = ? "
@@ -85,6 +89,8 @@ class PreparedSessionCollector:
         res = cursor.fetchall()
         if res is None:
             return None
+
+        # save the learning session set as a list of prepared sessions
         dataset = []
         for p_session in res:
             dataset.append(json.loads(p_session[2]))
@@ -92,13 +98,17 @@ class PreparedSessionCollector:
 
     def store_prepared_session(self, p_session):
 
+        # all prepared sessions have to be validate before store them
         if not self._validate_prepared_session(p_session):
             print("[-] Invalid data")
             return False
 
+        # assign an user_id and session_id to a prepared_session in order to
+        # distinguish different sessions and different datasets
         user_id = self.segregation_system_config['user_id']
         session_id = self._prepared_session_counter
 
+        # store the prepared session to the database
         query = "INSERT INTO p_session (user_id, session_id, json) \
                         VALUES(?, ?, ?) "
         cursor = self._conn.cursor()
