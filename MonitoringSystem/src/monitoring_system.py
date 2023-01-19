@@ -100,8 +100,6 @@ class MonitoringSystem:
                 print(f"[+] MonitoringSystem - Accuracy Report Generated, with Accuracy :  {_accuracy_report['accuracy']*100} % \n")
 
 
-                # -------------- DELETE ALL LABELS --------------#
+                # -------------- DELETE LABELS --------------#
                 _labels_store.delete_labels()
-                print("[+]MonitoringSystem - All labels deleted from DB \n")
                 _collecting_phase.reset_counter()
-                print("[+] MonitoringSystem - Labels counter set to 0, to produce a new Accuracy Report")

@@ -10,17 +10,17 @@ DB_PATH = os.path.join(os.path.abspath('..'), DB_NAME)
 class LabelsStore:
 
     def __init__(self):
-        self._conn = None
+        self._conn = sqlite3.connect(DB_PATH)
 
 
     def _open_connection(self):
         if not os.path.exists(DB_PATH):
-            print("[-] DB does not exist, the db will be created")
+            print("[-] LabelsStore - DB does not exist, create the DB")
             return False
         try:
             self._conn = sqlite3.connect(DB_PATH)
         except sqlite3.Error as err:
-            print('[-] Sqlite Connection Error: ', err)
+            print('[-]LabelsStore - Sqlite Connection Error: ', err)
             return False
         return True
 
@@ -32,7 +32,7 @@ class LabelsStore:
             self._conn.close()
             self._conn = None
         except sqlite3.Error as err:
-            print("[-] Sqlite Close connection Error: ", err)
+            print("[-]LabelsStore - Sqlite Close connection Error: ", err)
             return False
 
         return True
@@ -70,7 +70,7 @@ class LabelsStore:
                 query = 'UPDATE session_labels SET '+column_to_set+' = ? WHERE uuid = ? '
                 LabelsStore._insert_label(self,query,cursor,_uuid,_label)
             else:
-                print("[-] Row already full")
+                print("[-] LabelsStore - Row already full")
 
 
     def _check_if_row_exists(self, query, cursor, _uuid):
@@ -81,7 +81,7 @@ class LabelsStore:
         try:
             cursor.execute(query,(_uuid,))
         except sqlite3.Error as err:
-            print("[-]Sqlite Execution Error:", err)
+            print("[-]LabelsStore - Sqlite Execution Error:", err)
             exit(1)
         res = cursor.fetchone()
         if res is None:
@@ -98,10 +98,9 @@ class LabelsStore:
         try:
             cursor.execute(query, (_uuid,))
         except sqlite3.Error as err:
-            print("[-]Sqlite Execution Error:", err)
+            print("[-]LabelsStore - Sqlite Execution Error:", err)
 
         res = cursor.fetchone()
-        print("EMPTY COLUMNS : ",res)
         return res
 
     def _insert_label(self, query, cursor, _uuid, _label):
@@ -113,10 +112,10 @@ class LabelsStore:
             cursor.execute(query, (_label, _uuid))
 
         except sqlite3.Error as err:
-            print("[-]Sqlite UPDATE Error: ", err)
+            print("[-]LabelsStore - Sqlite UPDATE Error: ", err)
             return False
 
-        print("[+] Succesfully UPDATE existing row \n")
+        print("[+]LabelsStore -  Succesfully UPDATE existing row \n")
         self._conn.commit()
 
     def _create_new_row(self,query,cursor, _uuid, _label):
@@ -128,10 +127,10 @@ class LabelsStore:
             cursor.execute(query,(_uuid,_label))
 
         except sqlite3.Error as err:
-            print("[-]Sqlite INSERT Error: ",err)
+            print("[-]LabelsStore - Sqlite INSERT Error: ",err)
             return False
 
-        print("[+] Succesfully INSERT new row \n")
+        print("[+]LabelsStore - Succesfully INSERT new row \n")
         self._conn.commit()
 
 
@@ -149,7 +148,7 @@ class LabelsStore:
         try:
             cursor.execute(query)
         except sqlite3.Error as err:
-            print("[-] Error LOAD session labels: ",err)
+            print("[-]LabelsStore -  Error while LOADING session labels: ",err)
             return None
 
         res = cursor.fetchall()
@@ -181,11 +180,11 @@ class LabelsStore:
             cursor.execute(query)
 
         except sqlite3.Error as err:
-            print ("[-] Error while DELETING all labels: ",err)
+            print ("[-] Error while DELETING labels from DB: ",err)
             return False
 
         self._conn.commit()
-        print("[+] DELETED all labels")
+        print("[+]LabelsStore - Labels DELETED from DB \n")
         return True
 
 
