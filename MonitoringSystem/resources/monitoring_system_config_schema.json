@@ -2,15 +2,24 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
+    "labels_threshold": {
+      "type": "integer"
+    },
+    "max_errors_tolerated" : {
+        "type": "integer"
+      }
+    },
     "testing_mode": {
       "type": "boolean"
     },
-    "labels_threshold": {
-      "type": "integer"
-    }
-  },
+    "expected_accuracy" : {
+      "type" : "number"
+    },
+
   "required": [
+    "labels_threshold",
+    "max_errors_tolerated",
     "testing_mode",
-    "labels_threshold"
+    "expected_accuracy"
   ]
 }

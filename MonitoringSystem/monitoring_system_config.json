@@ -1,4 +1,6 @@
 {
+  "labels_threshold" : 10,
+  "max_errors_tolerated" : 2,
   "testing_mode" : false,
-  "labels_threshold" : 10
+  "expected_accuracy" : 0.7
 }

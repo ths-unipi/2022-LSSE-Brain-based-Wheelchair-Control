@@ -144,7 +144,7 @@ class LabelsStore:
             return None
 
         cursor = self._conn.cursor()
-        query = "SELECT * from session_labels"
+        query = "SELECT * FROM session_labels"
 
         try:
             cursor.execute(query)
@@ -189,5 +189,23 @@ class LabelsStore:
         return True
 
 
+    # ==================== ROW LABEL COMPLETE ====================#
+    def row_label_complete(self, uuid):
+        if not self._open_connection():
+            return None
 
+        cursor = self._conn.cursor()
+        query = "SELECT label1,label2 FROM session_labels WHERE uuid = ? AND (label1 IS NOT NULL AND label2 IS NOT NULL)"
+
+        try:
+            cursor.execute(query,(uuid,))
+        except sqlite3.Error as err:
+            print("[-] Error to FIND labels: ", err)
+            return None
+
+        res = cursor.fetchone()
+        if res is None:
+            return False
+        else:
+            return True
 

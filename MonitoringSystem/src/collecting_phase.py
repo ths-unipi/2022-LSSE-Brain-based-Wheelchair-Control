@@ -19,6 +19,9 @@ class CollectingPhase:
     def increment_counter(self):
         self.counter_session_labels +=1
 
+    def reset_counter(self):
+        self.counter_session_labels = 0
+
     def check_labels_thresold(self):
         if self.counter_session_labels < self.labels_threshold:
             return False

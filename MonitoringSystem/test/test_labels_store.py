@@ -47,10 +47,20 @@ def test_load_session_label():
     labels_store = LabelsStore()
     labels = labels_store.load_labels()
     print("\nALL LABELS IN THE DB\n")
+    print(labels)
     for row in labels:
         print(f"uuid:{row['uuid']}, label1:{row['label1']}, label2:{row['label2']}\n")
 
-
+#===================== DELETE LABELS TEST ===================== #
 def test_delete_labels():
     labels_store = LabelsStore()
     labels_store.delete_labels()
+
+
+#===================== CHECK ROW COMPLETE TEST ===================== #
+def test_row_label_complete():
+    labels_store = LabelsStore()
+    uuid = "a923-45b7-gh12-7408023776.5000"
+    res = labels_store.row_label_complete(uuid)
+    print("ROW COMPLETE : ", res)
+
