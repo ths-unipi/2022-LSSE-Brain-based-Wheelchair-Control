@@ -72,7 +72,9 @@ class DevelopmentSystem:
                 EarlyTrainingController(mental_command_classifier=self.mental_command_classifier,
                                         number_of_hidden_layers_range=self.config['number_of_hidden_layers_range'],
                                         number_of_hidden_neurons_range=self.config['number_of_hidden_neurons_range']) \
-                    .run(self.config['operational_mode'], self.config['testing_mode'], training_dataset)
+                    .run(operational_mode=self.config['operational_mode'],
+                         testing=self.config['testing_mode'],
+                         training_dataset=training_dataset)
 
                 # change operational mode and stop (if testing mode instead continue)
                 self.change_operational_mode('check_early_training_report')
@@ -85,7 +87,7 @@ class DevelopmentSystem:
 
             if self.config['operational_mode'] == 'check_early_training_report':
                 # the early training controller will return the ML Engineer evaluation
-                report_evaluation = EarlyTrainingController().run(self.config['operational_mode'])
+                report_evaluation = EarlyTrainingController().run(operational_mode=self.config['operational_mode'])
                 if report_evaluation is True:
                     print('[+] The Number of Generations is good, Early Training ended')
                     self.change_operational_mode('grid_search')
@@ -156,7 +158,7 @@ class DevelopmentSystem:
                 test_dataset = self._learning_session_store.get_test_set()
 
                 # start test controller
-                TestController(self.mental_command_classifier) \
+                TestController(mental_command_classifier=self.mental_command_classifier) \
                     .run(operational_mode=self.config['operational_mode'],
                          testing=self.config['testing_mode'],
                          dataset=training_dataset | test_dataset,
@@ -179,7 +181,8 @@ class DevelopmentSystem:
                 self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
 
                 # the test controller will return the ML Engineer evaluation
-                report_evaluation = TestController(self.mental_command_classifier).run(self.config['operational_mode'])
+                report_evaluation = TestController(mental_command_classifier=self.mental_command_classifier)\
+                    .run(operational_mode=self.config['operational_mode'])
                 if report_evaluation is True:
                     print('[+] The Best Classifier is valid, can be sent to Execution System')
 
@@ -194,8 +197,7 @@ class DevelopmentSystem:
                     print('[+] The Best Classifier isn\'t valid, Reconfiguration of the Systems are needed')
                     self.change_operational_mode('waiting_for_dataset')
 
-        # close db connections and all threads
-        self._learning_session_store.close_connection()
+        # close all threads
         exit(0)
 
     def change_operational_mode(self, new_mode: str):

@@ -20,32 +20,13 @@ ENVIRONMENT_TO_INT = {
 class LearningSessionStore:
 
     def __init__(self) -> None:
-        self._store_path = os.path.join(os.path.abspath('..'), 'data', 'learning_session_store.db')
-        self._conn = None
+        self._conn = sqlite3.connect(os.path.join(os.path.abspath('..'), 'data', 'learning_session_store.db'))
 
-        if self.open_connection() and self.create_table():
+        if self._conn is not None and self.create_table():
             print('[+] connection to DB established and \'learning_session\' table initialized')
         else:
             print('[-] failed to initialize learning session store')
             exit(1)
-
-    def open_connection(self) -> bool:
-        try:
-            self._conn = sqlite3.connect(self._store_path)
-        except sqlite3.Error:
-            print(f'[-] failed to open connection to DB')
-            return False
-
-        return True
-
-    def close_connection(self) -> bool:
-        try:
-            self._conn.close()
-        except sqlite3.Error:
-            print(f'[-] failed to close connection to DB')
-            return False
-
-        return True
 
     def check_connection(self) -> bool:
         return self._conn is not None
