@@ -11,6 +11,9 @@ from src.test_controller import TestController
 from src.validation_controller import ValidationController
 
 
+ACCEPTED_OPERATIONAL_MODES = ['waiting_for_dataset', 'early_training', 'check_early_training_report', 'grid_search',
+                              'check_top_five_classifiers_report', 'test_best_classifier', 'check_test_report']
+
 class DevelopmentSystem:
 
     def __init__(self) -> None:
@@ -30,6 +33,11 @@ class DevelopmentSystem:
         self.mental_command_classifier = None
 
     def run(self):
+        # check if operational mode is valid
+        if self.config["operational_mode"] not in ACCEPTED_OPERATIONAL_MODES:
+            print(f'[-] \'{self.config["operational_mode"]}\' isn\'t a valid operational mode')
+            exit(1)
+
         print(f'[+] Development System started on main thread in \'{self.config["operational_mode"]}\' mode')
 
         # start the rest server in a new thread as daemon
@@ -137,6 +145,9 @@ class DevelopmentSystem:
                     # load from disk the best classifier
                     self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
 
+                # remove unused classifiers from disk
+                self.remove_serialized_classifiers()
+
             # ====================== Test Best Classifier =======================
 
             if self.config['operational_mode'] == 'test_best_classifier':
@@ -199,3 +210,10 @@ class DevelopmentSystem:
             json.dump(self.config, f, indent=4)
 
         print(f'[+] Switch to \'{new_mode}\' operational mode')
+
+    def remove_serialized_classifiers(self):
+        path = os.path.join(os.path.abspath('..'), 'data')
+
+        for file in os.listdir(path):
+            if file.endswith('.sav') and file != 'best_classifier.sav':
+                os.remove(os.path.join(path, file))
