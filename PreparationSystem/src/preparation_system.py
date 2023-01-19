@@ -19,23 +19,25 @@ class PreparationSystem:
             # get received raw session
             self._raw_session = JsonIO.get_instance().get_received_json()
 
-            print(self._raw_session['headset'][9])
-            self._raw_session['headset'][9] = []
-            print(self._raw_session['headset'][9])
+            # print(self._raw_session['headset'][9])
+            # self._raw_session['headset'][9] = []
+            # print(self._raw_session['headset'][9])
 
             # correct missing samples
             SessionCleaning().correct_missing_samples(self._raw_session['headset'])
+
             # print(self._raw_session)
-            print(self._raw_session['headset'][9])
-            print(self._raw_session['headset'][8])
-            print(self._raw_session['headset'][10])
-            print(self._raw_session['headset'][15])
-            print(self._raw_session['headset'][3])
+            # print(self._raw_session['headset'][9])
+            # print(self._raw_session['headset'][8])
+            # print(self._raw_session['headset'][10])
+            # print(self._raw_session['headset'][15])
+            # print(self._raw_session['headset'][3])
 
             # correct outliers
             SessionCleaning.correct_outliers(self._raw_session['headset'],
                                              self._preparation_system_configuration['min_eeg'],
                                              self._preparation_system_configuration['max_eeg'])
+
             # print(self._raw_session['headset'][0])
 
             # extract features and prepare session

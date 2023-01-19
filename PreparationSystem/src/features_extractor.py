@@ -25,7 +25,8 @@ class FeaturesExtractor:
                                                    features['beta_wave']['end_frequency']))
         return delta, theta, alpha, beta
 
-    def compute_average_power(self, headset: list, start_frequency: int, end_frequency: int):
+    @staticmethod
+    def compute_average_power(headset: list, start_frequency: int, end_frequency: int):
         sampling_frequency = 250
         window_seconds = 1.25
         # Define window length
@@ -44,7 +45,8 @@ class FeaturesExtractor:
         # Integral approximation of the spectrum using Simpson's rule.
         return simps(psd[intersecting_bands], dx=frequency_resolution)
 
-    def prepare_session_development(self, raw_session: dict, prepared_session: dict, delta: list, theta: list,
+    @staticmethod
+    def prepare_session_development(raw_session: dict, prepared_session: dict, delta: list, theta: list,
                                     alpha: list, beta: list):
         prepared_session['uuid'] = raw_session['UUID']
         prepared_session['features'] = {}
@@ -56,7 +58,8 @@ class FeaturesExtractor:
         prepared_session['calendar'] = raw_session['calendar']
         prepared_session['commandThought'] = raw_session['commandThought']
 
-    def prepare_session_execution(self, raw_session: dict, prepared_session: dict, delta: list, theta: list,
+    @staticmethod
+    def prepare_session_execution(raw_session: dict, prepared_session: dict, delta: list, theta: list,
                                   alpha: list, beta: list, features: dict):
         prepared_session['uuid'] = raw_session['UUID']
         # Take the numeric value corresponding to the value of environment in raw session

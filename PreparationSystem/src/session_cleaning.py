@@ -8,9 +8,9 @@ class SessionCleaning:
 
     @staticmethod
     def interpolate_list(headset, channel):
-        channel_length = len(headset[0])
         # list of adjacent channels in the EEG headset
         lists_to_use = [channel - 1, channel + 1, channel - 6, channel + 6]
+        channel_length = len(headset[0])
         for i in range(channel_length):
             value = 0
             list_number = 0
@@ -18,7 +18,8 @@ class SessionCleaning:
                 if 0 <= j < len(headset) and headset[j]:
                     value += headset[j][i]
                     list_number += 1
-            headset[channel][i] = value / list_number if list_number != 0 else None
+            if list_number != 0:
+                headset[channel].append(value / list_number)
 
     @staticmethod
     def correct_outliers(headset: list, min_eeg: int, max_eeg: int):
