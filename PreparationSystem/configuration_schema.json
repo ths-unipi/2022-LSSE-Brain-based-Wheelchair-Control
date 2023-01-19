@@ -27,138 +27,87 @@
     "features": {
       "type": "object",
       "properties": {
-        "headset": {
-          "type": "array",
-          "items": [
-            {
-              "type": "object",
-              "properties": {
-                "wave": {
-                  "type": "string"
-                },
-                "start_frequency": {
-                  "type": "number"
-                },
-                "end_frequency": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "wave",
-                "start_frequency",
-                "end_frequency"
-              ]
+        "delta_wave": {
+          "type": "object",
+          "properties": {
+            "start_frequency": {
+              "type": "number"
             },
-            {
-              "type": "object",
-              "properties": {
-                "wave": {
-                  "type": "string"
-                },
-                "start_frequency": {
-                  "type": "integer"
-                },
-                "end_frequency": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "wave",
-                "start_frequency",
-                "end_frequency"
-              ]
-            },
-            {
-              "type": "object",
-              "properties": {
-                "wave": {
-                  "type": "string"
-                },
-                "start_frequency": {
-                  "type": "integer"
-                },
-                "end_frequency": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "wave",
-                "start_frequency",
-                "end_frequency"
-              ]
-            },
-            {
-              "type": "object",
-              "properties": {
-                "wave": {
-                  "type": "string"
-                },
-                "start_frequency": {
-                  "type": "integer"
-                },
-                "end_frequency": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "wave",
-                "start_frequency",
-                "end_frequency"
-              ]
-            },
-            {
-              "type": "object",
-              "properties": {
-                "wave": {
-                  "type": "string"
-                },
-                "start_frequency": {
-                  "type": "integer"
-                },
-                "end_frequency": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "wave",
-                "start_frequency",
-                "end_frequency"
-              ]
+            "end_frequency": {
+              "type": "integer"
             }
+          },
+          "required": [
+            "start_frequency",
+            "end_frequency"
           ]
         },
-        "calendar": {
-          "type": "array",
-          "items": [
-            {
-              "type": "string"
+        "theta_wave": {
+          "type": "object",
+          "properties": {
+            "start_frequency": {
+              "type": "integer"
             },
-            {
-              "type": "string"
-            },
-            {
-              "type": "string"
-            },
-            {
-              "type": "string"
+            "end_frequency": {
+              "type": "integer"
             }
+          },
+          "required": [
+            "start_frequency",
+            "end_frequency"
+          ]
+        },
+        "alpha_wave": {
+          "type": "object",
+          "properties": {
+            "start_frequency": {
+              "type": "integer"
+            },
+            "end_frequency": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start_frequency",
+            "end_frequency"
+          ]
+        },
+        "beta_wave": {
+          "type": "object",
+          "properties": {
+            "start_frequency": {
+              "type": "integer"
+            },
+            "end_frequency": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "start_frequency",
+            "end_frequency"
           ]
         },
         "environment": {
-          "type": "array",
-          "items": [
-            {
-              "type": "string"
+          "type": "object",
+          "properties": {
+            "indoor": {
+              "type": "integer"
             },
-            {
-              "type": "string"
+            "outdoor": {
+              "type": "integer"
             }
+          },
+          "required": [
+            "indoor",
+            "outdoor"
           ]
         }
       },
       "required": [
-        "headset",
-        "calendar",
+        "delta_wave",
+        "theta_wave",
+        "alpha_wave",
+        "beta_wave",
         "environment"
       ]
     }

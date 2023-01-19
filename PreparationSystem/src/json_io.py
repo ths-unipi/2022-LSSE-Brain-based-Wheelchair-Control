@@ -20,7 +20,7 @@ class JsonIO:
 
     # -------- SERVER HANDLER --------
 
-    def receive_json(self, received_json):
+    def receive(self, received_json):
         # if the queue is full the thread is blocked
         try:
             self._received_json_queue.put(received_json, timeout=5)
@@ -29,7 +29,7 @@ class JsonIO:
 
     # -------- CLIENT REQUEST --------
 
-    def send_json(self, endpoint_ip, endpoint_port, json_to_send):
+    def send(self, endpoint_ip: str, endpoint_port: int, json_to_send: dict):
         response = post(f'http://{endpoint_ip}:{endpoint_port}/json', json=json_to_send)
 
         if response.status_code != 200:
@@ -56,7 +56,7 @@ def post_json():
 
     received_json = request.json
 
-    new_thread = Thread(target=JsonIO.get_instance().receive_json, args=(received_json,))
+    new_thread = Thread(target=JsonIO.get_instance().receive, args=(received_json,))
     new_thread.start()
 
     return {}, 200

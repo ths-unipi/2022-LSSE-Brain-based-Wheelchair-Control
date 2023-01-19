@@ -2,18 +2,15 @@
   "operative_mode": "development",
   "segregation_endpoint_IP": "127.0.0.1",
   "segregation_endpoint_port": 85,
-  "execution_endpoint_IP": "127.0.0.2",
-  "execution_endpoint_port": 86,
+  "execution_endpoint_IP": "127.0.0.1",
+  "execution_endpoint_port": 5000,
   "max_eeg": 15,
   "min_eeg": -15,
   "features": {
-    "headset": [
-      {"wave": "delta", "start_frequency": 0.5, "end_frequency": 4},
-      {"wave": "theta", "start_frequency": 4, "end_frequency": 8},
-      {"wave": "alpha", "start_frequency": 8, "end_frequency": 12},
-      {"wave": "beta", "start_frequency": 12, "end_frequency": 30}
-    ],
-    "calendar":["working", "shopping", "sport", "home"],
-    "environment":["indoor", "outdoor"]
+    "delta_wave": {"start_frequency": 0.5, "end_frequency": 4},
+    "theta_wave": {"start_frequency": 4, "end_frequency": 8},
+    "alpha_wave": {"start_frequency": 8, "end_frequency": 12},
+    "beta_wave": {"start_frequency": 12, "end_frequency": 30},
+    "environment": {"indoor": 0, "outdoor": 1}
   }
 }
