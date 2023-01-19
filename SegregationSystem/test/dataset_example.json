@@ -10,7 +10,7 @@
         'environment': 'indoor'
       },
       'calendar': 'working',
-      'command_thought': 'move'
+      'commandThought': 'move'
     },
     {
       'uuid': '210',

@@ -8,5 +8,5 @@
     "environment": "indoor"
   },
   "calendar": "working",
-  "command_thought": "left"
+  "commandThought": "left"
 }

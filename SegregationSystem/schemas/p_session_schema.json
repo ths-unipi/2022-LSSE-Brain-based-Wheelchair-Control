@@ -48,10 +48,10 @@
             "working"
           ]
         },
-    "command_thought": {
+    "commandThought": {
           "type": "string",
           "enum": ["move", "stop", "right", "left"]
         }
   },
-  "required": ["uuid", "features", "calendar", "command_thought"]
+  "required": ["uuid", "features", "calendar", "commandThought"]
 }

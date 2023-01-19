@@ -21,7 +21,7 @@ if __name__ == '__main__':
             data = json.load(file)
 
         data['uuid'] = str(uuid)
-        data['command_thought'] = command_thought
+        data['commandThought'] = command_thought
 
         i = 0
         while i < 22:
