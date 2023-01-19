@@ -1,9 +1,10 @@
 import os.path
 import pickle
-
+import warnings
 import joblib
 from pandas import DataFrame
 from sklearn.neural_network import MLPClassifier
+from sklearn.exceptions import ConvergenceWarning, DataConversionWarning
 
 
 class MentalCommandClassifier:
@@ -21,6 +22,10 @@ class MentalCommandClassifier:
         # file_name is given load it from disk
         else:
             self.load(file_name)
+
+        # remove the training warnings
+        warnings.filterwarnings("ignore", category=ConvergenceWarning)
+        warnings.filterwarnings("ignore", category=DataConversionWarning)
 
     def train_classifier(self, training_data: DataFrame, training_labels: DataFrame) -> None:
         self._classifier.fit(training_data, training_labels)

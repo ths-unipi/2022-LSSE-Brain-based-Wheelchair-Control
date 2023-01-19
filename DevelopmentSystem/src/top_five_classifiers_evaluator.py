@@ -1,6 +1,4 @@
 import os
-import warnings
-from sklearn.exceptions import ConvergenceWarning, DataConversionWarning
 from src.mental_command_classifier import MentalCommandClassifier
 
 
@@ -9,10 +7,6 @@ class TopFiveClassifierEvaluators:
     def __init__(self, dataset) -> None:
         self._top_five_classifiers = []
         self._dataset = dataset
-
-        # remove the warnings
-        warnings.filterwarnings("ignore", category=ConvergenceWarning)
-        warnings.filterwarnings("ignore", category=DataConversionWarning)
 
     def evaluate_new_classifier(self, new_classifier: MentalCommandClassifier) -> bool:
         # compute validation error
