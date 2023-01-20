@@ -82,7 +82,7 @@ class LearningSessionStore:
             session = [str(uuid.uuid4())] + session['features']['alpha'] + session['features']['beta'] + \
                       session['features']['delta'] + session['features']['theta'] + \
                       [ENVIRONMENT_TO_INT[session['features']['environment']],
-                       LABEL_TO_INT[session['commandThought']]]
+                       LABEL_TO_INT[session['command_thought']]]
             training.append(tuple(session))
 
         # convert validation set to a list of tuple
@@ -91,7 +91,7 @@ class LearningSessionStore:
             session = [str(uuid.uuid4())] + session['features']['alpha'] + session['features']['beta'] + \
                       session['features']['delta'] + session['features']['theta'] + \
                       [ENVIRONMENT_TO_INT[session['features']['environment']],
-                       LABEL_TO_INT[session['commandThought']]]
+                       LABEL_TO_INT[session['command_thought']]]
             validation.append(tuple(session))
 
         # convert test set to a list of tuple
@@ -100,7 +100,7 @@ class LearningSessionStore:
             session = [str(uuid.uuid4())] + session['features']['alpha'] + session['features']['beta'] + \
                       session['features']['delta'] + session['features']['theta'] + \
                       [ENVIRONMENT_TO_INT[session['features']['environment']],
-                       LABEL_TO_INT[session['commandThought']]]
+                       LABEL_TO_INT[session['command_thought']]]
             test.append(tuple(session))
 
         # insert the three datasets in the database
