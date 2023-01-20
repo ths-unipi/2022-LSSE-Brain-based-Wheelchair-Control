@@ -17,7 +17,7 @@ ENVIRONMENT_TO_INT = {
 }
 
 if __name__ == '__main__':
-    with open(os.path.join(os.path.abspath('.'), 'dataset.json')) as f:
+    with open(os.path.join(os.path.abspath('.'), 'dataset_100.json')) as f:
         dataset = json.load(f)
 
     db = LearningSessionStore()
