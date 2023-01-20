@@ -30,8 +30,8 @@ class FeaturesExtractor:
         sampling_frequency = 250
         window_seconds = 1.25
         # Define window length
-        # segment_length = (2 / start_frequency) * sampling_frequency
         segment_length = window_seconds * sampling_frequency
+        # segment_length = (2 / start_frequency) * sampling_frequency
 
         # Compute the modified periodogram (Welch)
         frequencies, psd = welch(headset, sampling_frequency, nperseg=segment_length)
@@ -48,7 +48,7 @@ class FeaturesExtractor:
     @staticmethod
     def prepare_session_development(raw_session: dict, prepared_session: dict, delta: list, theta: list,
                                     alpha: list, beta: list):
-        prepared_session['uuid'] = raw_session['UUID']
+        prepared_session['uuid'] = raw_session['uuid']
         prepared_session['features'] = {}
         prepared_session['features']['delta'] = delta
         prepared_session['features']['theta'] = theta
@@ -56,7 +56,7 @@ class FeaturesExtractor:
         prepared_session['features']['beta'] = beta
         prepared_session['features']['environment'] = raw_session['environment']
         prepared_session['calendar'] = raw_session['calendar']
-        prepared_session['commandThought'] = raw_session['commandThought']
+        prepared_session['command_thought'] = raw_session['command_thought']
 
     @staticmethod
     def prepare_session_execution(raw_session: dict, prepared_session: dict, delta: list, theta: list,

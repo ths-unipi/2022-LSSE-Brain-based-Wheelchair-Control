@@ -1,4 +1,5 @@
 import queue
+from socket import timeout
 from threading import Thread
 
 from flask import Flask, request
@@ -30,7 +31,11 @@ class JsonIO:
     # -------- CLIENT REQUEST --------
 
     def send(self, endpoint_ip: str, endpoint_port: int, json_to_send: dict):
-        response = post(f'http://{endpoint_ip}:{endpoint_port}/json', json=json_to_send)
+        try:
+            response = post(f'http://{endpoint_ip}:{endpoint_port}/json', json=json_to_send, timeout=5)
+        except ConnectionError as e:
+            print(f'[-] ConnectionError: {e}')
+            return False
 
         if response.status_code != 200:
             error_message = response.json()['error']

@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from threading import Thread
 from jsonschema import validate, ValidationError
 from src.json_io import JsonIO
@@ -12,40 +13,29 @@ class PreparationSystem:
     def __init__(self):
         self._preparation_system_configuration = self.get_configuration()
         self._raw_session = None
-        self._prepared_session = {}
+        self._prepared_session = None
 
     def run(self):
         while True:
             # get received raw session
             self._raw_session = JsonIO.get_instance().get_received_json()
-
-            # print(self._raw_session['headset'][9])
-            # self._raw_session['headset'][9] = []
-            # print(self._raw_session['headset'][9])
+            print('[+] raw session received')
 
             # correct missing samples
             SessionCleaning().correct_missing_samples(self._raw_session['headset'])
-
-            # print(self._raw_session)
-            # print(self._raw_session['headset'][9])
-            # print(self._raw_session['headset'][8])
-            # print(self._raw_session['headset'][10])
-            # print(self._raw_session['headset'][15])
-            # print(self._raw_session['headset'][3])
 
             # correct outliers
             SessionCleaning.correct_outliers(self._raw_session['headset'],
                                              self._preparation_system_configuration['min_eeg'],
                                              self._preparation_system_configuration['max_eeg'])
 
-            # print(self._raw_session['headset'][0])
-
             # extract features and prepare session
+            self._prepared_session = {}
             FeaturesExtractor().extract_features \
                 (self._preparation_system_configuration['features'], self._raw_session, self._prepared_session,
                  self._preparation_system_configuration['operative_mode'])
 
-            print(self._prepared_session)
+            print('[+] features extracted and session prepared')
 
             # Send prepared session to the endpoint corresponding to the current operating mode
             if self._preparation_system_configuration['operative_mode'] == 'development':
@@ -56,6 +46,8 @@ class PreparationSystem:
                 JsonIO.get_instance().send(self._preparation_system_configuration['execution_endpoint_IP'],
                                            self._preparation_system_configuration['execution_endpoint_port'],
                                            self._prepared_session)
+            print(f'[+] prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+            print(self._prepared_session)
 
     @staticmethod
     def validate_configuration():
