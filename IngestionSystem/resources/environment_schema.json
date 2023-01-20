@@ -1,16 +1,16 @@
 {
   "type": "object",
   "properties": {
-    "SETTINGS": {
+    "environment": {
       "type": "string",
       "enum": ["indoor", "outdoor"]
     },
-    "TIMESTAMP": {
+    "timestamp": {
       "type": "string"
     },
-    "UUID": {
+    "uuid": {
       "type": "string"
     }
   },
-  "required": ["SETTINGS", "TIMESTAMP", "UUID"]
+  "required": ["environment", "timestamp", "uuid"]
 }

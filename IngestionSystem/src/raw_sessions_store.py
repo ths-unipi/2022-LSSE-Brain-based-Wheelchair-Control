@@ -4,7 +4,7 @@ import json
 from jsonschema import validate, ValidationError
 
 DB_NAME = 'RawSessionsStore.db'
-RECORD_TYPE = ['CALENDAR', 'LABEL', 'SETTINGS', 'CHANNEL']
+RECORD_TYPE = ['calendar', 'label', 'environment', 'channel']
 NUM_CHANNELS = 22
 
 
@@ -21,11 +21,12 @@ class RawSessionsStore:
 
         db_path = os.path.join(os.path.abspath('..'), 'data', DB_NAME)
         if os.path.exists(db_path):
-            print('[+] sqlite3 previous database deleted')
+            # print('[+] sqlite3 previous database deleted')
             os.remove(db_path)
 
         if self.open_connection() and self.create_table():
-            print('[+] sqlite3 connection established and raw_session table initialized')
+            # print('[+] sqlite3 connection established and raw_session table initialized')
+            pass
         else:
             print('[-] sqlite3 initialize failed')
             exit(-1)
@@ -111,7 +112,7 @@ class RawSessionsStore:
         :return: True if the validation is successful. False if the validation fails.
         """
         try:
-            record_schema_path = os.path.join(os.path.abspath('..'), 'resources', record_type.lower() + '_schema.json')
+            record_schema_path = os.path.join(os.path.abspath('..'), 'resources', record_type + '_schema.json')
             with open(record_schema_path) as f:
                 loaded_schema = json.load(f)
                 validate(record, loaded_schema)
@@ -129,16 +130,16 @@ class RawSessionsStore:
     def generate_query_parameters(self, record: dict, record_type: str) -> tuple:
 
         parameters = {
-            'UUID': record['UUID'],
-            'CALENDAR': None,
-            'LABEL': None,
-            'SETTINGS': None,
-            'CHANNELS': [None] * NUM_CHANNELS
+            'uuid': record['uuid'],
+            'calendar': None,
+            'label': None,
+            'environment': None,
+            'channels': [None] * NUM_CHANNELS
         }
 
-        if record_type == 'CHANNEL':
-            channel = record['CHANNEL'] - 1
-            parameters['CHANNELS'][channel] = json.dumps(record)
+        if record_type == 'channel':
+            channel = record['channel'] - 1
+            parameters['channels'][channel] = json.dumps(record)
         else:
             parameters[record_type] = json.dumps(record)
 
@@ -149,13 +150,13 @@ class RawSessionsStore:
 
     def row_exists(self, uuid: str) -> bool:
         """
-
-        :param uuid:
-        :return:
+        Checks if exists a row in the Data Store
+        :param uuid: string representing the Raw Session to check
+        :return: True if the Raw Session exists. False otherwise
         """
         try:
             cursor = self._conn.cursor()
-            cursor.execute('SELECT COUNT(1) FROM raw_session WHERE uuid = ?', (uuid,))
+            cursor.execute('SELECT COUNT(1) FROM raw_session WHERE uuid = ?', (uuid, ))
             self._conn.commit()
 
             result = cursor.fetchone()
@@ -186,10 +187,10 @@ class RawSessionsStore:
             return False
 
         # Check if the record received belongs to a session already in the database or to a new one
-        if self.row_exists(record['UUID']):
+        if self.row_exists(record['uuid']):
             # Update
-            if record_type == 'CHANNEL':
-                column_name = record_type + '_' + str(record['CHANNEL'])
+            if record_type == 'channel':
+                column_name = record_type + '_' + str(record['channel'])
             else:
                 column_name = record_type
             query_result = self.update_record(record=record, column_to_set=column_name)
@@ -208,7 +209,7 @@ class RawSessionsStore:
         :return: True if the insert is successful. False otherwise.
         """
         try:
-            query = 'INSERT INTO raw_session (uuid, calendar, label, settings, ' \
+            query = 'INSERT INTO raw_session (uuid, calendar, label, environment, ' \
                     'channel_1, channel_2, channel_3, channel_4, channel_5, channel_6, channel_7, channel_8, ' \
                     'channel_9, channel_10, channel_11, channel_12, channel_13, channel_14, channel_15, channel_16, ' \
                     'channel_17, channel_18, channel_19, channel_20, channel_21, channel_22 ) ' \
@@ -233,7 +234,7 @@ class RawSessionsStore:
         try:
             query = 'UPDATE raw_session SET ' + column_to_set + ' = ? WHERE uuid = ?'
             cursor = self._conn.cursor()
-            cursor.execute(query, (json.dumps(record), record['UUID']))
+            cursor.execute(query, (json.dumps(record), record['uuid']))
             self._conn.commit()
         except sqlite3.Error as e:
             print(f'[-] sqlite3 "update_record" error [{e}]')
@@ -252,7 +253,7 @@ class RawSessionsStore:
         try:
             query = 'SELECT * FROM raw_session WHERE uuid = ?'
             cursor = self._conn.cursor()
-            cursor.execute(query, (uuid,))
+            cursor.execute(query, (uuid, ))
             self._conn.commit()
 
             result = cursor.fetchone()
@@ -261,16 +262,16 @@ class RawSessionsStore:
 
             # Building the loaded Raw Session as a dictionary
             raw_session = {
-                'UUID': result[0],
-                'calendar': json.loads(result[1])['CALENDAR'],
-                'commandThought': None,
-                'environment': json.loads(result[3])['SETTINGS'],
+                'uuid': result[0],
+                'calendar': json.loads(result[1])['calendar'],
+                'command_thought': None,
+                'environment': json.loads(result[3])['environment'],
                 'headset': list()
             }
 
             # Handling missing label
             if result[2] is not None:
-                raw_session['commandThought'] = json.loads(result[2])['LABEL']
+                raw_session['command_thought'] = json.loads(result[2])['label']
 
             # Handling missing channels eeg data
             for channel in result[4:]:
@@ -297,7 +298,7 @@ class RawSessionsStore:
         try:
             query = 'DELETE FROM raw_session WHERE uuid = ?'
             cursor = self._conn.cursor()
-            cursor.execute(query, (uuid,))
+            cursor.execute(query, (uuid, ))
             self._conn.commit()
         except sqlite3.Error as e:
             print(f'[-] sqlite3 "delete_raw_session" error [{e}]')
@@ -316,7 +317,7 @@ class RawSessionsStore:
         else:
             # In execution mode the 'label' is not required
             for column_name in query_result.keys():
-                if query_result.get(column_name) is None and column_name != 'LABEL':
+                if query_result.get(column_name) is None and column_name != 'label':
                     return False
         return True
 
@@ -334,7 +335,7 @@ class RawSessionsStore:
         try:
             query = 'SELECT * FROM raw_session WHERE uuid = ?'
             cursor = self._conn.cursor()
-            cursor.execute(query, (uuid,))
+            cursor.execute(query, (uuid, ))
             self._conn.commit()
 
             # Fetch raw session from the data store
@@ -345,7 +346,7 @@ class RawSessionsStore:
                 # So the task to check if the session is good or not is shifted to the RawSessionIntegrity class
                 # Here the only important thing is to check if the required fields are not missing
                 column_names = [description[0] for description in cursor.description][0:len(RECORD_TYPE)]
-                # res contains only the following (required) fields: ['CALENDAR, 'LABEL', 'SETTINGS']
+                # res contains only the following (required) fields: ['calendar, 'label', 'environment']
                 res = dict(zip(column_names, result[0:len(RECORD_TYPE)]))
                 return self.check_required_fields(query_result=res, operative_mode=operative_mode)
             else:
@@ -353,7 +354,7 @@ class RawSessionsStore:
                 # So it is necessary to check all the possible fields (except for the labels during the execution mode)
                 # If all the records exist, the session can be labeled as 'fully complete'
                 column_names = [description[0] for description in cursor.description]
-                # res has all the possible fields: ['CALENDAR, 'LABEL', 'SETTINGS', 'CHANNELS_1', ETC..]
+                # res has all the possible fields: ['calendar, 'label', 'environment', 'channel_1', etc..]
                 res = dict(zip(column_names, result))
                 return self.check_required_fields(query_result=res, operative_mode=operative_mode)
 

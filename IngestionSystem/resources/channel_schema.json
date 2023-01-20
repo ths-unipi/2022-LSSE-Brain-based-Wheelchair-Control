@@ -1,17 +1,17 @@
 {
   "type": "object",
   "properties": {
-    "CHANNEL": {
+    "channel": {
       "type": "integer",
       "minimum": 1,
       "maximum": 22
     },
-    "TIMESTAMP": {
+    "timestamp": {
       "type": "string"
     },
-    "UUID": {
+    "uuid": {
       "type": "string"
     }
   },
-  "required": ["CHANNEL", "TIMESTAMP", "UUID"]
+  "required": ["channel", "timestamp", "uuid"]
 }
