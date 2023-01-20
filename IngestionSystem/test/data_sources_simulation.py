@@ -7,10 +7,10 @@ from pandas import read_csv, DataFrame
 from requests import post
 
 INGESTION_SYSTEM_IP = 'localhost'
-INGESTION_SYSTEM_PORT = 5000
+INGESTION_SYSTEM_PORT = 4000
 MISSING_SAMPLES = [9, 10, 11]
-TESTING_MODE = False
-NUM_OF_DATASET = 3
+TESTING_MODE = True
+DATASET_TO_SEND = 3
 
 YELLOW_COLOR = "\033[93m"
 BLUE_COLOR = "\033[94m"
@@ -32,9 +32,7 @@ def yellow(string):
 
 
 def save_timestamp():
-    # Save timestamp into a CSV
-    current_time = datetime.now().strftime("%H:%M:%S.%f")
-    df = DataFrame([[current_time]], columns=['Timestamp'])
+    df = DataFrame([[time.time()]], columns=['Timestamp'])
     df.to_csv('timestamp.csv', index=False)
 
 
@@ -51,7 +49,7 @@ def read_dataset():
     labels = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_labels.csv'))
     set_labels = labels[['LABELS', 'UUID']].rename(columns={'LABELS': 'label', 'UUID': 'uuid'})
 
-    sets = [
+    dataset = [
         {
             'name': 'calendar',
             'records': set_calendar
@@ -66,25 +64,23 @@ def read_dataset():
             'records': set_settings
         }]
 
-    return sets
+    return dataset
 
 
 def send_dataset(dataset_counter: int):
     stop_sending = False
     catch_timestamp = True
 
-    while not stop_sending:
-
+    while True:
         # Shuffle in order to create non-synchronized records
         random.shuffle(sets)
 
+        for i in range(0, len(sets)):
+            if sets[i]['records'].empty:
+                return
+
         print(cyan('============================ START SESSION ============================'))
         for i in range(0, len(sets)):
-
-            if sets[i]['records'].empty:
-                stop_sending = True
-                break
-
             if sets[i]['name'] == 'headset':
                 headset_channels = sets[i]['records'].iloc[:22, :].to_dict('records')
                 sets[i]['records'].drop(sets[i]['records'].index[:22], inplace=True)
@@ -100,12 +96,12 @@ def send_dataset(dataset_counter: int):
 
                     # Sending a record with a probability of 0.2
                     if channel in MISSING_SAMPLES and random.random() < 0.2:
-                        print(f'({record["uuid"]})' + yellow(f' Generating a missing sample [channel {channel}]'))
+                        print(f'({uuid})' + yellow(f' Generating a missing sample [channel {channel}]'))
                     else:
-                        print(f'({record["uuid"]})' + blue(f' Sending headset EEG data [channel {channel}]'))
+                        print(f'({uuid})' + blue(f' Sending headset EEG data [channel {channel}]'))
                         post(connection_string, json=record)
 
-                        if TESTING_MODE and catch_timestamp and dataset_counter == 0:
+                        if dataset_counter == 0 and catch_timestamp:
                             save_timestamp()
                             catch_timestamp = False
 
@@ -120,7 +116,7 @@ def send_dataset(dataset_counter: int):
                     print(f'({record["uuid"]})' + blue(f' Sending {sets[i]["name"]} data'))
                     post(connection_string, json=record)
 
-                    if TESTING_MODE and catch_timestamp and dataset_counter == 0:
+                    if dataset_counter == 0 and catch_timestamp:
                         save_timestamp()
                         catch_timestamp = False
 
@@ -132,10 +128,13 @@ if __name__ == '__main__':
     print(blue(f'Testing mode: {TESTING_MODE}\n'))
 
     if TESTING_MODE:
-        for i in range(0, NUM_OF_DATASET):
-            print(cyan(f'Dataset {i + 1}'))
+        j = 0
+        while j < DATASET_TO_SEND:
+            current_time = datetime.now().strftime("%H:%M:%S.%f")
+            print(f'({current_time})' + cyan(f' Sending Dataset #{j + 1}'))
             sets = read_dataset()
-            send_dataset(i)
+            send_dataset(j)
+            j += 1
     else:
         sets = read_dataset()
         send_dataset(-1)

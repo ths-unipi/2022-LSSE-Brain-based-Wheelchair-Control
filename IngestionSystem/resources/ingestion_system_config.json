@@ -1,5 +1,5 @@
 {
-  "operative_mode" : "execution",
+  "operative_mode" : "development",
   "preparation_system_ip" : "172.16.0.14",
   "preparation_system_port" : 5000,
   "monitoring_system_ip": "172.16.0.15",

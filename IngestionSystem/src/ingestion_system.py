@@ -74,7 +74,7 @@ class IngestionSystem:
         raw_sessions_store = RawSessionsStore()
 
         # Run REST server
-        listener = Thread(target=JsonIO.get_instance().listen, args=('0.0.0.0', 5000), daemon=True)
+        listener = Thread(target=JsonIO.get_instance().listen, args=('0.0.0.0', 4000), daemon=True)
         listener.start()
 
         while True:
