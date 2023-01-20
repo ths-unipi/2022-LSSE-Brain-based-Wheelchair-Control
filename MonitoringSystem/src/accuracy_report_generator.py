@@ -1,13 +1,14 @@
 import json
 import os
 import random
+from datetime import datetime
+import time
 
 
 class AccuracyReportGenerator:
 
     def __init__(self):
-        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report.json')
-        self._report_count = 1
+        pass
 
     def generate_accuracy_report(self, labels, max_errors_tolerated, testing_mode):
         #compute evaluated labels
@@ -46,12 +47,15 @@ class AccuracyReportGenerator:
             else:
                 accuracy_report['classifier_accepted'] = "No"
 
-        #save report as a Json file
-        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report' + str(self._report_count) + '.json')
-        with open(self.json_path, "w") as f:
+        #get the current time (for the json name)
+        date_time = datetime.fromtimestamp(time.time())
+        date_time_string = date_time.strftime("%d-%m-%Y_%H-%M") + '.json'
+
+        # save report as a Json file
+        json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report' + str(date_time_string))
+        with open(json_path, "w") as f:
             json.dump(accuracy_report, f, indent=4)
         print('[+] AccuracyReportGenerator - Accuracy Report exported')
-        self._report_count += 1
 
         return accuracy_report
 

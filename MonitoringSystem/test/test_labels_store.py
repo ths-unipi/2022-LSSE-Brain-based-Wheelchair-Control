@@ -7,7 +7,7 @@ from src.labels_store import LabelsStore
 #===================== STORE LABEL TEST ===================== #
 
 def test1_insert_label():
-    session_label_path = os.path.join(os.path.abspath('..'), 'data', 'session_label_test1.json')
+    session_label_path = os.path.join(os.path.abspath('..'), 'data', 'session_label_test2.json')
     with open(session_label_path) as f:
         session_label = json.load(f)
     print("uuid to compare :" ,session_label['uuid'])

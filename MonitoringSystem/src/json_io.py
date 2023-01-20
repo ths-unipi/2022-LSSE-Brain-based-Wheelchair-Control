@@ -5,7 +5,7 @@ from threading import Thread
 import queue
 
 
-#to test receive method
+#to data receive method
 connection_string = 'http://192.168.178.22:5000' + '/'
 
 class JsonIO:
@@ -36,7 +36,7 @@ class JsonIO:
     def get_queue(self) -> queue:
         return self.queue
 
-    #to test the receive() method
+    #to data the receive() method
     def send(self, json_to_send):
         response = post(connection_string + 'json', json=json_to_send)
         if response.status_code != 200:
