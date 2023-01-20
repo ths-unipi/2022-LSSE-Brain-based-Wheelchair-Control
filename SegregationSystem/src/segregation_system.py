@@ -189,12 +189,15 @@ class SegregationSystem:
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
                 splitted_dataset = splitter.generate_training_validation_testing_set(dataset)
-                print(splitted_dataset)
+                # print(splitted_dataset)
 
                 ip = self.segregation_system_config['endpoint_ip']
                 port = self.segregation_system_config['endpoint_port']
 
-                JsonIO.get_instance().send(ip, port, splitted_dataset)
+                if JsonIO.get_instance().send(ip, port, splitted_dataset):
+                    print("[+] Splitted dataset successfully sent")
+                else:
+                    print("[-] Sending splitted dataset failed")
 
                 # the dataset is evaluated and sent, so it's possible continue collecting new data
                 # and build a new dataset (new user_id)
