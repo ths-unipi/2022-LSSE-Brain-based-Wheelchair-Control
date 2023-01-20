@@ -54,39 +54,42 @@ def read_dataset():
             'name': 'calendar',
             'records': set_calendar
         }, {
+            'name': 'headset',
+            'records': set_headset,
+        }, {
             'name': 'label',
             'records': set_labels
         }, {
             'name': 'environment',
             'records': set_settings
-        }, {
-            'name': 'headset',
-            'records': set_headset,
         }]
 
     return dataset
 
 
-def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: int):
+def send_dataset(dataset_copy: list, dataset_counter: int):
     catch_timestamp = True
-    session_index = 0
 
-    while session_index < maximum_dataset_length:
+    while True:
         # Shuffle in order to create non-synchronized records
-        random.shuffle(dataset)
+        random.shuffle(dataset_copy)
+
+        for i in range(0, len(dataset_copy)):
+            if dataset_copy[i]['records'].empty:
+                return
 
         print(cyan('============================ START SESSION ============================'))
-        for i in range(0, len(dataset)):
-            if dataset[i]['name'] == 'headset':
-                # Read the 22 channels data in the dataset
-                headset_channels = dataset[i]['records'].iloc[session_index*22:session_index*22 + 22, :].to_dict('records')
+        for i in range(0, len(dataset_copy)):
+            if dataset_copy[i]['name'] == 'headset':
+                headset_channels = dataset_copy[i]['records'].iloc[:22, :].to_dict('records')
+                dataset_copy[i]['records'].drop(dataset_copy[i]['records'].index[:22], inplace=True)
+                dataset_copy[i]['records'].reset_index(drop=True, inplace=True)
 
                 # Shuffle the headset EEG data
                 random.shuffle(headset_channels)
 
-                channel_index = 0
-                while channel_index < len(headset_channels):
-                    record = headset_channels[channel_index]
+                while headset_channels:
+                    record = headset_channels.pop(0)
                     uuid = record['uuid']
                     channel = record['channel']
 
@@ -101,22 +104,20 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                             save_timestamp()
                             catch_timestamp = False
 
-                    channel_index += 1
-
             else:
-                record = dataset[i]['records'].loc[session_index].to_dict()
+                record = dataset_copy[i]['records'].loc[0].to_dict()
+                dataset_copy[i]['records'].drop(0, inplace=True)
+                dataset_copy[i]['records'].reset_index(drop=True, inplace=True)
 
                 if random.random() < 0.01:
-                    print(f'({record["uuid"]})' + yellow(f' Generating a missing sample [{dataset[i]["name"]}]'))
+                    print(f'({record["uuid"]})' + yellow(f' Generating a missing sample [{dataset_copy[i]["name"]}]'))
                 else:
-                    print(f'({record["uuid"]})' + blue(f' Sending {dataset[i]["name"]} data'))
+                    print(f'({record["uuid"]})' + blue(f' Sending {dataset_copy[i]["name"]} data'))
                     post(connection_string, json=record)
 
                     if dataset_counter == 0 and catch_timestamp:
                         save_timestamp()
                         catch_timestamp = False
-
-        session_index += 1
 
 
 if __name__ == '__main__':
@@ -125,16 +126,15 @@ if __name__ == '__main__':
     print(blue(f'Connection to {connection_string}'))
     print(blue(f'Testing mode: {TESTING_MODE}\n'))
 
-    dataset_to_send = read_dataset()
-    maximum_dataset_length = len(dataset_to_send[0]['records'])
-
     if TESTING_MODE:
         j = 0
         # while j < DATASET_TO_SEND:
         while True:
             current_time = datetime.now().strftime("%H:%M:%S.%f")
             print(f'({current_time})' + cyan(f' Sending Dataset #{j + 1}'))
-            send_dataset(dataset=dataset_to_send, maximum_dataset_length=maximum_dataset_length, dataset_counter=j)
+            sets = read_dataset()
+            send_dataset(dataset_copy=sets, dataset_counter=j)
             j += 1
     else:
-        send_dataset(dataset=dataset_to_send, maximum_dataset_length=maximum_dataset_length, dataset_counter=-1)
+        sets = read_dataset()
+        send_dataset(dataset_copy=sets, dataset_counter=-1)
