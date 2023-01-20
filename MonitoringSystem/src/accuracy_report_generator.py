@@ -47,11 +47,11 @@ class AccuracyReportGenerator:
                 accuracy_report['classifier_accepted'] = "No"
 
         #save report as a Json file
-        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report'+ str(self._report_count) + '.json')
-        self._report_count += 1
+        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report' + str(self._report_count) + '.json')
         with open(self.json_path, "w") as f:
             json.dump(accuracy_report, f, indent=4)
         print('[+] AccuracyReportGenerator - Accuracy Report exported')
+        self._report_count += 1
 
         return accuracy_report
 
