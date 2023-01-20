@@ -1,5 +1,5 @@
 {
-    "operative_mode": "splitting_op_mode",
+    "operative_mode": "collecting_op_mode",
     "user_id": 0,
     "testing_mode": true,
     "endpoint_ip": "172.16.0.10",

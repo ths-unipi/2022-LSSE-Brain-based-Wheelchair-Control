@@ -31,9 +31,9 @@ class BalanceBarChartReportGenerator:
             values[index] += 1
 
         plt.bar(labels, values, width=0.4, align='center')
-        plt.xlabel('Command Thoughts')
+        plt.xlabel('Commands Thought')
         plt.ylabel('Number of Occurrences')
-        plt.title(f'Histogram of Command Thoughts')
+        plt.title(f'Histogram of Commands Thought')
         plt.grid(True)
 
         # save data just calculated in a dict
