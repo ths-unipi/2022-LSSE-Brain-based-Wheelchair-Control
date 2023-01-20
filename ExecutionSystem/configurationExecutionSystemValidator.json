@@ -3,8 +3,7 @@
   "type": "object",
   "properties": {
     "operating_mode": {
-      "type": "string",
-      "enum": ["development", "execution"]
+      "type": "string"
     },
     "threshold_value": {
       "type": "integer"
@@ -14,12 +13,16 @@
     },
     "endpoint_port": {
       "type": "integer"
+    },
+    "testing": {
+      "type": "boolean"
     }
   },
   "required": [
     "operating_mode",
     "threshold_value",
     "endpoint_IP",
-    "endpoint_port"
+    "endpoint_port",
+    "testing"
   ]
 }

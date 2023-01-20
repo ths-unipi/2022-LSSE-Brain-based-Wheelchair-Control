@@ -1,4 +1,6 @@
 from jsonschema import validate, ValidationError
+from pandas import DataFrame
+
 from src.json_io import JsonIO
 from threading import Thread
 from src.mental_command_classifier import MentalCommandClassifier
@@ -6,11 +8,16 @@ from src.monitoring_phase import MonitoringPhase
 
 import json
 import os
+import csv
+import time
+
+TESTING_THRESHOLD = 1000
 
 
 def open_json_file(path):
+    print(path)
     try:
-        with open(os.path.join(path)) as f:
+        with open(path) as f:
             json_file = json.load(f)
 
     except FileNotFoundError:
@@ -39,6 +46,13 @@ def validate_configuration():
         exit(1)
 
 
+def save_result_on_csv(filepath: str):
+    time_stamp = time.time()
+    with open(filepath, 'a', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile)
+        csvwriter.writerow([time_stamp])
+
+
 class ExecutionSystem:
 
     def __init__(self):
@@ -47,12 +61,21 @@ class ExecutionSystem:
     def run(self):
         mental_command_classifier_instance = MentalCommandClassifier()
         monitoring_instance = MonitoringPhase()
+        counter_testing = 0
         while True:
             if self._configuration_execution_system['operating_mode'] == 'development':
                 json_file = JsonIO.get_instance().get_received_json()
                 # if there is the development flow, the best classifier is received and saved on a file
                 if mental_command_classifier_instance.deploy_classifier(json_file):
-                    print("***Execution System***   Deployment completed successfully")
+                    if self._configuration_execution_system['testing']:
+                        save_result_on_csv(os.path.join(os.path.abspath('..'), f'development_{TESTING_THRESHOLD}_classifier.csv'))
+                        counter_testing += 1
+                        print(f"***Execution System***   Counter testing: {counter_testing}")
+                        if counter_testing == TESTING_THRESHOLD:
+                            print("***Execution System***   Collection finished")
+                            exit(0)
+                        else:
+                            continue
                     exit(0)
 
             else:
@@ -67,6 +90,12 @@ class ExecutionSystem:
                 #print(classifier)
                 # the response of the classifier is computed
                 final_label = list(mental_command_classifier_instance.execute_classifier(classifier))[0]
+                if self._configuration_execution_system['testing']:
+                    save_result_on_csv(os.path.join(os.path.abspath('..'), f'execution_{TESTING_THRESHOLD}_sessions.csv'))
+                    counter_testing += 1
+                    print(f"***Execution System***   Counter testing: {counter_testing}")
+                    if counter_testing == TESTING_THRESHOLD:
+                        exit(0)
                 # the label is sent to the client
                 print(f"***Execution System***   The final prediction is: {final_label}")
                 if monitoring_instance.check_threshold(self._configuration_execution_system['threshold_value']):
@@ -76,7 +105,8 @@ class ExecutionSystem:
                         (mental_command_classifier_instance._prepared_session['uuid'], final_label)
                     print(f"***Execution System***   The label to send is: {label_to_send}")
                 # the label is sent to the monitoring system
-                    JsonIO.get_instance().send_json("172.16.0.15", 5000, label_to_send)
+                    JsonIO.get_instance().send_json(self._configuration_execution_system['endpoint_IP'],
+                                                    self._configuration_execution_system['endpoint_port'], label_to_send)
         exit(0)
 
 

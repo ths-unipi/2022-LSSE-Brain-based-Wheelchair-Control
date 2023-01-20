@@ -14,15 +14,14 @@ class MentalCommandClassifier:
             print('No classifier received')
             return False
 
-        received_json_path = \
-            os.path.join(os.path.abspath('..'), 'data', 'mental_command_classifier.json')
+        received_json_path = os.path.join(os.path.abspath('..'), 'data', 'mental_command_classifier.json')
         try:
             with open(received_json_path, 'w') as f:
                 json.dump(json_file, f)
         except IOError:
             print("Failed to load classifier on the .json file")
             exit(1)
-
+        print("***Execution System***   Deployment completed successfully")
         return True
 
     def execute_classifier(self, classifier):
