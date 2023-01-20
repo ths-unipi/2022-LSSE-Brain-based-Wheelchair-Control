@@ -17,7 +17,7 @@ class BalanceBarChartReportGenerator:
 
         # prepare data to build the bar chart
         for p_session in dataset:
-            ct = p_session['commandThought']
+            ct = p_session['command_thought']
             index = None
             if ct == 'move':
                 index = 0
