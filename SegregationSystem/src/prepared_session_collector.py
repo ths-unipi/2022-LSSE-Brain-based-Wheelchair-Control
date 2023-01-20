@@ -55,7 +55,7 @@ class PreparedSessionCollector:
             return None
 
         # use the last session_id user to set the prepared_session_counter
-        res = cursor.fetchone()  # fetchall for more results
+        res = cursor.fetchone()
         if res is None:
             self._prepared_session_counter = 0
         else:
@@ -77,11 +77,12 @@ class PreparedSessionCollector:
     def load_learning_session_set(self):
         # load all prepared sessions of a learning session set
         user_id = self.segregation_system_config['user_id']
+        dataset_size = self.segregation_system_config['collecting_threshold']
 
-        query = "SELECT * FROM p_session WHERE user_id = ? "
+        query = "SELECT * FROM p_session WHERE user_id = ? LIMIT ?"
         cursor = self._conn.cursor()
         try:
-            cursor.execute(query, (user_id,))
+            cursor.execute(query, (user_id, dataset_size))
         except sqlite3.Error as e:
             print(f'[-] Sqlite Execution Error [{e}]')
             return None

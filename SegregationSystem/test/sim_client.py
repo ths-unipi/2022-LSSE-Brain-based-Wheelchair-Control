@@ -1,10 +1,13 @@
 from requests import post
 import random
 import json
+import time
 
 if __name__ == '__main__':
-    sessions = 100
-    while sessions > 0:
+    sessions = 1000
+    n = 0
+    while n < sessions:
+
         uuid = random.randint(0, 1000)
         command_thought = None
         e = random.randint(0, 3)
@@ -36,4 +39,6 @@ if __name__ == '__main__':
             error_message = response.json()['error']
             print(f'Error: {error_message}')
 
-        sessions -= 1
+        print(n)
+        n += 1
+

@@ -130,7 +130,8 @@ class SegregationSystem:
                     # if the balance bar chart was evaluated with 'not balanced', the dataset is not usable, so
                     # it's possible continue collecting new data and build a new dataset (new user_id)
                     self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
-                    self.segregation_system_config['user_id'] += 1
+                    if not testing_mode:
+                        self.segregation_system_config['user_id'] += 1
                     self._save_config()
                     collector.retrieve_counter()
                     continue
@@ -174,7 +175,8 @@ class SegregationSystem:
                     # if the radar diagram was evaluated with 'bad quality', the dataset is not usable, so
                     # it's possible continue collecting new data and build a new dataset (new user_id)
                     self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
-                    self.segregation_system_config['user_id'] += 1
+                    if not testing_mode:
+                        self.segregation_system_config['user_id'] += 1
                     self._save_config()
                     collector.retrieve_counter()
                     continue
@@ -197,7 +199,8 @@ class SegregationSystem:
                 # the dataset is evaluated and sent, so it's possible continue collecting new data
                 # and build a new dataset (new user_id)
                 self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
-                self.segregation_system_config['user_id'] += 1
+                if not testing_mode:
+                    self.segregation_system_config['user_id'] += 1
                 self._save_config()
                 collector.retrieve_counter()
 

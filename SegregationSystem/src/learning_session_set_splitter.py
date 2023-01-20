@@ -6,6 +6,7 @@ class LearningSessionSetSplitter:
     def __init__(self, config):
         self.segregation_system_config = config
 
+    # TODO funziona male, a volte res, training devono essere scambiati, a volte bisogna mettere '>' al posto di '<'
     def generate_training_validation_testing_set(self, dataset):
         # train_test_split function can split the dataset only in two part, so it's needed to execute it
         # again to obtain three sets
@@ -16,8 +17,10 @@ class LearningSessionSetSplitter:
         testing_size = testing_size / (1 - training_size)
         validation_size = 1 - testing_size
 
-        training, res = train_test_split(dataset, train_size=training_size)
-        if testing_size < validation_size:
+        res, training = train_test_split(dataset, train_size=training_size)
+
+        print(f"{len(training)} { len(res)}")
+        if testing_size > validation_size:
             testing, validation = train_test_split(res, train_size=testing_size, test_size=validation_size)
         else:
             validation, testing = train_test_split(res, train_size=validation_size, test_size=testing_size)
