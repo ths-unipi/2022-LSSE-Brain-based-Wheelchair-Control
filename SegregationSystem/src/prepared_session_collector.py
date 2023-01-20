@@ -79,7 +79,7 @@ class PreparedSessionCollector:
         user_id = self.segregation_system_config['user_id']
         dataset_size = self.segregation_system_config['collecting_threshold']
 
-        query = "SELECT * FROM p_session WHERE user_id = ? LIMIT ?"
+        query = "SELECT * FROM p_session WHERE user_id = ? ORDER BY session_id DESC LIMIT ?"
         cursor = self._conn.cursor()
         try:
             cursor.execute(query, (user_id, dataset_size))
