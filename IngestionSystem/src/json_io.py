@@ -52,7 +52,7 @@ class JsonIO:
         """
         return self.received_records_queue.get(block=True)
 
-    def receive(self, received_record) -> bool:
+    def receive(self, received_record: dict) -> bool:
         """
         Receives a record and enqueues it in a thread-safe queue
         :param received_record: record sent from a data source (calendar, labels, settings, headset_eeg_data)
@@ -67,7 +67,7 @@ class JsonIO:
 
     def send(self, endpoint_ip: str, endpoint_port: int, data: dict) -> bool:
         """
-        Sends a Raw Session to the Preparation System
+        Sends data to the Preparation System
         :param endpoint_ip: IP of the Preparation System
         :param endpoint_port: Port of the Preparation System
         :param data: dictionary containing the data to send

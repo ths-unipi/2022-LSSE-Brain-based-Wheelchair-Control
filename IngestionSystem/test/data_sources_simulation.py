@@ -69,9 +69,8 @@ def read_dataset():
 
 def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: int):
     catch_timestamp = True
-    session_index = 0
 
-    while session_index < maximum_dataset_length:
+    for session_index in range(0, maximum_dataset_length):
         # Shuffle in order to create non-synchronized records
         random.shuffle(dataset)
 
@@ -84,9 +83,8 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                 # Shuffle the headset EEG data
                 random.shuffle(headset_channels)
 
-                channel_index = 0
-                while channel_index < len(headset_channels):
-                    record = headset_channels[channel_index]
+                for m in range(0, len(headset_channels)):
+                    record = headset_channels[m]
                     uuid = record['uuid']
                     channel = record['channel']
 
@@ -100,9 +98,6 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                         if dataset_counter == 0 and catch_timestamp:
                             save_timestamp()
                             catch_timestamp = False
-
-                    channel_index += 1
-
             else:
                 record = dataset[i]['records'].loc[session_index].to_dict()
 
@@ -115,8 +110,6 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                     if dataset_counter == 0 and catch_timestamp:
                         save_timestamp()
                         catch_timestamp = False
-
-        session_index += 1
 
 
 if __name__ == '__main__':
