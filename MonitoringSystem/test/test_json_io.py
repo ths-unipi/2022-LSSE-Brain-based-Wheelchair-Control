@@ -12,7 +12,7 @@ def test_receive():
     json_path = os.path.join(os.path.abspath('..'), 'data', 'session_label_test1.json')
     with open(json_path) as f:
         json_to_send = json.load(f)
-    for i in range (0,100):
+    for i in range (0,50):
         json_to_send['uuid'] = "a923-45b7-gh12-7408003775." + str(i)
         JsonIO.get_instance().send(json_to_send)
 

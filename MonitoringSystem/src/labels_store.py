@@ -115,7 +115,7 @@ class LabelsStore:
             print("[-]LabelsStore - Sqlite UPDATE Error: ", err)
             return False
 
-        print("[+]LabelsStore -  Succesfully UPDATE existing row \n")
+        print("[+]LabelsStore -  Successfully UPDATE existing row \n")
         self._conn.commit()
 
     def _create_new_row(self,query,cursor, _uuid, _label):
@@ -130,7 +130,7 @@ class LabelsStore:
             print("[-]LabelsStore - Sqlite INSERT Error: ",err)
             return False
 
-        print("[+]LabelsStore - Succesfully INSERT new row \n")
+        print("[+]LabelsStore - Successfully INSERT new row \n")
         self._conn.commit()
 
 

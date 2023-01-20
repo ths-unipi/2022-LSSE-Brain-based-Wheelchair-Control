@@ -12,14 +12,10 @@
     "testing_mode": {
       "type": "boolean"
     },
-    "expected_accuracy" : {
-      "type" : "number"
-    },
 
   "required": [
     "labels_threshold",
     "max_errors_tolerated",
-    "testing_mode",
-    "expected_accuracy"
+    "testing_mode"
   ]
 }

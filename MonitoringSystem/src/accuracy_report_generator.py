@@ -1,6 +1,6 @@
 import json
 import os
-from jsonschema import validate, ValidationError
+import random
 
 
 class AccuracyReportGenerator:
@@ -8,7 +8,7 @@ class AccuracyReportGenerator:
     def __init__(self):
         self.json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report.json')
 
-    def generate_accuracy_report(self, labels, max_errors_tolerated, testing_mode, expected_accuracy):
+    def generate_accuracy_report(self, labels, max_errors_tolerated, testing_mode):
         #compute evaluated labels
         _evaluated_labels = len(labels)
         _errors = 0
@@ -27,7 +27,6 @@ class AccuracyReportGenerator:
 
         #compute accuracy
         _accuracy = ((_evaluated_labels - _errors) / _evaluated_labels)
-        print("ACCURACY : ", _accuracy)
 
         #create accuracy report
         accuracy_report = {
@@ -40,6 +39,8 @@ class AccuracyReportGenerator:
 
         # -------------- TESTING MODE --------------#
         if testing_mode:
+            expected_accuracy = random.uniform(0.1, 1)
+            print("[+] AccuracyReportGenerator - Testing Mode, Expected Accuracy: ", expected_accuracy)
             if accuracy_report['accuracy'] >= expected_accuracy:
                 accuracy_report['classifier_accepted'] = "Yes"
             else:

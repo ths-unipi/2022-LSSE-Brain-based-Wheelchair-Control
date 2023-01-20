@@ -92,11 +92,10 @@ class MonitoringSystem:
 
                 #metrics used to create the accuracy report
                 _max_errors_tolerated = self._monitoring_system_config['max_errors_tolerated']
-                _expected_accuracy = self._monitoring_system_config['expected_accuracy']
                 _testing_mode = self._monitoring_system_config['testing_mode']
 
                 # create accuracy report
-                _accuracy_report = _accuracy_report_generator.generate_accuracy_report(_labels, _max_errors_tolerated, _testing_mode, _expected_accuracy)
+                _accuracy_report = _accuracy_report_generator.generate_accuracy_report(_labels, _max_errors_tolerated, _testing_mode)
                 #validate accuracy report created
                 MonitoringSystem._validate_schema(self,_accuracy_report, ACCURACY_REPORT_SCHEMA)
                 print(f"[+] MonitoringSystem - Accuracy Report Generated, with Accuracy :  {_accuracy_report['accuracy']*100} % \n")
