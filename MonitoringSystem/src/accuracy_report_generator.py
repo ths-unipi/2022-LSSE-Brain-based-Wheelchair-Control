@@ -7,6 +7,7 @@ class AccuracyReportGenerator:
 
     def __init__(self):
         self.json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report.json')
+        self._report_count = 1
 
     def generate_accuracy_report(self, labels, max_errors_tolerated, testing_mode):
         #compute evaluated labels
@@ -22,7 +23,6 @@ class AccuracyReportGenerator:
             _label2 = row['label2']
             if _label1 != _label2:
                 _errors += 1
-                print(f"uuid:{row['uuid']}, label1:{row['label1']}, label2:{row['label2']}\n")
 
 
         #compute accuracy
@@ -47,6 +47,8 @@ class AccuracyReportGenerator:
                 accuracy_report['classifier_accepted'] = "No"
 
         #save report as a Json file
+        self.json_path = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report'+ str(self._report_count) + '.json')
+        self._report_count += 1
         with open(self.json_path, "w") as f:
             json.dump(accuracy_report, f, indent=4)
         print('[+] AccuracyReportGenerator - Accuracy Report exported')
