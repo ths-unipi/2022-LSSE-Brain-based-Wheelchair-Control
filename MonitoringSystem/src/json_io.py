@@ -1,15 +1,13 @@
 from flask import Flask, request
-from requests import post,get
+from requests import post
 from threading import Thread
-
 import queue
 
-
-#to data receive method
+# to data receive method
 connection_string = 'http://192.168.178.22:5000' + '/'
 
-class JsonIO:
 
+class JsonIO:
     _json_io_instance = None
 
     @staticmethod
@@ -17,7 +15,6 @@ class JsonIO:
         if JsonIO._json_io_instance is None:
             JsonIO._json_io_instance = JsonIO()
         return JsonIO._json_io_instance
-
 
     def __init__(self):
         self._app = Flask(__name__)
@@ -29,14 +26,13 @@ class JsonIO:
     def get_app(self) -> Flask:
         return self._app
 
-
     def receive(self, received_json) -> None:
         self.queue.put(received_json, block=True)
 
     def get_queue(self) -> queue:
         return self.queue
 
-    #to data the receive() method
+    # to data the receive() method
     def send(self, json_to_send):
         response = post(connection_string + 'json', json=json_to_send)
         if response.status_code != 200:
@@ -45,8 +41,8 @@ class JsonIO:
         return True
 
 
-
 app = JsonIO().get_instance().get_app()
+
 
 @app.post('/json')
 def post_json():
@@ -55,7 +51,7 @@ def post_json():
 
     received_json = request.json
 
-    new_thread = Thread(target= JsonIO.get_instance().receive, args=(received_json,))
+    new_thread = Thread(target=JsonIO.get_instance().receive, args=(received_json,))
     new_thread.start()
 
     return {}, 200

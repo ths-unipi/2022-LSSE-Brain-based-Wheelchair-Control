@@ -1,7 +1,5 @@
 import os
 import sqlite3
-import json
-from jsonschema import ValidationError
 
 DB_NAME = "LabelsStore.db"
 DB_PATH = os.path.join(os.path.abspath('..'), DB_NAME)
@@ -11,7 +9,6 @@ class LabelsStore:
 
     def __init__(self):
         self._conn = sqlite3.connect(DB_PATH)
-
 
     def _open_connection(self):
         if not os.path.exists(DB_PATH):
@@ -37,9 +34,7 @@ class LabelsStore:
 
         return True
 
-
-
-    #==================== STORE SESSION LABEL ====================#
+    # ==================== STORE SESSION LABEL ====================#
     def store_session_label(self, session_label):
         _uuid = session_label['uuid']
         _label = session_label['label']
@@ -48,30 +43,29 @@ class LabelsStore:
             return None
         cursor = self._conn.cursor()
 
-        #check if the row already exists
+        # check if the row already exists
         query = "SELECT * FROM session_labels WHERE uuid = ?"
         res = LabelsStore._check_if_row_exists(self, query, cursor, _uuid)
 
-        #if the row does not exist, create it
+        # if the row does not exist, create it
         if not res:
             query = "INSERT INTO session_labels (uuid,label1) VALUES (?,?) "
-            LabelsStore._create_new_row(self,query,cursor,_uuid,_label)
-        #if the row, insert the label
+            LabelsStore._create_new_row(self, query, cursor, _uuid, _label)
+        # if the row, insert the label
         else:
-            #check which column is empty
+            # check which column is empty
             query = 'SELECT label1,label2 FROM session_labels WHERE uuid = ? AND label1 IS NULL OR label2 IS NULL '
             columns = LabelsStore._find_empty_column(self, query, cursor, _uuid)
-            #set the value in the empty column
+            # set the value in the empty column
             if columns is not None:
                 if columns[0] is None:
                     column_to_set = "label1"
                 elif columns[1] is None:
                     column_to_set = "label2"
-                query = 'UPDATE session_labels SET '+column_to_set+' = ? WHERE uuid = ? '
-                LabelsStore._insert_label(self,query,cursor,_uuid,_label)
+                query = 'UPDATE session_labels SET ' + column_to_set + ' = ? WHERE uuid = ? '
+                LabelsStore._insert_label(self, query, cursor, _uuid, _label)
             else:
                 print("[-] LabelsStore - Row already full")
-
 
     def _check_if_row_exists(self, query, cursor, _uuid):
         '''
@@ -79,7 +73,7 @@ class LabelsStore:
         return True if the uuid is already in the DB, False Otherwise
         '''
         try:
-            cursor.execute(query,(_uuid,))
+            cursor.execute(query, (_uuid,))
         except sqlite3.Error as err:
             print("[-]LabelsStore - Sqlite Execution Error:", err)
             exit(1)
@@ -89,11 +83,10 @@ class LabelsStore:
         else:
             return True
 
-
     def _find_empty_column(self, query, cursor, _uuid):
         '''
         Method used in store_label().
-        Return the column values a specific row, to find where there is a NULL value.
+        Return the column of a specific row where there is a NULL value
         '''
         try:
             cursor.execute(query, (_uuid,))
@@ -118,26 +111,23 @@ class LabelsStore:
         print("[+]LabelsStore -  Successfully UPDATE existing row \n")
         self._conn.commit()
 
-    def _create_new_row(self,query,cursor, _uuid, _label):
+    def _create_new_row(self, query, cursor, _uuid, _label):
         '''
         method used in store_label().
         Create a new row with the received uuid and label
         '''
         try:
-            cursor.execute(query,(_uuid,_label))
+            cursor.execute(query, (_uuid, _label))
 
         except sqlite3.Error as err:
-            print("[-]LabelsStore - Sqlite INSERT Error: ",err)
+            print("[-]LabelsStore - Sqlite INSERT Error: ", err)
             return False
 
         print("[+]LabelsStore - Successfully INSERT new row \n")
         self._conn.commit()
 
-
-
-
-    #==================== LOAD SESSION LABELS ====================#
-    def load_labels(self) :
+    # ==================== LOAD SESSION LABELS ====================#
+    def load_labels(self):
 
         if not self._open_connection():
             return None
@@ -148,7 +138,7 @@ class LabelsStore:
         try:
             cursor.execute(query)
         except sqlite3.Error as err:
-            print("[-]LabelsStore -  Error while LOADING session labels: ",err)
+            print("[-]LabelsStore -  Error while LOADING session labels: ", err)
             return None
 
         res = cursor.fetchall()
@@ -158,14 +148,12 @@ class LabelsStore:
         labels = []
         label = {}
         for row in res:
-            label.update({"uuid":row[0]})
+            label.update({"uuid": row[0]})
             label.update({"label1": row[1]})
             label.update({"label2": row[2]})
             labels.append(label)
             label = {}
         return labels
-
-
 
     # ==================== DELETE SESSION LABELS ====================#
     def delete_labels(self):
@@ -180,13 +168,12 @@ class LabelsStore:
             cursor.execute(query)
 
         except sqlite3.Error as err:
-            print ("[-] Error while DELETING labels from DB: ",err)
+            print("[-] Error while DELETING labels from DB: ", err)
             return False
 
         self._conn.commit()
         print("[+]LabelsStore - Labels DELETED from DB \n")
         return True
-
 
     # ==================== ROW LABEL COMPLETE ====================#
     def row_label_complete(self, uuid):
@@ -197,7 +184,7 @@ class LabelsStore:
         query = "SELECT label1,label2 FROM session_labels WHERE uuid = ? AND (label1 IS NOT NULL AND label2 IS NOT NULL)"
 
         try:
-            cursor.execute(query,(uuid,))
+            cursor.execute(query, (uuid,))
         except sqlite3.Error as err:
             print("[-] Error to FIND labels: ", err)
             return None
@@ -207,4 +194,3 @@ class LabelsStore:
             return False
         else:
             return True
-
