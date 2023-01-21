@@ -24,7 +24,7 @@ class LearningSessionSetSplitter:
         else:
             validation, testing = train_test_split(res, train_size=validation_size)
 
-        print(f"training_size: {len(training)} validation_size: {len(validation)} testing_size{len(testing)}")
+        print(f"training_size: {len(training)} validation_size: {len(validation)} testing_size: {len(testing)}")
 
         # return the final dataset composed by the splitted dataset
         return {'training': training, 'validation': validation, 'testing': testing}
