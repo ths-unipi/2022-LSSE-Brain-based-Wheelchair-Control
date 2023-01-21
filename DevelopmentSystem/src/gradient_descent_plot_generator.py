@@ -4,10 +4,10 @@ from matplotlib import pyplot as plt
 
 class GradientDescentPlotGenerator:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._image_path = os.path.join(os.path.abspath('..'), 'data', 'gradient_descent_plot.png')
 
-    def generate_plot(self, losses: list):
+    def generate_plot(self, losses: list) -> None:
         # plot
         plt.plot(range(1, len(losses) + 1), losses)
         plt.xlabel('Iterations')

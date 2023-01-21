@@ -33,7 +33,7 @@ class DevelopmentSystem:
         self.mental_command_classifier = None
         self._learning_session_store = LearningSessionStore()
 
-    def run(self):
+    def run(self) -> None:
         # check if operational mode is valid
         if self.config["operational_mode"] not in ACCEPTED_OPERATIONAL_MODES:
             print(f'[-] \'{self.config["operational_mode"]}\' isn\'t a valid operational mode')
@@ -53,7 +53,7 @@ class DevelopmentSystem:
             if self.config['operational_mode'] == 'waiting_for_dataset':
                 # get new received learning set and save in the learning session store
                 learning_session_set = JsonIO.get_instance().get_queue().get(block=True)
-                self._learning_session_store.store_dataset(learning_session_set)
+                self._learning_session_store.store_dataset(received_dataset=learning_session_set)
 
                 # create JSON file containing the number of generations
                 with open(os.path.join(os.path.abspath('..'), 'data', 'number_of_generations.json'), "w") as f:
@@ -187,7 +187,7 @@ class DevelopmentSystem:
                     print('[+] The Best Classifier is valid, can be sent to Execution System')
 
                     # send serialized classifier to execution system
-                    serialized_classifier = self.mental_command_classifier.serialize('best_classifier.sav')
+                    serialized_classifier = self.mental_command_classifier.serialize()
                     JsonIO.get_instance().send(ip_endpoint=self.config['ip_endpoint'],
                                                port_endpoint=self.config['port_endpoint'],
                                                classifier=serialized_classifier)
@@ -201,7 +201,7 @@ class DevelopmentSystem:
         # close all threads
         exit(0)
 
-    def change_operational_mode(self, new_mode: str):
+    def change_operational_mode(self, new_mode: str) -> None:
         self.config['operational_mode'] = new_mode
 
         # save the new version of config
@@ -210,7 +210,7 @@ class DevelopmentSystem:
 
         print(f'[+] Switch to \'{new_mode}\' operational mode')
 
-    def remove_serialized_classifiers(self):
+    def remove_serialized_classifiers(self) -> None:
         path = os.path.join(os.path.abspath('..'), 'data')
 
         for file in os.listdir(path):

@@ -4,11 +4,11 @@ from src.mental_command_classifier import MentalCommandClassifier
 
 class TopFiveClassifierEvaluators:
 
-    def __init__(self, dataset) -> None:
+    def __init__(self, dataset: dict) -> None:
         self._top_five_classifiers = []
         self._dataset = dataset
 
-    def evaluate_new_classifier(self, new_classifier: MentalCommandClassifier) -> bool:
+    def evaluate_new_classifier(self, new_classifier: MentalCommandClassifier) -> None:
         # compute validation error
         validation_error = new_classifier.get_error(self._dataset['validation_data'],
                                                     self._dataset['validation_labels'])

@@ -4,11 +4,11 @@ from src.test_report_generator import TestReportGenerator
 
 class TestController:
 
-    def __init__(self, mental_command_classifier: MentalCommandClassifier = None):
+    def __init__(self, mental_command_classifier: MentalCommandClassifier = None) -> None:
         self._mental_command_classifier = mental_command_classifier
 
     def run(self, operational_mode: str, testing: bool = False, dataset: dict = None,
-            test_error_threshold: float = None):
+            test_error_threshold: float = None) -> bool:
         if operational_mode == 'test_best_classifier':
             # get training and test errors
             errors = {

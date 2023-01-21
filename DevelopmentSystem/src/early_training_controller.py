@@ -24,17 +24,19 @@ class EarlyTrainingController:
             self.mental_command_classifier = MentalCommandClassifier(uuid=0, training_parameters=training_parameters)
 
             # train the classifier
-            self.mental_command_classifier.train_classifier(training_dataset['training_data'],
-                                                            training_dataset['training_labels'])
+            self.mental_command_classifier.train_classifier(training_data=training_dataset['training_data'],
+                                                            training_labels=training_dataset['training_labels'])
             print('[+] Early Training completed')
 
             # generate the report
-            training_error = self.mental_command_classifier.get_error(
-                training_dataset['training_data'], training_dataset['training_labels'])
-            EarlyTrainingReportGenerator().generate_report(training_parameters, training_error, testing)
+            training_error = self.mental_command_classifier.get_error(data=training_dataset['training_data'],
+                                                                      label=training_dataset['training_labels'])
+            EarlyTrainingReportGenerator().generate_report(training_parameter=training_parameters,
+                                                           training_error=training_error,
+                                                           testing=testing)
 
             # generate the gradient descent plot
-            GradientDescentPlotGenerator().generate_plot(self.mental_command_classifier.get_losses())
+            GradientDescentPlotGenerator().generate_plot(losses=self.mental_command_classifier.get_losses())
 
         elif operational_mode == 'check_early_training_report':
             return EarlyTrainingReportGenerator().evaluate_report()

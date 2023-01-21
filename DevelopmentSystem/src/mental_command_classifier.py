@@ -2,7 +2,6 @@ import os.path
 import pickle
 import warnings
 import joblib
-from pandas import DataFrame
 from sklearn.neural_network import MLPClassifier
 from sklearn.exceptions import ConvergenceWarning, DataConversionWarning
 
@@ -27,10 +26,10 @@ class MentalCommandClassifier:
         warnings.filterwarnings("ignore", category=ConvergenceWarning)
         warnings.filterwarnings("ignore", category=DataConversionWarning)
 
-    def train_classifier(self, training_data: DataFrame, training_labels: DataFrame) -> None:
+    def train_classifier(self, training_data: list, training_labels: list) -> None:
         self._classifier.fit(training_data, training_labels)
 
-    def get_error(self, data: DataFrame, label: DataFrame) -> float:
+    def get_error(self, data: list, label: list) -> float:
         return self._classifier.score(data, label)
 
     def get_losses(self) -> list:
@@ -66,7 +65,7 @@ class MentalCommandClassifier:
             self._uuid = uuid
         self._classifier = MLPClassifier(training_parameters)
 
-    def serialize(self, file_name: str) -> dict:
+    def serialize(self) -> dict:
         # convert to string and insert in a dictionary
         serialized_classifier = pickle.dumps(self._classifier).decode('ISO-8859-1')
         return {'classifier': serialized_classifier}

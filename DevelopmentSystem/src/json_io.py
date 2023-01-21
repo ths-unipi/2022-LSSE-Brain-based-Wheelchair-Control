@@ -9,7 +9,7 @@ class JsonIO:
     # singleton
     json_io_instance = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._app = Flask(__name__)
         self._queue = queue.Queue()
 
@@ -20,7 +20,12 @@ class JsonIO:
     def send(self, ip_endpoint: str, port_endpoint: int, classifier: dict) -> bool:
         url = f'http://{ip_endpoint}:{port_endpoint}/json'
         print(f'[+] send to: {url}')
-        response = post(url=url, json=classifier)
+
+        try:
+            response = post(url=url, json=classifier)
+        except ConnectionError:
+            print('[-] execution system unreachable')
+            exit(1)
 
         if response.status_code != 200:
             print(f'[-] Failed to send Classifier\n\t-> Response Code: {response.status_code}')
@@ -29,7 +34,7 @@ class JsonIO:
         print(f'[+] Classifier sent to Execution System')
         return True
 
-    def listen(self, ip, port):
+    def listen(self, ip: str, port: int) -> None:
         print('[+] Start Rest Server thread')
         self._app.run(host=ip, port=port, debug=False)
 

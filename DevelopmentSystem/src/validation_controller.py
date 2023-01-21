@@ -1,5 +1,6 @@
 import json
 import os
+from typing import Any
 
 from jsonschema import validate, ValidationError
 
@@ -17,7 +18,7 @@ class ValidationController:
         self._number_of_hidden_neurons_range = number_of_hidden_neurons_range
 
     def run(self, operational_mode: str, testing: bool = False, dataset: dict = None,
-            validation_error_threshold: float = None):
+            validation_error_threshold: float = None) -> int:
         if operational_mode == 'grid_search':
             top_five_classifiers_evaluator = TopFiveClassifierEvaluators(dataset)
             self._mental_command_classifier = MentalCommandClassifier()
@@ -35,7 +36,7 @@ class ValidationController:
                 self._mental_command_classifier.train_classifier(dataset['training_data'], dataset['training_labels'])
 
                 # evaluate if is one of the top five
-                top_five_classifiers_evaluator.evaluate_new_classifier(self._mental_command_classifier)
+                top_five_classifiers_evaluator.evaluate_new_classifier(new_classifier=self._mental_command_classifier)
 
                 counter += 1
                 print(f'[+] {round((counter / number_of_combinations) * 100)}% of Grid Search completed')
@@ -43,12 +44,14 @@ class ValidationController:
             # generate the report
             TopFiveClassifiersReportGenerator().generate_report(
                 top_five_classifiers=top_five_classifiers_evaluator.get_top_classifiers(
-                    number_of_generations, validation_error_threshold), testing=testing)
+                    number_of_generations=number_of_generations,
+                    validation_error_threshold=validation_error_threshold),
+                testing=testing)
 
         elif operational_mode == 'check_top_five_classifiers_report':
             return TopFiveClassifiersReportGenerator().evaluate_report()
 
-    def generate_training_parameters_combinations(self) -> list:
+    def generate_training_parameters_combinations(self) -> tuple[Any, list[tuple[int, ...]]]:
         # load number of generations file and schema
         with open(os.path.join(os.path.abspath('..'), 'data', 'number_of_generations.json')) as f:
             number_of_generations_file = json.load(f)
