@@ -24,7 +24,7 @@ class ValidationController:
             self._mental_command_classifier = MentalCommandClassifier()
 
             # prepare the combinations of parameters
-            number_of_generations, training_parameters_combinations = self.generate_training_parameters_combinations()
+            number_of_generations, training_parameters_combinations = self._generate_training_parameters_combinations()
             number_of_combinations = len(training_parameters_combinations)
             print(f'[+] Grid Search with {number_of_combinations} combinations of parameters')
             counter = 0
@@ -51,7 +51,7 @@ class ValidationController:
         elif operational_mode == 'check_top_five_classifiers_report':
             return TopFiveClassifiersReportGenerator().evaluate_report()
 
-    def generate_training_parameters_combinations(self) -> tuple[Any, list[tuple[int, ...]]]:
+    def _generate_training_parameters_combinations(self) -> tuple[Any, list[tuple[int, ...]]]:
         # load number of generations file and schema
         with open(os.path.join(os.path.abspath('..'), 'data', 'number_of_generations.json')) as f:
             number_of_generations_file = json.load(f)

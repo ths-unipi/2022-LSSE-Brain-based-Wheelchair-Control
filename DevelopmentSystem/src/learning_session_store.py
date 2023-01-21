@@ -22,17 +22,17 @@ class LearningSessionStore:
     def __init__(self) -> None:
         self._conn = sqlite3.connect(os.path.join(os.path.abspath('..'), 'data', 'learning_session_store.db'))
 
-        if self._conn is not None and self.create_table():
+        if self._conn is not None and self._create_table():
             print('[+] connection to DB established and \'learning_session\' table initialized')
         else:
             print('[-] failed to initialize learning session store')
             exit(1)
 
-    def check_connection(self) -> bool:
+    def _check_connection(self) -> bool:
         return self._conn is not None
 
-    def create_table(self) -> bool:
-        if self.check_connection() is False:
+    def _create_table(self) -> bool:
+        if self._check_connection() is False:
             return False
 
         # generate all column names
@@ -63,7 +63,7 @@ class LearningSessionStore:
 
         return True
 
-    def insert_dataset(self, dataset: list, dataset_name: str) -> bool:
+    def _insert_dataset(self, dataset: list, dataset_name: str) -> bool:
         try:
             query = 'INSERT INTO ' + dataset_name + ' VALUES (?' + (',?' * (22 * 4 + 2)) + ')'
             self._conn.cursor().executemany(query, dataset)
@@ -104,9 +104,9 @@ class LearningSessionStore:
             test.append(tuple(session))
 
         # insert the three datasets in the database
-        res_training = self.insert_dataset(training, 'training_set')
-        res_validation = self.insert_dataset(validation, 'validation_set')
-        res_test = self.insert_dataset(test, 'test_set')
+        res_training = self._insert_dataset(training, 'training_set')
+        res_validation = self._insert_dataset(validation, 'validation_set')
+        res_test = self._insert_dataset(test, 'test_set')
 
         if res_training and res_validation and res_test:
             return True
@@ -127,18 +127,18 @@ class LearningSessionStore:
         return True
 
     def get_training_set(self) -> dict:
-        dataset = self.get_dataset('training_set')
+        dataset = self._get_dataset('training_set')
         return {'training_data': dataset[0], 'training_labels': dataset[1]}
 
     def get_validation_set(self) -> dict:
-        dataset = self.get_dataset('validation_set')
+        dataset = self._get_dataset('validation_set')
         return {'validation_data': dataset[0], 'validation_labels': dataset[1]}
 
     def get_test_set(self) -> dict:
-        dataset = self.get_dataset('test_set')
+        dataset = self._get_dataset('test_set')
         return {'test_data': dataset[0], 'test_labels': dataset[1]}
 
-    def get_dataset(self, dataset_name: str) -> list:
+    def _get_dataset(self, dataset_name: str) -> list:
         try:
             results = []
 

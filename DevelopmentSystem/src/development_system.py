@@ -60,7 +60,7 @@ class DevelopmentSystem:
                     json.dump({'number_of_generations': self.config['initial_number_of_generations']}, f, indent=4)
 
                 # change operational mode to early training
-                self.change_operational_mode('early_training')
+                self._change_operational_mode('early_training')
 
             # ====================== Early training =======================
 
@@ -77,7 +77,7 @@ class DevelopmentSystem:
                          training_dataset=training_dataset)
 
                 # change operational mode and stop (if testing mode instead continue)
-                self.change_operational_mode('check_early_training_report')
+                self._change_operational_mode('check_early_training_report')
                 if self.config['testing_mode'] is False:
                     break
                 else:
@@ -90,10 +90,10 @@ class DevelopmentSystem:
                 report_evaluation = EarlyTrainingController().run(operational_mode=self.config['operational_mode'])
                 if report_evaluation is True:
                     print('[+] The Number of Generations is good, Early Training ended')
-                    self.change_operational_mode('grid_search')
+                    self._change_operational_mode('grid_search')
                 else:
                     print('[+] The Number of Generations has changed, restart from Early Training')
-                    self.change_operational_mode('early_training')
+                    self._change_operational_mode('early_training')
 
             # ====================== Grid search =======================
 
@@ -112,7 +112,7 @@ class DevelopmentSystem:
                          validation_error_threshold=self.config['validation_error_threshold'])
 
                 # change operational mode and stop (if testing mode instead continue)
-                self.change_operational_mode('check_top_five_classifiers_report')
+                self._change_operational_mode('check_top_five_classifiers_report')
                 if self.config['testing_mode'] is False:
                     break
                 else:
@@ -126,10 +126,10 @@ class DevelopmentSystem:
                 if best_classifier_uuid == -1:
                     print('[+] No valid Best Classifier found, restart from Early Training with new Number of '
                           'Generations')
-                    self.change_operational_mode('early_training')
+                    self._change_operational_mode('early_training')
                 else:
                     print(f'[+] Best Classifier found with UUID:({best_classifier_uuid}), Validation Phase ended')
-                    self.change_operational_mode('test_best_classifier')
+                    self._change_operational_mode('test_best_classifier')
 
                     # rename classifier on disk (for easier recovery in the future)
                     old_name = os.path.join(os.path.abspath('..'), 'data', f'{best_classifier_uuid}.sav')
@@ -144,7 +144,7 @@ class DevelopmentSystem:
                     self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
 
                 # remove unused classifiers from disk
-                self.remove_serialized_classifiers()
+                self._remove_serialized_classifiers()
 
             # ====================== Test Best Classifier =======================
 
@@ -168,7 +168,7 @@ class DevelopmentSystem:
                 self._learning_session_store.delete_dataset()
 
                 # change operational mode and stop (if testing mode instead continue)
-                self.change_operational_mode('check_test_report')
+                self._change_operational_mode('check_test_report')
                 if self.config['testing_mode'] is False:
                     break
                 else:
@@ -193,15 +193,15 @@ class DevelopmentSystem:
                                                classifier=serialized_classifier)
 
                     # restart workflow
-                    self.change_operational_mode('waiting_for_dataset')
+                    self._change_operational_mode('waiting_for_dataset')
                 else:
                     print('[+] The Best Classifier isn\'t valid, Reconfiguration of the Systems are needed')
-                    self.change_operational_mode('waiting_for_dataset')
+                    self._change_operational_mode('waiting_for_dataset')
 
         # close all threads
         exit(0)
 
-    def change_operational_mode(self, new_mode: str) -> None:
+    def _change_operational_mode(self, new_mode: str) -> None:
         self.config['operational_mode'] = new_mode
 
         # save the new version of config
@@ -210,7 +210,7 @@ class DevelopmentSystem:
 
         print(f'[+] Switch to \'{new_mode}\' operational mode')
 
-    def remove_serialized_classifiers(self) -> None:
+    def _remove_serialized_classifiers(self) -> None:
         path = os.path.join(os.path.abspath('..'), 'data')
 
         for file in os.listdir(path):

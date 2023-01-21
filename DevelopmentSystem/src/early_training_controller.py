@@ -18,7 +18,7 @@ class EarlyTrainingController:
     def run(self, operational_mode: str, testing: bool = False, training_dataset: dict = None) -> bool:
         if operational_mode == 'early_training':
             # get the average number of hidden layer
-            training_parameters = self.generate_training_parameters()
+            training_parameters = self._generate_training_parameters()
 
             # generate the first classifier
             self.mental_command_classifier = MentalCommandClassifier(uuid=0, training_parameters=training_parameters)
@@ -41,7 +41,7 @@ class EarlyTrainingController:
         elif operational_mode == 'check_early_training_report':
             return EarlyTrainingReportGenerator().evaluate_report()
 
-    def generate_training_parameters(self) -> dict:
+    def _generate_training_parameters(self) -> dict:
         # load number of generations file and schema
         with open(os.path.join(os.path.abspath('..'), 'data', 'number_of_generations.json')) as f:
             number_of_generations_file = json.load(f)
@@ -66,5 +66,5 @@ class EarlyTrainingController:
 
         return {'number_of_generations': number_of_generations, 'hidden_layer_sizes': hidden_layer_sizes}
 
-    def evaluate_early_training_results(self) -> bool:
+    def _evaluate_early_training_results(self) -> bool:
         return EarlyTrainingReportGenerator().evaluate_report()
