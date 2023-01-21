@@ -11,7 +11,8 @@ from src.features_extractor import FeaturesExtractor
 class PreparationSystem:
 
     def __init__(self):
-        self._preparation_system_configuration = self.get_configuration()
+        self._preparation_system_configuration = self.validate_configuration()
+        print(f'[+] The configuration is valid, {self._preparation_system_configuration["operative_mode"]} mode')
         self._raw_session = None
         self._prepared_session = None
 
@@ -34,26 +35,26 @@ class PreparationSystem:
             FeaturesExtractor().extract_features \
                 (self._preparation_system_configuration['features'], self._raw_session, self._prepared_session,
                  self._preparation_system_configuration['operative_mode'])
-
             print('[+] features extracted and session prepared')
 
             # Send prepared session to the endpoint corresponding to the current operating mode
             if self._preparation_system_configuration['operative_mode'] == 'development':
-                JsonIO.get_instance().send(self._preparation_system_configuration['segregation_endpoint_IP'],
-                                           self._preparation_system_configuration['segregation_endpoint_port'],
-                                           self._prepared_session)
+                if JsonIO.get_instance().send(self._preparation_system_configuration['segregation_endpoint_IP'],
+                                              self._preparation_system_configuration['segregation_endpoint_port'],
+                                              self._prepared_session):
+                    print(f'[+] prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+
             elif self._preparation_system_configuration['operative_mode'] == 'execution':
-                JsonIO.get_instance().send(self._preparation_system_configuration['execution_endpoint_IP'],
-                                           self._preparation_system_configuration['execution_endpoint_port'],
-                                           self._prepared_session)
-            print(f'[+] prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
-            print(self._prepared_session)
+                if JsonIO.get_instance().send(self._preparation_system_configuration['execution_endpoint_IP'],
+                                              self._preparation_system_configuration['execution_endpoint_port'],
+                                              self._prepared_session):
+                    print(f'[+] prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
     @staticmethod
     def validate_configuration():
         try:
             # load configuration from file
-            with open(os.path.join(os.path.abspath('..'), 'PreparationSystemConfiguration.json')) as f:
+            with open(os.path.join(os.path.abspath('..'), 'preparation_system_configuration.json')) as f:
                 _configuration = json.load(f)
             # load schema from file
             with open(os.path.join(os.path.abspath('..'), 'configuration_schema.json')) as f:
@@ -65,17 +66,11 @@ class PreparationSystem:
 
         except FileNotFoundError:
             print('Failed to open configuration file')
-            return None
+            exit(1)
 
         except ValidationError:
             print('Config validation failed')
-            return None
-
-    def get_configuration(self):
-        configuration = self.validate_configuration()
-        if configuration is None:
             exit(1)
-        return configuration
 
 
 if __name__ == '__main__':
