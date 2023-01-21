@@ -204,6 +204,9 @@ class SegregationSystem:
                 self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                 if not testing_mode:
                     self.segregation_system_config['user_id'] += 1
+                else:
+                    print(f"[!] splitted dataset size: {self.segregation_system_config['collecting_threshold']}")
+                    self.segregation_system_config['collecting_threshold'] += 30
                 self._save_config()
                 collector.retrieve_counter()
 
