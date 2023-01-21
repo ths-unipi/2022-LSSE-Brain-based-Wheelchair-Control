@@ -9,14 +9,28 @@ from src.features_extractor import FeaturesExtractor
 
 
 class PreparationSystem:
+    """
+    Class that controls the execution of the Preparation System calling all the necessary functions to produce
+    the prepared session from the raw one.
+    """
 
     def __init__(self):
-        self._preparation_system_configuration = self.validate_configuration()
+        """
+        Initializes the PreparationSystem class, validates the configuration and sets the instance variables
+        for raw and prepared sessions.
+        """
+        self._preparation_system_configuration = self._validate_configuration()
         print(f'[+] The configuration is valid, {self._preparation_system_configuration["operative_mode"]} mode')
         self._raw_session = None
         self._prepared_session = None
 
     def run(self):
+        """
+        Method that runs all the instructions needed for session preparation.
+        It continuously listens for new raw sessions, processes them, extracts features,
+        prepares the session and sends it to the corresponding endpoint based on the current operating mode.
+        :return: None
+        """
         while True:
             # get received raw session
             self._raw_session = JsonIO.get_instance().get_received_json()
@@ -51,7 +65,11 @@ class PreparationSystem:
                     print(f'[+] prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
     @staticmethod
-    def validate_configuration():
+    def _validate_configuration():
+        """
+        Validates the configuration according to the loaded schema
+        :return: The configuration if it is valid.
+        """
         try:
             # load configuration from file
             with open(os.path.join(os.path.abspath('..'), 'preparation_system_configuration.json')) as f:
@@ -74,6 +92,8 @@ class PreparationSystem:
 
 
 if __name__ == '__main__':
+    # Start the run method on a new Thread
     preparation_thread = Thread(target=PreparationSystem().run, args=())
     preparation_thread.start()
+    # Start the Flask app listener on the port specified
     JsonIO.get_instance().listener("0.0.0.0", "5000")

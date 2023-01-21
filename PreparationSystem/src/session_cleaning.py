@@ -1,13 +1,24 @@
 class SessionCleaning:
 
     def correct_missing_samples(self, headset: list):
+        """
+        Corrects missing samples in the list of headset channels.
+        :param headset: List of EEG channels.
+        :return: None
+        """
         for channel in range(len(headset)):
             # if a sample (a channel) is missing the interpolation is computed
             if not headset[channel]:
-                self.interpolate_list(headset, channel)
+                self._interpolate_list(headset, channel)
 
     @staticmethod
-    def interpolate_list(headset, channel):
+    def _interpolate_list(headset, channel):
+        """
+        Interpolates the specified channel with the adjacent ones
+        :param headset: List of EEG channels.
+        :param channel: The channel to interpolate.
+        :return: None
+        """
         # list of adjacent channels in the EEG headset
         lists_to_use = [channel - 1, channel + 1, channel - 6, channel + 6]
         channel_length = len(headset[0])
@@ -23,6 +34,13 @@ class SessionCleaning:
 
     @staticmethod
     def correct_outliers(headset: list, min_eeg: int, max_eeg: int):
+        """
+        Corrects outliers in the EEG data of the different channels.
+        :param headset: List of EEG channels.
+        :param min_eeg: Minimum EEG value.
+        :param max_eeg: Maximum EEG value.
+        :return: None
+        """
         for channel in headset:
             for i in range(len(channel)):
                 if channel[i] > max_eeg:

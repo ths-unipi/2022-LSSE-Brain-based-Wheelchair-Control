@@ -4,29 +4,53 @@ from scipy.integrate import simps
 
 
 class FeaturesExtractor:
+    """
+    Class that extracts features and prepares the session to be sent.
+    """
 
     def extract_features(self, features: dict, raw_session: dict, prepared_session: dict, operative_mode: str):
-        delta, theta, alpha, beta = self.extract_headset_features(raw_session['headset'], features)
+        """
+        Extracts the relevant features from the raw EEG session data.
+        :param features: Dictionary of features to extract from raw EEG session data.
+        :param raw_session: Raw EEG session data.
+        :param prepared_session: Dictionary to store the prepared session to send.
+        :param operative_mode: Execution or development mode.
+        :return: None
+        """
+        delta, theta, alpha, beta = self._extract_headset_features(raw_session['headset'], features)
         if operative_mode == 'development':
-            self.prepare_session_development(raw_session, prepared_session, delta, theta, alpha, beta)
+            self._prepare_session_development(raw_session, prepared_session, delta, theta, alpha, beta)
         elif operative_mode == 'execution':
-            self.prepare_session_execution(raw_session, prepared_session, delta, theta, alpha, beta, features)
+            self._prepare_session_execution(raw_session, prepared_session, delta, theta, alpha, beta, features)
 
-    def extract_headset_features(self, headset: list, features: dict):
+    def _extract_headset_features(self, headset: list, features: dict):
+        """
+        Extracts the relevant features from the headset data of the raw EEG session data.
+        :param headset: List of channels in the EEG headset.
+        :param features: Dictionary of features to extract from the headset data.
+        :return: Lists of extracted features in the different frequency bands.
+        """
         delta, theta, alpha, beta = [], [], [], []
         for channel in headset:
-            delta.append(self.compute_average_power(channel, features['delta_wave']['start_frequency'],
-                                                    features['delta_wave']['end_frequency']))
-            theta.append(self.compute_average_power(channel, features['theta_wave']['start_frequency'],
-                                                    features['theta_wave']['end_frequency']))
-            alpha.append(self.compute_average_power(channel, features['alpha_wave']['start_frequency'],
-                                                    features['alpha_wave']['end_frequency']))
-            beta.append(self.compute_average_power(channel, features['beta_wave']['start_frequency'],
-                                                   features['beta_wave']['end_frequency']))
+            delta.append(self._compute_average_power(channel, features['delta_wave']['start_frequency'],
+                                                     features['delta_wave']['end_frequency']))
+            theta.append(self._compute_average_power(channel, features['theta_wave']['start_frequency'],
+                                                     features['theta_wave']['end_frequency']))
+            alpha.append(self._compute_average_power(channel, features['alpha_wave']['start_frequency'],
+                                                     features['alpha_wave']['end_frequency']))
+            beta.append(self._compute_average_power(channel, features['beta_wave']['start_frequency'],
+                                                    features['beta_wave']['end_frequency']))
         return delta, theta, alpha, beta
 
     @staticmethod
-    def compute_average_power(headset: list, start_frequency: int, end_frequency: int):
+    def _compute_average_power(headset: list, start_frequency: int, end_frequency: int) -> float:
+        """
+        Computes the average power in a specified frequency range.
+        :param headset: List of voltage data to compute average power on.
+        :param start_frequency: Starting frequency of the range in which to compute the average power in.
+        :param end_frequency: End frequency of the range in which to compute the average power in.
+        :return: Average power in the specified frequency range.
+        """
         sampling_frequency = 250
         window_seconds = 1.25
         # Define window length
@@ -46,8 +70,18 @@ class FeaturesExtractor:
         return simps(psd[intersecting_bands], dx=frequency_resolution)
 
     @staticmethod
-    def prepare_session_development(raw_session: dict, prepared_session: dict, delta: list, theta: list,
-                                    alpha: list, beta: list):
+    def _prepare_session_development(raw_session: dict, prepared_session: dict, delta: list, theta: list,
+                                     alpha: list, beta: list):
+        """
+        Prepares the session (development mode).
+        :param raw_session: Raw session data.
+        :param prepared_session: Dictionary to store the prepared session to be sent.
+        :param delta: Average power on the delta frequency band.
+        :param theta: Average power on the theta frequency band.
+        :param alpha: Average power on the alpha frequency band.
+        :param beta: Average power on the beta frequency band.
+        :return: None
+        """
         prepared_session['uuid'] = raw_session['uuid']
         prepared_session['features'] = {}
         prepared_session['features']['delta'] = delta
@@ -59,8 +93,19 @@ class FeaturesExtractor:
         prepared_session['command_thought'] = raw_session['command_thought']
 
     @staticmethod
-    def prepare_session_execution(raw_session: dict, prepared_session: dict, delta: list, theta: list,
-                                  alpha: list, beta: list, features: dict):
+    def _prepare_session_execution(raw_session: dict, prepared_session: dict, delta: list, theta: list,
+                                   alpha: list, beta: list, features: dict):
+        """
+        Prepares the session (execution mode).
+        :param raw_session: Raw session data.
+        :param prepared_session: Dictionary to store the prepared session to be sent.
+        :param delta: Average power on the delta frequency band.
+        :param theta: Average power on the theta frequency band.
+        :param alpha: Average power on the alpha frequency band.
+        :param beta: Average power on the beta frequency band.
+        :param features: Dictionary that stores the features.
+        :return: None
+        """
         prepared_session['uuid'] = raw_session['UUID']
         # Take the numeric value corresponding to the value of environment in raw session
         environment = features['environment'][raw_session['environment']]
