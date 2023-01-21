@@ -93,7 +93,7 @@ class RawSessionsStore:
 
     def get_record_type(self, record: dict) -> str:
         """
-        Identifies the record type. The possible ones are CALENDAR, LABELS, SETTINGS and CHANNEL.
+        Identifies the record type. The possible ones are calendar, label, environment and channel.
         :param record: record to identify
         :return: type of the record
         """
@@ -127,30 +127,9 @@ class RawSessionsStore:
 
         return True
 
-    def generate_query_parameters(self, record: dict, record_type: str) -> tuple:
-
-        parameters = {
-            'uuid': record['uuid'],
-            'calendar': None,
-            'label': None,
-            'environment': None,
-            'channels': [None] * NUM_CHANNELS
-        }
-
-        if record_type == 'channel':
-            channel = record['channel'] - 1
-            parameters['channels'][channel] = json.dumps(record)
-        else:
-            parameters[record_type] = json.dumps(record)
-
-        values = list(parameters.values())
-        query_parameters = values[0:-1] + values[-1]
-
-        return tuple(query_parameters)
-
-    def row_exists(self, uuid: str) -> bool:
+    def raw_session_exists(self, uuid: str) -> bool:
         """
-        Checks if exists a row in the Data Store
+        Checks if already exists a Raw Session in the Data Store
         :param uuid: string representing the Raw Session to check
         :return: True if the Raw Session exists. False otherwise
         """
@@ -164,7 +143,7 @@ class RawSessionsStore:
                 return False
 
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "row_exists" error [{e}]')
+            print(f'[-] sqlite3 "raw_session_exists" error [{e}]')
             # TODO: check if this return is correct (it can be ambiguous)
             return False
 
@@ -186,25 +165,47 @@ class RawSessionsStore:
             print("[-] Record schema not valid (record discarded)")
             return False
 
-        # Check if the record received belongs to a session already in the database or to a new one
-        if self.row_exists(record['uuid']):
-            # Update
+        # Check if the record received belongs to a session whose synchronization/join is taking place
+        if self.raw_session_exists(record['uuid']):
+            # Update the Raw Session row
             if record_type == 'channel':
                 column_name = record_type + '_' + str(record['channel'])
             else:
                 column_name = record_type
-            query_result = self.update_record(record=record, column_to_set=column_name)
+            query_result = self.update_raw_session(record=record, column_to_set=column_name)
         else:
-            # Insert
-            query_parameters = self.generate_query_parameters(record=record, record_type=record_type)
-            query_result = self.insert_record(parameters=query_parameters)
+            # Insert a new Raw Session row with only one column containing the record received
+            query_parameters = self.generate_insert_parameters(record=record, record_type=record_type)
+            query_result = self.insert_raw_session(parameters=query_parameters)
 
         return query_result
 
-    def insert_record(self, parameters: tuple) -> bool:
+    def generate_insert_parameters(self, record: dict, record_type: str) -> tuple:
         """
-        Inserts a row in the database upon receiving a record belonging to a new session (uuid and last_uuid_received
-        are different)
+        Generates parameters for the insertion of a new Raw Session
+        """
+        parameters = {
+            'uuid': record['uuid'],
+            'calendar': None,
+            'label': None,
+            'environment': None,
+            'channels': [None] * NUM_CHANNELS
+        }
+
+        if record_type == 'channel':
+            channel = record['channel'] - 1
+            parameters['channels'][channel] = json.dumps(record)
+        else:
+            parameters[record_type] = json.dumps(record)
+
+        values = list(parameters.values())
+        query_parameters = values[0:-1] + values[-1]
+
+        return tuple(query_parameters)
+
+    def insert_raw_session(self, parameters: tuple) -> bool:
+        """
+        Inserts a Raw Session in the database upon receiving a record belonging to a new session
         :param parameters: query parameters in order to set the right column
         :return: True if the insert is successful. False otherwise.
         """
@@ -218,16 +219,15 @@ class RawSessionsStore:
             cursor.execute(query, parameters)
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "insert_record" error [{e}]')
+            print(f'[-] sqlite3 "insert_raw_session" error [{e}]')
             return False
 
         return True
 
-    def update_record(self, record: dict, column_to_set: str) -> bool:
+    def update_raw_session(self, record: dict, column_to_set: str) -> bool:
         """
-        Updates a row in the database upon receiving a record belonging to a session already in the database (uuid and
-        last_uuid_received are equal)
-        :param record: dictionary representing the received record to store
+        Updates a Raw Session in the database upon receiving a record belonging to a session already in the database
+        :param record: dictionary representing the received record to store and identifying the Raw Session
         :param column_to_set: column to update
         :return: True if the update is successful. False otherwise.
         """
@@ -237,7 +237,26 @@ class RawSessionsStore:
             cursor.execute(query, (json.dumps(record), record['uuid']))
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "update_record" error [{e}]')
+            print(f'[-] sqlite3 "update_raw_session" error [{e}]')
+            return False
+
+        return True
+
+    def delete_raw_session(self, uuid: str) -> bool:
+        """
+        Deletes a Raw Session from the data store
+        :param uuid: string that represents the primary key of the row to delete form the data store
+        :return: True if the 'delete' is successful. False otherwise.
+        """
+        self.check_connection()
+
+        try:
+            query = 'DELETE FROM raw_session WHERE uuid = ?'
+            cursor = self._conn.cursor()
+            cursor.execute(query, (uuid, ))
+            self._conn.commit()
+        except sqlite3.Error as e:
+            print(f'[-] sqlite3 "delete_raw_session" error [{e}]')
             return False
 
         return True
@@ -287,28 +306,9 @@ class RawSessionsStore:
             print(f'[-] sqlite3 "load_raw_session" error [{e}]')
             return {}
 
-    def delete_raw_session(self, uuid: str) -> bool:
-        """
-        Deletes a Raw Session from the data store
-        :param uuid: string that represents the primary key of the row to delete form the data store
-        :return: True if the 'delete' is successful. False otherwise.
-        """
-        self.check_connection()
-
-        try:
-            query = 'DELETE FROM raw_session WHERE uuid = ?'
-            cursor = self._conn.cursor()
-            cursor.execute(query, (uuid, ))
-            self._conn.commit()
-        except sqlite3.Error as e:
-            print(f'[-] sqlite3 "delete_raw_session" error [{e}]')
-            return False
-
-        return True
-
     def check_required_fields(self, query_result: dict, operative_mode: str) -> bool:
         """
-        Checks if required fields are missing
+        Checks if required fields are missing: calendar, environment and label (only in development mode)
         """
         if operative_mode == 'development':
             for column_name in query_result.keys():

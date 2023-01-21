@@ -79,14 +79,13 @@ class IngestionSystem:
 
         while True:
             # Wait for a new record
-            received_record = JsonIO.get_instance().get_received_record()
+            received_record = JsonIO.get_instance().receive()
 
             # Sending Label to Monitoring System if the system is in Execution Mode
             if operative_mode == 'execution' and 'label' in received_record.keys():
                 sent = JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['monitoring_system_ip'],
                                                   endpoint_port=self.ingestion_system_config['monitoring_system_port'],
                                                   data=received_record)
-                sent = True
                 if sent:
                     current_time = datetime.now().strftime("%H:%M:%S.%f")
                     print(f'({current_time})' + blue(
@@ -144,7 +143,6 @@ class IngestionSystem:
                             sent = JsonIO.get_instance().send(endpoint_ip=preparation_system_ip,
                                                               endpoint_port=preparation_system_port,
                                                               data=raw_session)
-                            sent = True
                             if sent:
                                 current_time = datetime.now().strftime("%H:%M:%S.%f")
                                 print(f'({current_time})' + cyan(

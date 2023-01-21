@@ -32,8 +32,9 @@ def yellow(string):
 
 
 def save_timestamp():
-    df = DataFrame([[time.time()]], columns=['Timestamp'])
-    df.to_csv('timestamp.csv', index=False)
+    t = time.time()
+    df = DataFrame([[t]], columns=['Timestamp'])
+    df.to_csv(f'timestamp-{t}.csv', index=False)
 
 
 def read_dataset():
@@ -111,6 +112,9 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                         save_timestamp()
                         catch_timestamp = False
 
+        # Send a session very X milliseconds
+        time.sleep(0.8)
+
 
 if __name__ == '__main__':
 
@@ -119,7 +123,7 @@ if __name__ == '__main__':
     print(blue(f'Testing mode: {TESTING_MODE}\n'))
 
     dataset_to_send = read_dataset()
-    maximum_dataset_length = len(dataset_to_send[0]['records'])
+    dataset_length = len(dataset_to_send[0]['records'])
 
     if TESTING_MODE:
         j = 0
@@ -127,7 +131,7 @@ if __name__ == '__main__':
         while True:
             current_time = datetime.now().strftime("%H:%M:%S.%f")
             print(f'({current_time})' + cyan(f' Sending Dataset #{j + 1}'))
-            send_dataset(dataset=dataset_to_send, maximum_dataset_length=maximum_dataset_length, dataset_counter=j)
+            send_dataset(dataset=dataset_to_send, maximum_dataset_length=dataset_length, dataset_counter=j)
             j += 1
     else:
-        send_dataset(dataset=dataset_to_send, maximum_dataset_length=maximum_dataset_length, dataset_counter=-1)
+        send_dataset(dataset=dataset_to_send, maximum_dataset_length=dataset_length, dataset_counter=-1)
