@@ -2,6 +2,8 @@ import os
 import sqlite3
 import uuid
 
+from utility.logging import error, trace, success
+
 # labels to integer conversion
 LABEL_TO_INT = {
     'move': 0,
@@ -23,9 +25,9 @@ class LearningSessionStore:
         self._conn = sqlite3.connect(os.path.join(os.path.abspath('..'), 'data', 'learning_session_store.db'))
 
         if self._conn is not None and self._create_table():
-            print('[+] connection to DB established and \'learning_session\' table initialized')
+            trace('Connection to DB established and \'learning_session\' table initialized')
         else:
-            print('[-] failed to initialize learning session store')
+            error('Failed to initialize learning session store')
             exit(1)
 
     def _check_connection(self) -> bool:
@@ -58,7 +60,7 @@ class LearningSessionStore:
                 self._conn.commit()
 
         except sqlite3.Error:
-            print('[-] failed to create table')
+            error('Failed to create table')
             return False
 
         return True
@@ -69,10 +71,10 @@ class LearningSessionStore:
             self._conn.cursor().executemany(query, dataset)
             self._conn.commit()
         except sqlite3.Error:
-            print(f'[-] failed to insert {dataset_name} dataset')
+            error(f'Failed to insert {dataset_name} dataset')
             return False
 
-        print(f'[+] inserted new dataset in the \'{dataset_name}\' table')
+        success(f'Inserted new dataset in the \'{dataset_name}\' table')
         return True
 
     def store_dataset(self, received_dataset: dict) -> bool:
@@ -120,10 +122,10 @@ class LearningSessionStore:
                 self._conn.cursor().execute(query)
                 self._conn.commit()
         except sqlite3.Error:
-            print('[-] failed to empy dataset')
+            error('Failed to empy dataset')
             return False
 
-        print(f'[+] the dataset has been removed from DB')
+        trace(f'The dataset has been removed from DB')
         return True
 
     def get_training_set(self) -> dict:
@@ -162,7 +164,7 @@ class LearningSessionStore:
             cursor.execute(query)
             results.append(cursor.fetchall())
         except sqlite3.Error:
-            print(f'[-] failed to get the training set')
+            error(f'Failed to get datset from DB')
             return None
 
         return results

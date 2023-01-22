@@ -1,5 +1,6 @@
 import os
 from src.mental_command_classifier import MentalCommandClassifier
+from utility.logging import error
 
 
 class TopFiveClassifierEvaluators:
@@ -30,7 +31,7 @@ class TopFiveClassifierEvaluators:
                     uuid_to_remove = self._top_five_classifiers[5]['uuid']
                     os.remove(os.path.join(os.path.abspath('..'), 'data', f'{uuid_to_remove}.sav'))
                 except FileNotFoundError:
-                    print('[-] Serialized Classifier not found')
+                    error('Serialized Classifier not found')
                     exit(1)
 
                 # remove the sixth from the list

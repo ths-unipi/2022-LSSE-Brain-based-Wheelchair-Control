@@ -7,6 +7,7 @@ from jsonschema import validate, ValidationError
 from src.mental_command_classifier import MentalCommandClassifier
 from src.top_five_classifiers_evaluator import TopFiveClassifierEvaluators
 from src.top_five_classifiers_report_generator import TopFiveClassifiersReportGenerator
+from utility.logging import info, trace, error
 
 
 class ValidationController:
@@ -26,7 +27,7 @@ class ValidationController:
             # prepare the combinations of parameters
             number_of_generations, training_parameters_combinations = self._generate_training_parameters_combinations()
             number_of_combinations = len(training_parameters_combinations)
-            print(f'[+] Grid Search with {number_of_combinations} combinations of parameters')
+            info(f'Grid Search with {number_of_combinations} combinations of parameters')
             counter = 0
 
             # grid search
@@ -39,7 +40,7 @@ class ValidationController:
                 top_five_classifiers_evaluator.evaluate_new_classifier(new_classifier=self._mental_command_classifier)
 
                 counter += 1
-                print(f'[+] {round((counter / number_of_combinations) * 100)}% of Grid Search completed')
+                trace(f'{round((counter / number_of_combinations) * 100)}% of Grid Search completed')
 
             # generate the report
             TopFiveClassifiersReportGenerator().generate_report(
@@ -63,7 +64,7 @@ class ValidationController:
             validate(number_of_generations_file, number_of_generations_schema)
             number_of_generations = number_of_generations_file['number_of_generations']
         except ValidationError:
-            print('[-] Number of generations validation failed')
+            error('Number of generations validation failed')
             exit(1)
 
         # compute the possible number of neurons with descending logarithm

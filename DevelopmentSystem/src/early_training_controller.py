@@ -5,6 +5,7 @@ from jsonschema import validate, ValidationError
 from src.early_training_report_generator import EarlyTrainingReportGenerator
 from src.gradient_descent_plot_generator import GradientDescentPlotGenerator
 from src.mental_command_classifier import MentalCommandClassifier
+from utility.logging import info, error, trace
 
 
 class EarlyTrainingController:
@@ -26,7 +27,7 @@ class EarlyTrainingController:
             # train the classifier
             self.mental_command_classifier.train_classifier(training_data=training_dataset['training_data'],
                                                             training_labels=training_dataset['training_labels'])
-            print('[+] Early Training completed')
+            info('Early Training completed')
 
             # generate the report
             training_error = self.mental_command_classifier.get_error(data=training_dataset['training_data'],
@@ -53,7 +54,7 @@ class EarlyTrainingController:
             validate(number_of_generations_file, number_of_generations_schema)
             number_of_generations = number_of_generations_file['number_of_generations']
         except ValidationError:
-            print('[-] Number of generations validation failed')
+            error('Number of generations validation failed')
             exit(1)
 
         # get the average hyperparameters
@@ -62,9 +63,6 @@ class EarlyTrainingController:
 
         # get the sizes of hidden layers with descending lorithmic number of neurons
         hidden_layer_sizes = tuple([math.ceil(average_neurons / (2 ** i)) for i in range(average_layers)])
-        print(f'[+] The Early Training Network has this hidden layer sizes: {hidden_layer_sizes}')
+        trace(f'The Early Training Network has this hidden layer sizes: {hidden_layer_sizes}')
 
         return {'number_of_generations': number_of_generations, 'hidden_layer_sizes': hidden_layer_sizes}
-
-    def _evaluate_early_training_results(self) -> bool:
-        return EarlyTrainingReportGenerator().evaluate_report()

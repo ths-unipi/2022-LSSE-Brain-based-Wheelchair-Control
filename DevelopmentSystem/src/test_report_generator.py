@@ -4,6 +4,8 @@ from random import random
 
 from jsonschema import validate, ValidationError
 
+from utility.logging import trace, error
+
 
 class TestReportGenerator:
 
@@ -32,7 +34,7 @@ class TestReportGenerator:
         # save the report in a JSON file
         with open(self._json_path, "w") as f:
             json.dump(test_report, f, indent=4)
-        print('[+] Test Best Classifier Report exported')
+        trace('Test Best Classifier Report exported')
 
     def evaluate_report(self) -> bool:
         # open report and schema
@@ -45,11 +47,11 @@ class TestReportGenerator:
         try:
             validate(report, report_schema)
         except ValidationError:
-            print('[-] Test Best Classifier Report validation failed')
+            error('Test Best Classifier Report validation failed')
             exit(1)
 
         if report['valid_classifier'] is None:
-            print('[-] valid_classifier parameter can\'t be None')
+            error('\'valid_classifier\' parameter can\'t be None')
             exit(1)
 
         return report['valid_classifier']

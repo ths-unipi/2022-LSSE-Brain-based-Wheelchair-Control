@@ -9,6 +9,7 @@ from src.learning_session_store import LearningSessionStore
 from src.mental_command_classifier import MentalCommandClassifier
 from src.test_controller import TestController
 from src.validation_controller import ValidationController
+from utility.logging import info, error, success, warning
 
 ACCEPTED_OPERATIONAL_MODES = ['waiting_for_dataset', 'early_training', 'check_early_training_report', 'grid_search',
                               'check_top_five_classifiers_report', 'test_best_classifier', 'check_test_report']
@@ -27,7 +28,7 @@ class DevelopmentSystem:
         try:
             validate(self.config, config_schema)
         except ValidationError:
-            print('[-] Config validation failed')
+            error('Config validation failed')
             exit(1)
 
         self.mental_command_classifier = None
@@ -36,10 +37,10 @@ class DevelopmentSystem:
     def run(self) -> None:
         # check if operational mode is valid
         if self.config["operational_mode"] not in ACCEPTED_OPERATIONAL_MODES:
-            print(f'[-] \'{self.config["operational_mode"]}\' isn\'t a valid operational mode')
+            error(f'Invalid operational mode: \'{self.config["operational_mode"]}\'')
             exit(1)
 
-        print(f'[+] Development System started on main thread in \'{self.config["operational_mode"]}\' mode')
+        info(f'Development System started on main thread in \'{self.config["operational_mode"]}\' mode')
 
         # start the rest server in a new thread as daemon
         run_thread = Thread(target=JsonIO.get_instance().listen, args=('0.0.0.0', 5000))
@@ -89,10 +90,10 @@ class DevelopmentSystem:
                 # the early training controller will return the ML Engineer evaluation
                 report_evaluation = EarlyTrainingController().run(operational_mode=self.config['operational_mode'])
                 if report_evaluation is True:
-                    print('[+] The Number of Generations is good, Early Training ended')
+                    success('The Number of Generations is good, Early Training ended')
                     self._change_operational_mode('grid_search')
                 else:
-                    print('[+] The Number of Generations has changed, restart from Early Training')
+                    warning('The Number of Generations has changed, restart from Early Training')
                     self._change_operational_mode('early_training')
 
             # ====================== Grid search =======================
@@ -124,11 +125,11 @@ class DevelopmentSystem:
                 # the validation controller will return the uuid of the best classifier (-1 if there isn't)
                 best_classifier_uuid = ValidationController().run(operational_mode=self.config['operational_mode'])
                 if best_classifier_uuid == -1:
-                    print('[+] No valid Best Classifier found, restart from Early Training with new Number of '
-                          'Generations')
+                    warning('No valid Best Classifier found, restart from Early Training with new Number of '
+                            'Generations')
                     self._change_operational_mode('early_training')
                 else:
-                    print(f'[+] Best Classifier found with UUID:({best_classifier_uuid}), Validation Phase ended')
+                    success(f'Best Classifier found with UUID:{best_classifier_uuid}, Validation Phase ended')
                     self._change_operational_mode('test_best_classifier')
 
                     # rename classifier on disk (for easier recovery in the future)
@@ -181,10 +182,10 @@ class DevelopmentSystem:
                 self.mental_command_classifier = MentalCommandClassifier(file_name='best_classifier.sav')
 
                 # the test controller will return the ML Engineer evaluation
-                report_evaluation = TestController(mental_command_classifier=self.mental_command_classifier)\
+                report_evaluation = TestController(mental_command_classifier=self.mental_command_classifier) \
                     .run(operational_mode=self.config['operational_mode'])
                 if report_evaluation is True:
-                    print('[+] The Best Classifier is valid, can be sent to Execution System')
+                    info('The Best Classifier is valid, can be sent to Execution System')
 
                     # send serialized classifier to execution system
                     serialized_classifier = self.mental_command_classifier.serialize()
@@ -195,7 +196,7 @@ class DevelopmentSystem:
                     # restart workflow
                     self._change_operational_mode('waiting_for_dataset')
                 else:
-                    print('[+] The Best Classifier isn\'t valid, Reconfiguration of the Systems are needed')
+                    warning('The Best Classifier isn\'t valid, Reconfiguration of the Systems are needed')
                     self._change_operational_mode('waiting_for_dataset')
 
         # close all threads
@@ -208,7 +209,7 @@ class DevelopmentSystem:
         with open(os.path.join(os.path.abspath('..'), 'development_system_config.json'), "w") as f:
             json.dump(self.config, f, indent=4)
 
-        print(f'[+] Switch to \'{new_mode}\' operational mode')
+        info(f'Switch to \'{new_mode}\' operational mode')
 
     def _remove_serialized_classifiers(self) -> None:
         path = os.path.join(os.path.abspath('..'), 'data')

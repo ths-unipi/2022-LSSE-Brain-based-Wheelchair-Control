@@ -1,8 +1,11 @@
 import queue
 from threading import Thread
+
 from flask import Flask, request
-from requests import post
+from requests import post, exceptions
 import logging
+
+from utility.logging import trace, success, error, info
 
 
 class JsonIO:
@@ -15,27 +18,27 @@ class JsonIO:
 
     def receive(self, learning_session_set: dict) -> None:
         self._queue.put(learning_session_set, block=True)
-        print('[+] New Dataset received')
+        trace('New Dataset received')
 
     def send(self, ip_endpoint: str, port_endpoint: int, classifier: dict) -> bool:
         url = f'http://{ip_endpoint}:{port_endpoint}/json'
-        print(f'[+] send to: {url}')
+        trace(f'Send Classifier to: {url}')
 
         try:
             response = post(url=url, json=classifier)
-        except ConnectionError:
-            print('[-] execution system unreachable')
+        except exceptions.RequestException:
+            error('Execution System unreachable')
             exit(1)
 
         if response.status_code != 200:
-            print(f'[-] Failed to send Classifier\n\t-> Response Code: {response.status_code}')
+            error(f'Failed to send Classifier\n\t-> Response Code: {response.status_code}')
             return False
 
-        print(f'[+] Classifier sent to Execution System')
+        success(f'Classifier sent to Execution System')
         return True
 
     def listen(self, ip: str, port: int) -> None:
-        print('[+] Start Rest Server thread')
+        info('Start Rest Server thread')
         self._app.run(host=ip, port=port, debug=False)
 
     def get_app(self) -> Flask:

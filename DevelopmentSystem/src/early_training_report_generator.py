@@ -4,6 +4,8 @@ from random import random
 
 from jsonschema import validate, ValidationError
 
+from utility.logging import trace, error
+
 
 class EarlyTrainingReportGenerator:
 
@@ -29,7 +31,7 @@ class EarlyTrainingReportGenerator:
         # save the report in a JSON file
         with open(self.json_path, "w") as f:
             json.dump(early_training_report, f, indent=4)
-        print('[+] Early Training Report exported')
+        trace('Early Training Report exported')
 
     def evaluate_report(self) -> bool:
         # open report and schema
@@ -42,11 +44,11 @@ class EarlyTrainingReportGenerator:
         try:
             validate(report, report_schema)
         except ValidationError:
-            print('[-] Early Training Report validation failed')
+            error('Early Training Report validation failed')
             exit(1)
 
         if report['valid_generations'] is None:
-            print('[-] valid_generations parameter can\'t be None')
+            error('Valid_generations parameter can\'t be None')
             exit(1)
 
         return report['valid_generations']

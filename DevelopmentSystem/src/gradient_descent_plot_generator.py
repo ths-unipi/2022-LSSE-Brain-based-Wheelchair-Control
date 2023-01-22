@@ -1,6 +1,8 @@
 import os
 from matplotlib import pyplot as plt
 
+from utility.logging import trace
+
 
 class GradientDescentPlotGenerator:
 
@@ -15,7 +17,7 @@ class GradientDescentPlotGenerator:
 
         # save plot as PNG
         plt.savefig(self._image_path, dpi=300)
-        print('[+] Gradient Descent Plot exported')
+        trace('Gradient Descent Plot exported')
 
         # show the plot
         # plt.show()

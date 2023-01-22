@@ -4,6 +4,8 @@ from random import random, choice
 
 from jsonschema import validate, ValidationError
 
+from utility.logging import trace, error
+
 
 class TopFiveClassifiersReportGenerator:
 
@@ -21,7 +23,7 @@ class TopFiveClassifiersReportGenerator:
         # save the report in a JSON file
         with open(self._json_path, "w") as f:
             json.dump(top_five_classifiers, f, indent=4)
-        print('[+] Top Five Classifiers Report exported')
+        trace('Top Five Classifiers Report exported')
 
     def evaluate_report(self) -> int:
         # open report and schema
@@ -34,7 +36,7 @@ class TopFiveClassifiersReportGenerator:
         try:
             validate(report, report_schema)
         except ValidationError:
-            print('[-] Top Five Classifiers Report validation failed')
+            error('Top Five Classifiers Report validation failed')
             exit(1)
 
         best_classifier_uuid = -1       # it will contain the uuid of the best classifier (-1 if there isn't)
@@ -48,7 +50,7 @@ class TopFiveClassifiersReportGenerator:
 
         # check if more than one classifier is marked as best
         if actual_best_counter > 1:
-            print('[-] Only one classifier can be marked as \'actual_best\'')
+            error('Only one classifier can be marked as \'actual_best\'')
             exit(1)
 
         return best_classifier_uuid
