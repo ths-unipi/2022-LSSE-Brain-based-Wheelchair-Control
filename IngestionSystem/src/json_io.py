@@ -44,7 +44,7 @@ class JsonIO:
         """
         try:
             self.received_records_queue.put(received_record, timeout=None)
-            if 300 < self.received_records_queue.qsize() < 350:
+            if 1000 <= self.received_records_queue.qsize() <= 1100:
                 print(f'[!] Record queue size: {self.received_records_queue.qsize()}')
         except queue.Full:
             print('Full queue exception')

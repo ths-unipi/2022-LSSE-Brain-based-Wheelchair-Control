@@ -306,21 +306,6 @@ class RawSessionsStore:
             print(f'[-] sqlite3 "load_raw_session" error [{e}]')
             return {}
 
-    def check_required_fields(self, query_result: dict, operative_mode: str) -> bool:
-        """
-        Checks if required fields are missing: calendar, environment and label (only in development mode)
-        """
-        if operative_mode == 'development':
-            for column_name in query_result.keys():
-                if query_result.get(column_name) is None:
-                    return False
-        else:
-            # In execution mode the 'label' is not required
-            for column_name in query_result.keys():
-                if query_result.get(column_name) is None and column_name != 'label':
-                    return False
-        return True
-
     def is_session_complete(self, uuid: str, operative_mode: str, last_missing_sample: bool) -> bool:
         """
         Checks if the synchronization and building of the Raw Session has been completed meaning there are no more
@@ -333,31 +318,36 @@ class RawSessionsStore:
         self.check_connection()
 
         try:
-            query = 'SELECT * FROM raw_session WHERE uuid = ?'
-            cursor = self._conn.cursor()
-            cursor.execute(query, (uuid, ))
-            self._conn.commit()
-
-            # Fetch raw session from the data store
-            result = cursor.fetchone()
-
             if last_missing_sample:
                 # Since last_missing_samples is True it means that there will be no more records related to this session
                 # So the task to check if the session is good or not is shifted to the RawSessionIntegrity class
                 # Here the only important thing is to check if the required fields are not missing
-                column_names = [description[0] for description in cursor.description][0:len(RECORD_TYPE)]
-                # res contains only the following (required) fields: ['calendar, 'label', 'environment']
-                res = dict(zip(column_names, result[0:len(RECORD_TYPE)]))
-                return self.check_required_fields(query_result=res, operative_mode=operative_mode)
+                query = 'SELECT COUNT(1) FROM raw_session WHERE uuid = ? ' \
+                        + 'AND calendar IS NOT NULL AND environment IS NOT NULL ' \
+                        + ('AND label IS NOT NULL' if operative_mode == 'development' else '')
             else:
                 # The session is still in the synchronization/building phase,
                 # So it is necessary to check all the possible fields (except for the labels during the execution mode)
-                # If all the records exist, the session can be labeled as 'fully complete'
-                column_names = [description[0] for description in cursor.description]
-                # res has all the possible fields: ['calendar, 'label', 'environment', 'channel_1', etc..]
-                res = dict(zip(column_names, result))
-                return self.check_required_fields(query_result=res, operative_mode=operative_mode)
+                # If all the records are not null, the session can be labeled as 'fully complete'
+                channel_columns = str()
+                for i in range(1, NUM_CHANNELS + 1):
+                    channel_columns += 'AND ' + RECORD_TYPE[3] + '_' + str(i) + ' IS NOT NULL '
+
+                query = 'SELECT COUNT(1) FROM raw_session WHERE uuid = ? ' \
+                        + 'AND calendar IS NOT NULL AND environment IS NOT NULL ' \
+                        + ('AND label IS NOT NULL ' if operative_mode == 'development' else ' ') \
+                        + channel_columns
+
+            cursor = self._conn.cursor()
+            cursor.execute(query, (uuid, ))
+            self._conn.commit()
+
+            result = cursor.fetchone()
+            if result[0] == 0:
+                return False
 
         except sqlite3.Error as e:
             print(f'[-] sqlite3 "is_session_complete" error [{e}]')
             return False
+
+        return True

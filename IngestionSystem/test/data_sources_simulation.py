@@ -1,6 +1,6 @@
 import os
 import random
-import time
+from time import time, sleep
 from datetime import datetime
 
 from pandas import read_csv, DataFrame
@@ -32,7 +32,7 @@ def yellow(string):
 
 
 def save_timestamp():
-    t = time.time()
+    t = time()
     df = DataFrame([[t]], columns=['Timestamp'])
     df.to_csv(f'timestamp-{t}.csv', index=False)
 
@@ -102,7 +102,7 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
             else:
                 record = dataset[i]['records'].loc[session_index].to_dict()
 
-                if random.random() < 0.01:
+                if random.random() < 0.1:
                     print(f'({record["uuid"]})' + yellow(f' Generating a missing sample [{dataset[i]["name"]}]'))
                 else:
                     print(f'({record["uuid"]})' + blue(f' Sending {dataset[i]["name"]} data'))
@@ -113,7 +113,7 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                         catch_timestamp = False
 
         # Send a session very X milliseconds
-        time.sleep(0.8)
+        sleep(0.1)
 
 
 if __name__ == '__main__':
@@ -131,6 +131,12 @@ if __name__ == '__main__':
         while True:
             current_time = datetime.now().strftime("%H:%M:%S.%f")
             print(f'({current_time})' + cyan(f' Sending Dataset #{j + 1}'))
+
+            # In order to flush the queue at the Ingestion System it is necessary wait some minutes every 3 dataset
+            if j == 3:
+                print('Waiting...')
+                sleep(300)
+
             send_dataset(dataset=dataset_to_send, maximum_dataset_length=dataset_length, dataset_counter=j)
             j += 1
     else:
