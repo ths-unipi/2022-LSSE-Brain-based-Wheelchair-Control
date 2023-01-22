@@ -1,6 +1,7 @@
 from flask import Flask, request
-from requests import post
+from requests import post, exceptions
 import queue
+import utility.logging as log
 
 
 class JsonIO:
@@ -37,14 +38,19 @@ class JsonIO:
 
     def send(self, ip, port, data):
         connection_string = f'http://{ip}:{port}/json'
-        response = post(connection_string, json=data)
+        response = None
+        try:
+            response = post(connection_string, json=data)
+        except exceptions.RequestException:
+            log.error("Endpoint system unreachable")
+            return False
 
         if response.status_code != 200:
             res = response.json()
             error_message = 'unknown'
             if 'error' in res:
                 error_message = res['error']
-            print(f'[-] Sending Error: {error_message}')
+            log.error(f'Sending Error: {error_message}')
             return False
 
         return True

@@ -2,7 +2,7 @@ import sqlite3
 import os
 import json
 from jsonschema import validate, ValidationError
-
+import utility.logging as log
 
 class PreparedSessionCollector:
 
@@ -13,12 +13,12 @@ class PreparedSessionCollector:
         db_name = config['db_name']
         db_path = os.path.join(os.path.abspath('..'), 'data', db_name)
         if not os.path.exists(db_path):
-            print("[-] Sqlite db doesn't exist")
+            log.error("Sqlite db doesn't exist")
             exit(1)
         try:
             self._conn = sqlite3.connect(db_path)
         except sqlite3.Error as e:
-            print(f'[-] Sqlite Connection Error [{e}]')
+            log.error(f'[-] Sqlite Connection Error [{e}]')
             exit(1)
 
     def _validate_prepared_session(self, p_session):
@@ -32,11 +32,11 @@ class PreparedSessionCollector:
             validate(p_session, p_session_schema)
 
         except FileNotFoundError:
-            print(f'[-] Failure to open p_session_schema.json')
+            log.error('Failure to open p_session_schema.json')
             return False
 
         except ValidationError:
-            print('[-] Prepared Session validation failed')
+            log.error('Prepared Session validation failed')
             return False
 
         return True
@@ -51,7 +51,7 @@ class PreparedSessionCollector:
         try:
             cursor.execute(query, (user_id,))
         except sqlite3.Error as e:
-            print(f'[-] Sqlite Execution Error [{e}]')
+            log.error(f'Sqlite Execution Error [{e}]')
             return None
 
         # use the last session_id user to set the prepared_session_counter
@@ -84,7 +84,7 @@ class PreparedSessionCollector:
         try:
             cursor.execute(query, (user_id, dataset_size))
         except sqlite3.Error as e:
-            print(f'[-] Sqlite Execution Error [{e}]')
+            log.error(f'Sqlite Execution Error [{e}]')
             return None
 
         res = cursor.fetchall()
@@ -101,7 +101,7 @@ class PreparedSessionCollector:
 
         # all prepared sessions have to be validate before store them
         if not self._validate_prepared_session(p_session):
-            print("[-] Invalid data")
+            log.error("Invalid data")
             return False
 
         # assign an user_id and session_id to a prepared_session in order to
@@ -118,8 +118,8 @@ class PreparedSessionCollector:
             cursor.execute(query, (user_id, session_id, json.dumps(p_session)))
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f"[-] Sqlite Execution Error [{e}]")
+            log.error(f"[-] Sqlite Execution Error [{e}]")
             return False
 
-        print(f"[+] Stored new prepared session (user_id: {user_id} session_id: {session_id})")
+        log.success(f"stored new prepared session (user_id: {user_id} session_id: {session_id})")
         return True

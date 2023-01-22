@@ -1,5 +1,6 @@
 from sklearn.model_selection import train_test_split
 import math
+import utility.logging as log
 
 
 class LearningSessionSetSplitter:
@@ -24,7 +25,7 @@ class LearningSessionSetSplitter:
         else:
             validation, testing = train_test_split(res, train_size=validation_size)
 
-        print(f"training_size: {len(training)} validation_size: {len(validation)} testing_size: {len(testing)}")
+        log.info(f"training_size: {len(training)} validation_size: {len(validation)} testing_size: {len(testing)}")
 
         # return the final dataset composed by the splitted dataset
         return {'training': training, 'validation': validation, 'testing': testing}

@@ -7,6 +7,7 @@ from src.balance_bar_chart_report_generator import BalanceBarChartReportGenerato
 from src.radar_diagram_quality_report_generator import RadarDiagramQualityReportGenerator
 from src.learning_session_set_splitter import LearningSessionSetSplitter
 from threading import Thread
+import utility.logging as log
 
 
 class SegregationSystem:
@@ -28,13 +29,13 @@ class SegregationSystem:
             validate(segregation_system_config, segregation_system_config_schema)
 
         except FileNotFoundError:
-            print(f'[-] Failed to open segregation_system_config.json')
-            print('[!] Shutdown')
+            log.error('Failed to open segregation_system_config.json')
+            log.warning('Shutdown')
             exit(1)
 
         except ValidationError:
-            print('[-] Config validation failed')
-            print('[!] Shutdown')
+            log.error('Config validation failed')
+            log.warning('Shutdown')
             exit(1)
 
         self.segregation_system_config = segregation_system_config
@@ -45,7 +46,7 @@ class SegregationSystem:
             with open(config_path, "w") as file:
                 json.dump(self.segregation_system_config, file, indent=4)
         except:
-            print('[-] Failure to save segregation_system_config.json')
+            log.error('Failure to save segregation_system_config.json')
             return False
         return True
 
@@ -64,12 +65,12 @@ class SegregationSystem:
 
         # set the testing mode
         testing_mode = self.segregation_system_config['testing_mode']
-        print(f"[!] Testing mode: {testing_mode}")
+        log.info(f"Testing mode: {testing_mode}")
 
         while True:
             op_mode = self.segregation_system_config['operative_mode']
 
-            print(f"[!] Mode: {op_mode}")
+            log.info(f"Mode: {op_mode}")
 
             # --------------- COLLECTING OP MODE -------------------
 
@@ -77,7 +78,7 @@ class SegregationSystem:
 
                 received_json = JsonIO.get_instance().receive()
 
-                print(f"[+] Received Json: {received_json}")
+                log.info(f"Received Json: {received_json}")
 
                 if collector.store_prepared_session(received_json):
                     collector.increment_prepared_session_counter()
@@ -97,7 +98,7 @@ class SegregationSystem:
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
-                    print("[-] Load database error")
+                    log.error("Load database error")
                     continue
 
                 b_generator = BalanceBarChartReportGenerator()
@@ -111,7 +112,7 @@ class SegregationSystem:
                 # if the system is in the testing mode, it must not shut down it because the humen evaluation
                 # has been simulated
                 if not self.segregation_system_config['testing_mode']:
-                    print('[!] Shutdown')
+                    log.warning('Shutdown')
                     exit(0)
                 else:
                     continue
@@ -138,12 +139,12 @@ class SegregationSystem:
                 else:
                     # if the balance bar char evaluation hasn't been done yet, the system shuts down because the human
                     # has to make it
-                    print('[!] Shutdown')
+                    log.warning('Shutdown')
                     exit(0)
 
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
-                    print("[-] Load database error")
+                    log.error("Load database error")
                     continue
 
                 q_generator = RadarDiagramQualityReportGenerator()
@@ -156,7 +157,7 @@ class SegregationSystem:
                 # if the system is in the testing mode, it must not shut down it because the humen evaluation
                 # has been simulated
                 if not self.segregation_system_config['testing_mode']:
-                    print('[!] Shutdown')
+                    log.warning('Shutdown')
                     exit(0)
                 else:
                     continue
@@ -183,21 +184,21 @@ class SegregationSystem:
                 else:
                     # if the radar diagram evaluation hasn't been done yet, the system shuts down because the human
                     # has to make it
-                    print('[!] Shutdown')
+                    log.warning('Shutdown')
                     exit(0)
 
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()
                 splitted_dataset = splitter.generate_training_validation_testing_set(dataset)
-                # print(splitted_dataset)
+                # log.info(splitted_dataset)
 
                 ip = self.segregation_system_config['endpoint_ip']
                 port = self.segregation_system_config['endpoint_port']
 
                 if JsonIO.get_instance().send(ip, port, splitted_dataset):
-                    print("[+] Splitted dataset successfully sent")
+                    log.success("Splitted dataset successfully sent")
                 else:
-                    print("[-] Sending splitted dataset failed")
+                    log.error("Sending splitted dataset failed")
 
                 # the dataset is evaluated and sent, so it's possible continue collecting new data
                 # and build a new dataset (new user_id)
@@ -205,14 +206,14 @@ class SegregationSystem:
                 if not testing_mode:
                     self.segregation_system_config['user_id'] += 1
                 else:
-                    print(f"[!] splitted dataset size: {self.segregation_system_config['collecting_threshold']}")
+                    log.info(f"splitted dataset size: {self.segregation_system_config['collecting_threshold']}")
                     self.segregation_system_config['collecting_threshold'] += 30
                 self._save_config()
                 collector.retrieve_counter()
 
             else:
-                print('[-] Invalid operative mode')
-                print('[!] Shutdown')
+                log.error('Invalid operative mode')
+                log.warning('Shutdown')
                 exit(1)
 
 

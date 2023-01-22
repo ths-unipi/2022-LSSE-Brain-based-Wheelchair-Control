@@ -3,6 +3,7 @@ import json
 from jsonschema import validate, ValidationError
 import matplotlib.pyplot as plt
 import random
+import utility.logging as log
 
 
 class BalanceBarChartReportGenerator:
@@ -48,10 +49,10 @@ class BalanceBarChartReportGenerator:
         try:
             plt.savefig(chart_path)
         except:
-            print('[-] Failure to save the balance bar chart')
+            log.error('Failure to save the balance bar chart')
             return None
 
-        print('[+] Balance bar chart generated')
+        log.success('Balance bar chart generated')
         return info
 
     def generate_balancing_report(self, info, testing_mode):
@@ -72,10 +73,10 @@ class BalanceBarChartReportGenerator:
             with open(report_path, "w") as file:
                 json.dump(info, file, indent=4)
         except:
-            print(f'[-] Failure to save balancing_report.json')
+            log.error('Failure to save balancing_report.json')
             return False
 
-        print('[+] Balancing report generated')
+        log.success('Balancing report generated')
         return True
 
     def check_balancing_evaluation_from_report(self):
@@ -94,22 +95,22 @@ class BalanceBarChartReportGenerator:
             validate(report, report_schema)
 
         except FileNotFoundError:
-            print(f'[-] Failure to open balancing_report.json')
+            log.error('Failure to open balancing_report.json')
             return -2
 
         except ValidationError:
-            print('[-] Balancing Report has invalid schema')
+            log.error('Balancing Report has invalid schema')
             return -2
 
         # get the evaluation from loaded report
         evaluation = report['evaluation']
 
         if evaluation == 'not balanced':
-            print("[-] Balancing evaluation: Dataset not balanced")
+            log.warning("Balancing evaluation: Dataset not balanced")
             return -1
         elif evaluation == 'balanced':
-            print("[+] Balancing evaluation: Dataset balanced")
+            log.warning("Balancing evaluation: Dataset balanced")
             return 0
         else:
-            print("[!] Balancing evaluation not done")
+            log.warning("Balancing evaluation not done")
             return -2

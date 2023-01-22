@@ -5,7 +5,7 @@ import json
 from jsonschema import validate, ValidationError
 import random
 from PIL import Image
-
+import utility.logging as log
 
 class RadarDiagramQualityReportGenerator:
 
@@ -41,9 +41,9 @@ class RadarDiagramQualityReportGenerator:
             try:
                 pio.write_image(fig, file_path)
             except:
-                print(f'[-] Failure to save {file_name}')
+                log.error(f'Failure to save {file_name}')
                 return False
-            print(f'[+] {title} generated')
+            log.success(f'{title} generated')
 
             i += 1
 
@@ -86,7 +86,7 @@ class RadarDiagramQualityReportGenerator:
             with open(report_path, "w") as file:
                 json.dump(info, file, indent=4)
         except:
-            print("[-] Failure to save quality_report.json")
+            log.error("Failure to save quality_report.json")
             return False
         return True
 
@@ -106,22 +106,22 @@ class RadarDiagramQualityReportGenerator:
             validate(report, report_schema)
 
         except FileNotFoundError:
-            print(f'[-] Failure to open quality_report.json')
+            log.error('Failure to open quality_report.json')
             return -2
 
         except ValidationError:
-            print('[-] Quality Report has invalid schema')
+            log.error('Quality Report has invalid schema')
             return -2
 
         # get the evaluation from the loaded report
         evaluation = report['evaluation']
 
         if evaluation == 'bad quality':
-            print("[-] Quality evaluation: Dataset bad quality")
+            log.warning("Quality evaluation: Dataset bad quality")
             return -1
         elif evaluation == 'good quality':
-            print("[+] Quality evaluation: Dataset good quality")
+            log.warning("Quality evaluation: Dataset good quality")
             return 0
         else:
-            print("[!] Quality evaluation non done")
+            log.warning("[!] Quality evaluation non done")
             return -2
