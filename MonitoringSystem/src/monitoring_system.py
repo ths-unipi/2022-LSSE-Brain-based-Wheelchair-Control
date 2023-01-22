@@ -31,6 +31,10 @@ class MonitoringSystem:
             print("[-] File not found: ", err)
 
     def _validate_schema(self, file_to_validate, schema_path):
+        """
+        Takes as parameters a dict and a json schema path. It try to validate the json according to the schema.
+        If is not validated, it raise an exception with a ValidationError.
+        """
         try:
             with open(schema_path) as f:
                 _schema = json.load(f)
@@ -70,7 +74,7 @@ class MonitoringSystem:
                 _increment = False
 
             # check if the threshold is exceeded, if yes generate the report
-            _threshold_exceeded = _collecting_phase.check_labels_thresold()
+            _threshold_exceeded = _collecting_phase.check_labels_threshold()
             if _threshold_exceeded is True:
                 # -------------- GENERATE ACCURACY REPORT --------------#
                 # load all labels

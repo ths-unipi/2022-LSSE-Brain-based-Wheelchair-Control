@@ -11,7 +11,7 @@ class CollectingPhase:
         print("[+] CollectingPhase - Labels counter set to 0, to produce a new Accuracy Report")
         self.counter_session_labels = 0
 
-    def check_labels_thresold(self):
+    def check_labels_threshold(self):
         if self.counter_session_labels < self.labels_threshold:
             return False
         else:

@@ -68,10 +68,10 @@ class LabelsStore:
                 print("[-] LabelsStore - Row already full")
 
     def _check_if_row_exists(self, query, cursor, _uuid):
-        '''
+        """
         Method used in store_label()
         return True if the uuid is already in the DB, False Otherwise
-        '''
+        """
         try:
             cursor.execute(query, (_uuid,))
         except sqlite3.Error as err:
@@ -84,10 +84,10 @@ class LabelsStore:
             return True
 
     def _find_empty_column(self, query, cursor, _uuid):
-        '''
+        """
         Method used in store_label().
         Return the column of a specific row where there is a NULL value
-        '''
+        """
         try:
             cursor.execute(query, (_uuid,))
         except sqlite3.Error as err:
@@ -97,10 +97,10 @@ class LabelsStore:
         return res
 
     def _insert_label(self, query, cursor, _uuid, _label):
-        '''
+        """
         Method used in store_label()
         Update the row by inserting the received label
-        '''
+        """
         try:
             cursor.execute(query, (_label, _uuid))
 
@@ -112,10 +112,10 @@ class LabelsStore:
         self._conn.commit()
 
     def _create_new_row(self, query, cursor, _uuid, _label):
-        '''
+        """
         method used in store_label().
         Create a new row with the received uuid and label
-        '''
+        """
         try:
             cursor.execute(query, (_uuid, _label))
 
@@ -128,7 +128,10 @@ class LabelsStore:
 
     # ==================== LOAD SESSION LABELS ====================#
     def load_labels(self):
-
+        """
+        Takes from the DB all the rows with no null values and return the values of the
+        columns label1 and label2 into a list
+        """
         if not self._open_connection():
             return None
 

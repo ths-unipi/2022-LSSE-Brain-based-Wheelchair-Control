@@ -11,6 +11,13 @@ class AccuracyReportGenerator:
         pass
 
     def generate_accuracy_report(self, labels, max_errors_tolerated, testing_mode):
+        """
+        Takes as parameters the labels that will be evaluated to produce the accuracy report, max_errrors tolerated
+        and the testing mode.
+        In the accuracy report are written the number of labels evalutaed, max_errors_tolerated, errors, the final
+        accuracy and if the testing mode is true it randomly calculate the expected_accuracy, if it is exceeded
+        the classifier_accepted is Yes, Otherwise is No.
+        """
         #compute evaluated labels
         _evaluated_labels = len(labels)
         _errors = 0
