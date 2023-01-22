@@ -32,6 +32,7 @@ class IngestionSystem:
 
         if self.validate_schema(loaded_json=loaded_config, schema=loaded_schema):
             self.ingestion_system_config = loaded_config
+            self.sessions_to_monitor = loaded_config['monitoring_threshold']
         else:
             error('Error during the Ingestion System initialization phase')
             exit(-1)
@@ -85,30 +86,36 @@ class IngestionSystem:
             received_record = JsonIO.get_instance().receive()
 
             # Sending Label to Monitoring System if the system is in Execution Mode
-            if operative_mode == 'execution' and 'label' in received_record.keys():
-                #sent = JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['monitoring_system_ip'],
-                #                                  endpoint_port=self.ingestion_system_config['monitoring_system_port'],
-                #                                  data=received_record)
-                sent = True
-                if sent:
-                    info(f'Label "{received_record["label"]}" sent to the Monitoring System', 1)
-                continue
+            # if operative_mode == 'execution' and 'label' in received_record.keys():
+            # sent = JsonIO.get_instance().send(endpoint_ip=self.ingestion_system_config['monitoring_system_ip'],
+            #                                  endpoint_port=self.ingestion_system_config['monitoring_system_port'],
+            #                                  data=received_record)
+            #    sent = True
+            #    if sent:
+            #        info(f'Label "{received_record["label"]}" sent to the Monitoring System', 1)
+            #    continue
 
             last_missing_sample = False
             if raw_sessions_store.store_record(record=received_record):
                 if self.last_uuid_received is not None:
+
+                    # Monitoring
+                    monitoring = 0 < self.sessions_to_monitor <= self.ingestion_system_config['monitoring_threshold']
+
                     if self.last_uuid_received == received_record['uuid']:
                         # Check on the current session
                         session_complete = raw_sessions_store.is_session_complete(uuid=received_record['uuid'],
                                                                                   operative_mode=operative_mode,
-                                                                                  last_missing_sample=False)
+                                                                                  last_missing_sample=False,
+                                                                                  monitoring=monitoring)
                         uuid = received_record['uuid']
                     else:
                         # Check on the previous session because of a missing sample
                         warning(f'Raw Session {self.last_uuid_received} missing sample detected')
                         session_complete = raw_sessions_store.is_session_complete(uuid=self.last_uuid_received,
                                                                                   operative_mode=operative_mode,
-                                                                                  last_missing_sample=True)
+                                                                                  last_missing_sample=True,
+                                                                                  monitoring=monitoring)
                         uuid = self.last_uuid_received
                         self.last_uuid_received = received_record['uuid']
                         last_missing_sample = True
@@ -137,17 +144,31 @@ class IngestionSystem:
                             # Send Raw Session to the Preparation System
                             preparation_system_ip = self.ingestion_system_config['preparation_system_ip']
                             preparation_system_port = self.ingestion_system_config['preparation_system_port']
-                            #sent = JsonIO.get_instance().send(endpoint_ip=preparation_system_ip,
+                            # sent_to_prep = JsonIO.get_instance().send(endpoint_ip=preparation_system_ip,
                             #                                  endpoint_port=preparation_system_port,
                             #                                  data=raw_session)
-                            sent = True
-                            if sent:
+                            sent_to_prep = True
+                            if sent_to_prep:
                                 info(f'Raw Session {uuid} sent to the Preparation System', 0)
 
+                            if monitoring:
+                                # Send Raw Session to the Preparation System
+                                monitoring_system_ip = self.ingestion_system_config['monitoring_system_ip']
+                                monitoring_system_port = self.ingestion_system_config['monitoring_system_port']
+                                # sent_to_monit = JsonIO.get_instance().send(endpoint_ip=monitoring_system_ip,
+                                #                                  endpoint_port=monitoring_system_port,
+                                #                                  data={'uuid': raw_session['uuid'], 'label': raw_session['command_thought']})
+                                sent_to_monit = True
+                                if sent_to_monit:
+                                    info(f'Label "{raw_session["command_thought"]}" sent to the Monitoring System', 1)
+                                    self.sessions_to_monitor -= 1
+
+                                print(f'Session to monitor: {self.sessions_to_monitor}')
+
                                 # Testing mode
-                                with open(f'timestamp.csv', 'a', newline='') as csv_file:
-                                    csvwriter = csv.writer(csv_file)
-                                    csvwriter.writerow([uuid, time()])
+                                # with open(f'timestamp.csv', 'a', newline='') as csv_file:
+                                #    csvwriter = csv.writer(csv_file)
+                                #    csvwriter.writerow([uuid, time()])
                         else:
                             error(f'Raw Session {uuid} discarded [threshold not satisfied]')
 
@@ -157,6 +178,7 @@ class IngestionSystem:
                             # Session not complete (meaning that some required record is missing)
                             # Being last_missing_samples equal to True, the system will not receive any other record
                             # related to this session (session is lost) so it must be deleted from the data store
-                            raw_sessions_store.delete_raw_session(uuid=uuid)
+                            # raw_sessions_store.delete_raw_session(uuid=uuid)
+                            self.last_uuid_received = None
                 else:
                     self.last_uuid_received = received_record['uuid']

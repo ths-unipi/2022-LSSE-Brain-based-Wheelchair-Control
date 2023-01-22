@@ -17,6 +17,9 @@
     "monitoring_system_port": {
       "type": "integer"
     },
+      "monitoring_threshold": {
+      "type": "integer"
+    },
     "missing_samples_threshold": {
       "type": "integer"
     }
@@ -27,5 +30,6 @@
     "preparation_system_port",
     "monitoring_system_ip",
     "monitoring_system_port",
+    "monitoring_threshold",
     "missing_samples_threshold"]
 }

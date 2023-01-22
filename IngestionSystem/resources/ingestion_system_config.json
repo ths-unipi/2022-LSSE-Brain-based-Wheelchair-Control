@@ -4,5 +4,6 @@
   "preparation_system_port" : 5000,
   "monitoring_system_ip": "172.16.0.15",
   "monitoring_system_port": 5000,
+  "monitoring_threshold": 2,
   "missing_samples_threshold": 1
 }

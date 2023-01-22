@@ -308,13 +308,14 @@ class RawSessionsStore:
             error(f'sqlite3 "load_raw_session" error [{e}]')
             return {}
 
-    def is_session_complete(self, uuid: str, operative_mode: str, last_missing_sample: bool) -> bool:
+    def is_session_complete(self, uuid: str, operative_mode: str, last_missing_sample: bool, monitoring: bool) -> bool:
         """
         Checks if the synchronization and building of the Raw Session has been completed meaning there are no more
         records related to the session.
         :param last_missing_sample:
         :param uuid: string that identifies the session to check
         :param operative_mode: mode in which the system is working (development or execution)
+        :monitoring
         :return: True if the session is completed. False otherwise.
         """
         self.check_connection()
@@ -326,7 +327,7 @@ class RawSessionsStore:
                 # Here the only important thing is to check if the required fields are not missing
                 query = 'SELECT COUNT(1) FROM raw_session WHERE uuid = ? ' \
                         + 'AND calendar IS NOT NULL AND environment IS NOT NULL ' \
-                        + ('AND label IS NOT NULL' if operative_mode == 'development' else '')
+                        + ('AND label IS NOT NULL' if (operative_mode == 'development' or monitoring) else '')
             else:
                 # The session is still in the synchronization/building phase,
                 # So it is necessary to check all the possible fields (except for the labels during the execution mode)
@@ -337,7 +338,7 @@ class RawSessionsStore:
 
                 query = 'SELECT COUNT(1) FROM raw_session WHERE uuid = ? ' \
                         + 'AND calendar IS NOT NULL AND environment IS NOT NULL ' \
-                        + ('AND label IS NOT NULL ' if operative_mode == 'development' else ' ') \
+                        + ('AND label IS NOT NULL ' if (operative_mode == 'development' or monitoring) else ' ') \
                         + channel_columns
 
             cursor = self._conn.cursor()

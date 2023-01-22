@@ -95,7 +95,7 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
             else:
                 record = dataset[i]['records'].loc[session_index].to_dict()
 
-                if random.random() < 0.1:
+                if random.random() < 0:
                     warning_simulation(record["uuid"], f'Generating a missing sample [{dataset[i]["name"]}]')
                 else:
                     info_simulation(record["uuid"], f'Sending {dataset[i]["name"]} data', 1)
@@ -106,7 +106,7 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                         catch_timestamp = False
 
         # Send a session very X milliseconds
-        sleep(0.3)
+        # sleep(0.3)
 
 
 if __name__ == '__main__':
