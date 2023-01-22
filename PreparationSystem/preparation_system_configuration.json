@@ -1,5 +1,5 @@
 {
-  "operative_mode": "development",
+  "operative_mode": "execution",
   "segregation_endpoint_IP": "172.16.0.12",
   "segregation_endpoint_port": 5000,
   "execution_endpoint_IP": "172.16.0.13",

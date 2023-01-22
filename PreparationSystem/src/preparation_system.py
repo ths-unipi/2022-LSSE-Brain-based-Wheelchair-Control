@@ -32,19 +32,19 @@ class PreparationSystem:
         :return: None
         """
         while True:
-            # get received raw session
+            # Get received raw session
             self._raw_session = JsonIO.get_instance().get_received_json()
             print('[+] raw session received')
 
-            # correct missing samples
+            # Correct missing samples
             SessionCleaning().correct_missing_samples(self._raw_session['headset'])
 
-            # correct outliers
+            # Correct outliers
             SessionCleaning.correct_outliers(self._raw_session['headset'],
                                              self._preparation_system_configuration['min_eeg'],
                                              self._preparation_system_configuration['max_eeg'])
 
-            # extract features and prepare session
+            # Extract features and prepare session
             self._prepared_session = {}
             FeaturesExtractor().extract_features \
                 (self._preparation_system_configuration['features'], self._raw_session, self._prepared_session,
@@ -71,14 +71,14 @@ class PreparationSystem:
         :return: The configuration if it is valid.
         """
         try:
-            # load configuration from file
+            # Load configuration from file
             with open(os.path.join(os.path.abspath('..'), 'preparation_system_configuration.json')) as f:
                 _configuration = json.load(f)
-            # load schema from file
+            # Load schema from file
             with open(os.path.join(os.path.abspath('..'), 'configuration_schema.json')) as f:
                 _configuration_schema = json.load(f)
 
-            # validate configuration schema
+            # Validate configuration schema
             validate(_configuration, _configuration_schema)
             return _configuration
 

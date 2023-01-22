@@ -7,7 +7,7 @@ class SessionCleaning:
         :return: None
         """
         for channel in range(len(headset)):
-            # if a sample (a channel) is missing the interpolation is computed
+            # If a sample (a channel) is missing the interpolation is computed
             if not headset[channel]:
                 self._interpolate_list(headset, channel)
 
@@ -19,7 +19,7 @@ class SessionCleaning:
         :param channel: The channel to interpolate.
         :return: None
         """
-        # list of adjacent channels in the EEG headset
+        # List of adjacent channels in the EEG headset
         lists_to_use = [channel - 1, channel + 1, channel - 6, channel + 6]
         channel_length = len(headset[0])
         for i in range(channel_length):

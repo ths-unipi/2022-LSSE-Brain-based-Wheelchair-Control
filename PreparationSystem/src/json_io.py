@@ -44,7 +44,7 @@ class JsonIO:
         :param received_json: JSON payload received by the server.
         :return: None
         """
-        # if the queue is full the thread is blocked
+        # If the queue is full the thread is blocked
         try:
             self._received_json_queue.put(received_json, timeout=5)
         except queue.Full:

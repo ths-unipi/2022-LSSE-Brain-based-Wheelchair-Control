@@ -55,7 +55,7 @@ class FeaturesExtractor:
         window_seconds = 1.25
         # Define window length
         segment_length = window_seconds * sampling_frequency
-        # segment_length = (2 / start_frequency) * sampling_frequency
+        # Segment_length = (2 / start_frequency) * sampling_frequency
 
         # Compute the modified periodogram (Welch)
         frequencies, psd = welch(headset, sampling_frequency, nperseg=segment_length)
@@ -106,7 +106,7 @@ class FeaturesExtractor:
         :param features: Dictionary that stores the features.
         :return: None
         """
-        prepared_session['uuid'] = raw_session['UUID']
+        prepared_session['uuid'] = raw_session['uuid']
         # Take the numeric value corresponding to the value of environment in raw session
         environment = features['environment'][raw_session['environment']]
         prepared_session['features'] = alpha + beta + delta + theta + [environment]
