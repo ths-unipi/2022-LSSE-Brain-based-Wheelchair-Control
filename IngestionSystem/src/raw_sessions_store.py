@@ -3,6 +3,8 @@ import sqlite3
 import json
 from jsonschema import validate, ValidationError
 
+from utility.logging import error
+
 DB_NAME = 'RawSessionsStore.db'
 RECORD_TYPE = ['calendar', 'label', 'environment', 'channel']
 NUM_CHANNELS = 22
@@ -28,7 +30,7 @@ class RawSessionsStore:
             # print('[+] sqlite3 connection established and raw_session table initialized')
             pass
         else:
-            print('[-] sqlite3 initialize failed')
+            error('sqlite3 initialize failed')
             exit(-1)
 
     def open_connection(self) -> bool:
@@ -40,7 +42,7 @@ class RawSessionsStore:
             self._conn = sqlite3.connect(os.path.join(os.path.abspath('..'), 'data', DB_NAME))
             return True
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 open connection error [{e}]')
+            error(f'sqlite3 open connection error [{e}]')
 
         return False
 
@@ -52,7 +54,7 @@ class RawSessionsStore:
         try:
             self._conn.close()
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 close connection error [{e}]')
+            error(f'sqlite3 close connection error [{e}]')
             exit(-1)
 
     def check_connection(self) -> None:
@@ -61,7 +63,7 @@ class RawSessionsStore:
         It terminates the system if the connection is not set.
         """
         if self._conn is None:
-            print('[-] sqlite3 connection not established')
+            error(f'sqlite3 connection not established')
             exit(-1)
 
     def create_table(self) -> bool:
@@ -86,7 +88,7 @@ class RawSessionsStore:
             self._conn.cursor().execute(query)
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "create_tables" error [{e}]')
+            error(f'sqlite3 "create_tables" error [{e}]')
             return False
 
         return True
@@ -118,11 +120,11 @@ class RawSessionsStore:
                 validate(record, loaded_schema)
 
         except ValidationError:
-            print('[-] Record schema validation failed')
+            error('Record schema validation failed')
             return False
 
         except FileNotFoundError:
-            print(f'[-] Failed to open schema path ({record_type})')
+            error(f'Failed to open schema path ({record_type})')
             exit(-1)
 
         return True
@@ -143,7 +145,7 @@ class RawSessionsStore:
                 return False
 
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "raw_session_exists" error [{e}]')
+            error(f'sqlite3 "raw_session_exists" error [{e}]')
             # TODO: check if this return is correct (it can be ambiguous)
             return False
 
@@ -162,7 +164,7 @@ class RawSessionsStore:
 
         # Record validation
         if not self.validate_schema_record(record, record_type):
-            print("[-] Record schema not valid (record discarded)")
+            error('Record schema not valid (record discarded)')
             return False
 
         # Check if the record received belongs to a session whose synchronization/join is taking place
@@ -219,7 +221,7 @@ class RawSessionsStore:
             cursor.execute(query, parameters)
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "insert_raw_session" error [{e}]')
+            error(f'sqlite3 "insert_raw_session" error [{e}]')
             return False
 
         return True
@@ -237,7 +239,7 @@ class RawSessionsStore:
             cursor.execute(query, (json.dumps(record), record['uuid']))
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "update_raw_session" error [{e}]')
+            error(f'sqlite3 "update_raw_session" error [{e}]')
             return False
 
         return True
@@ -256,7 +258,7 @@ class RawSessionsStore:
             cursor.execute(query, (uuid, ))
             self._conn.commit()
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "delete_raw_session" error [{e}]')
+            error(f'sqlite3 "delete_raw_session" error [{e}]')
             return False
 
         return True
@@ -303,7 +305,7 @@ class RawSessionsStore:
 
             return raw_session
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "load_raw_session" error [{e}]')
+            error(f'sqlite3 "load_raw_session" error [{e}]')
             return {}
 
     def is_session_complete(self, uuid: str, operative_mode: str, last_missing_sample: bool) -> bool:
@@ -347,7 +349,7 @@ class RawSessionsStore:
                 return False
 
         except sqlite3.Error as e:
-            print(f'[-] sqlite3 "is_session_complete" error [{e}]')
+            error(f'sqlite3 "is_session_complete" error [{e}]')
             return False
 
         return True

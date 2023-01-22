@@ -1,3 +1,6 @@
+from utility.logging import warning
+
+
 class RawSessionIntegrity:
 
     def mark_missing_samples(self, headset_eeg: list, threshold: int) -> bool:
@@ -11,8 +14,8 @@ class RawSessionIntegrity:
         missing_samples = 0
         for i in range(0, len(headset_eeg)):
             if not headset_eeg[i]:
-                # print(f'[!] [CHANNEL {i+1}] EEG Data not found')
+                # warning(f'[CHANNEL {i+1}] EEG Data not found')
                 missing_samples += 1
 
-        # print(f'[!] Missing samples detected: {missing_samples}')
+        # warning(f'Missing samples detected: {missing_samples}')
         return missing_samples <= threshold

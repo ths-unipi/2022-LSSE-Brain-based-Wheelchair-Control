@@ -3,8 +3,10 @@ from typing import Any
 
 from flask import Flask, request
 from threading import Thread
-from requests import post
+from requests import post, exceptions
 import queue
+
+from utility.logging import error, trace
 
 
 class JsonIO:
@@ -45,9 +47,9 @@ class JsonIO:
         try:
             self.received_records_queue.put(received_record, timeout=None)
             if 1000 <= self.received_records_queue.qsize() <= 1100:
-                print(f'[!] Record queue size: {self.received_records_queue.qsize()}')
+                trace(f'Record queue size: {self.received_records_queue.qsize()}')
         except queue.Full:
-            print('Full queue exception')
+            error('Full queue exception')
             return False
         return True
 
@@ -66,12 +68,16 @@ class JsonIO:
         :param data: dictionary containing the data to send
         :return: True if the 'send' is successful. False otherwise.
         """
-        connection_string = f'http://{endpoint_ip}:{endpoint_port}/json'
-        response = post(connection_string, json=data)
+        try:
+            connection_string = f'http://{endpoint_ip}:{endpoint_port}/json'
+            response = post(url=connection_string, json=data)
+        except exceptions.RequestException:
+            error(f'{connection_string} unreachable')
+            exit(-1)
 
         if response.status_code != 200:
             error_message = response.json()['error']
-            print(f'[-] Error: {error_message}')
+            error(f'Error: {error_message}')
             return False
         return True
 
