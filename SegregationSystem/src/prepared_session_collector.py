@@ -4,6 +4,7 @@ import json
 from jsonschema import validate, ValidationError
 import utility.logging as log
 
+
 class PreparedSessionCollector:
 
     def __init__(self, config):
@@ -61,6 +62,8 @@ class PreparedSessionCollector:
         else:
             self._prepared_session_counter = res[0] + 1
 
+        log.info(f"user_id: {user_id} counter: {self._prepared_session_counter}")
+
     def increment_prepared_session_counter(self):
         self._prepared_session_counter += 1
 
@@ -68,7 +71,7 @@ class PreparedSessionCollector:
 
         # if the prepared_session_counter it's big enough a learning session set is completed
         threshold = self.segregation_system_config['collecting_threshold']
-        if self._prepared_session_counter > threshold:
+        if self._prepared_session_counter >= threshold:
             self._prepared_session_counter = 0
             return True
         else:

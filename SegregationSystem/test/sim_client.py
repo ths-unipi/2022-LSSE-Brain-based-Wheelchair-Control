@@ -3,7 +3,7 @@ import random
 import json
 
 if __name__ == '__main__':
-    sessions = 1000
+    sessions = 99
     n = 0
     while n < sessions:
 
