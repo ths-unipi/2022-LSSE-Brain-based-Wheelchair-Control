@@ -70,7 +70,7 @@ class SegregationSystem:
         while True:
             op_mode = self.segregation_system_config['operative_mode']
 
-            log.info(f"Mode: {op_mode}")
+            log.info(f"Operative mode: {op_mode}")
 
             # --------------- COLLECTING OP MODE -------------------
 
@@ -106,10 +106,10 @@ class SegregationSystem:
                 # the bar chart info to build the report
                 b_generator.generate_balancing_report(info, (False if testing_mode == "off" else True))
 
-                self.segregation_system_config['operative_mode'] = 'quality_op_mode'
+                self.segregation_system_config['operative_mode'] = 'balancing_evaluation_mode'
                 self._save_config()
 
-                # if the system is in the testing mode, it must not shut down it because the humen evaluation
+                # if the system is in the testing mode, it must not shut down it because the human evaluation
                 # has been simulated
                 if self.segregation_system_config['testing_mode'] == "off":
                     log.warning('Shutdown')
@@ -117,16 +117,18 @@ class SegregationSystem:
                 else:
                     continue
 
-            # ---------------- QUALITY OP MODE -----------------------
+            # ------------ BALANCING EVALUATION MODE -----------------
 
-            elif op_mode == 'quality_op_mode':
+            elif op_mode == 'balancing_evaluation_mode':
 
                 b_generator = BalanceBarChartReportGenerator()
                 res = b_generator.check_balancing_evaluation_from_report()
                 if res == 0:
                     # if the balance bar chart was evaluated with 'balanced', it's possible continue with
                     # the actual dataset
-                    pass
+                    self.segregation_system_config['operative_mode'] = 'quality_op_mode'
+                    self._save_config()
+                    continue
                 elif res == -1:
                     # if the balance bar chart was evaluated with 'not balanced', the dataset is not usable, so
                     # it's necessary a new configuration
@@ -151,6 +153,10 @@ class SegregationSystem:
                     log.warning('Shutdown')
                     exit(0)
 
+            # ---------------- QUALITY OP MODE -----------------------
+
+            elif op_mode == 'quality_op_mode':
+
                 dataset = collector.load_learning_session_set()
                 if dataset is None:
                     log.error("Load database error")
@@ -160,10 +166,10 @@ class SegregationSystem:
                 q_generator.generate_radar_diagram(dataset)
                 q_generator.generate_quality_report(False if testing_mode == "off" else True)
 
-                self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
+                self.segregation_system_config['operative_mode'] = 'quality_evaluation_mode'
                 self._save_config()
 
-                # if the system is in the testing mode, it must not shut down it because the humen evaluation
+                # if the system is in the testing mode, it must not shut down it because the human evaluation
                 # has been simulated
                 if self.segregation_system_config['testing_mode'] == "off":
                     log.warning('Shutdown')
@@ -171,16 +177,18 @@ class SegregationSystem:
                 else:
                     continue
 
-            # ---------------- SPLITTING OP MODE -----------------------
+            # -------------- QUALITY EVALUATION MODE -------------------
 
-            elif op_mode == 'splitting_op_mode':
+            elif op_mode == 'quality_evaluation_mode':
 
                 q_generator = RadarDiagramQualityReportGenerator()
                 res = q_generator.check_quality_evaluation_from_report()
                 if res == 0:
                     # if the radar diagram was evaluated with 'good quality', it's possible continue with
                     # the actual dataset
-                    pass
+                    self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
+                    self._save_config()
+                    continue
                 elif res == -1:
                     # if the radar diagram was evaluated with 'bad quality', the dataset is not usable, so
                     # it's necessary a new configuration
@@ -203,6 +211,10 @@ class SegregationSystem:
                     # has to make it
                     log.warning('Shutdown')
                     exit(0)
+
+            # ---------------- SPLITTING OP MODE -----------------------
+
+            elif op_mode == 'splitting_op_mode':
 
                 splitter = LearningSessionSetSplitter(self.segregation_system_config)
                 dataset = collector.load_learning_session_set()

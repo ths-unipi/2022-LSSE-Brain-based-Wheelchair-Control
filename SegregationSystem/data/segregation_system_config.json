@@ -1,11 +1,11 @@
 {
     "operative_mode": "collecting_op_mode",
-    "user_id": 10,
-    "testing_mode": "incremental",
+    "user_id": 29,
+    "testing_mode": "off",
     "endpoint_ip": "127.0.0.1",
     "endpoint_port": "4000",
     "db_name": "segregation.db",
-    "collecting_threshold": 70,
+    "collecting_threshold": 10,
     "training_set_size": 0.7,
     "validation_set_size": 0.2,
     "testing_set_size": 0.1

@@ -4,7 +4,7 @@
   "properties": {
     "operative_mode": {
       "type": "string",
-      "enum": ["collecting_op_mode", "balancing_op_mode", "quality_op_mode", "splitting_op_mode"]
+      "enum": ["collecting_op_mode", "balancing_op_mode", "balancing_evaluation_mode", "quality_op_mode", "quality_evaluation_mode", "splitting_op_mode"]
     },
     "user_id": {"type": "number"},
     "testing_mode": {
