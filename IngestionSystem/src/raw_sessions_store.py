@@ -315,7 +315,7 @@ class RawSessionsStore:
         :param last_missing_sample:
         :param uuid: string that identifies the session to check
         :param operative_mode: mode in which the system is working (development or execution)
-        :monitoring
+        :param monitoring: boolean that says if the label has to be a required field or not
         :return: True if the session is completed. False otherwise.
         """
         self.check_connection()
