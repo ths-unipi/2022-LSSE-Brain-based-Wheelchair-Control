@@ -199,6 +199,12 @@ class DevelopmentSystem:
                     warning('The Best Classifier isn\'t valid, Reconfiguration of the Systems are needed')
                     self._change_operational_mode('waiting_for_dataset')
 
+                    # if not in testing mode stop, otherwise restart from waiting dataset
+                    if self.config['testing_mode'] is False:
+                        break
+                    else:
+                        continue
+
         # close all threads
         exit(0)
 
