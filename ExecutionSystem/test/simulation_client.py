@@ -1,6 +1,5 @@
 import json
 import os
-import sklearn
 
 from requests import post
 

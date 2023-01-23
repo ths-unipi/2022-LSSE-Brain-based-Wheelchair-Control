@@ -14,7 +14,7 @@ class MonitoringPhase:
 
     def increment_session_counter(self):
         """
-        Increment the counter that represents the number of sessions received
+        Increment the counter that represents the number of sessions received in the only Execution Phase
         :return: None
         """
         self._execution_session_counter += 1
