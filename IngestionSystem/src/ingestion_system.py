@@ -25,13 +25,15 @@ class IngestionSystem:
         Initializes the system
         """
         self.last_uuid_received = None
+        self.monitoring = False
+        self.sessions_to_monitor = 0
+        self.sessions_to_execute = 0
 
         loaded_config = self.load_json(json_filename=CONFIG_FILENAME)
         loaded_schema = self.load_json(json_filename=CONFIG_SCHEMA_FILENAME)
 
         if self.validate_schema(loaded_json=loaded_config, schema=loaded_schema):
             self.ingestion_system_config = loaded_config
-            self.sessions_to_monitor = loaded_config['monitoring_threshold']
         else:
             error('Error during the Ingestion System initialization phase')
             exit(-1)
@@ -87,16 +89,12 @@ class IngestionSystem:
             last_missing_sample = False
             if raw_sessions_store.store_record(record=received_record):
                 if self.last_uuid_received is not None:
-
-                    # Check whether the monitoring system needs labels or not
-                    monitoring = 0 < self.sessions_to_monitor <= self.ingestion_system_config['monitoring_threshold']
-
                     if self.last_uuid_received == received_record['uuid']:
                         # Check on the current session
                         session_complete = raw_sessions_store.is_session_complete(uuid=received_record['uuid'],
                                                                                   operative_mode=operative_mode,
                                                                                   last_missing_sample=False,
-                                                                                  monitoring=monitoring)
+                                                                                  monitoring=self.monitoring)
                         uuid = received_record['uuid']
                     else:
                         # Check on the previous session because of a missing sample
@@ -104,7 +102,7 @@ class IngestionSystem:
                         session_complete = raw_sessions_store.is_session_complete(uuid=self.last_uuid_received,
                                                                                   operative_mode=operative_mode,
                                                                                   last_missing_sample=True,
-                                                                                  monitoring=monitoring)
+                                                                                  monitoring=self.monitoring)
                         uuid = self.last_uuid_received
                         self.last_uuid_received = received_record['uuid']
                         last_missing_sample = True
@@ -140,7 +138,7 @@ class IngestionSystem:
                             if sent_to_preparation:
                                 info(f'Raw Session {uuid} sent to the Preparation System', 0)
 
-                            if monitoring:
+                            if self.monitoring:
                                 # Send Raw Session to the Preparation System
                                 monitoring_system_ip = self.ingestion_system_config['monitoring_system_ip']
                                 monitoring_system_port = self.ingestion_system_config['monitoring_system_port']
@@ -148,17 +146,24 @@ class IngestionSystem:
                                 sent_to_monitoring = JsonIO.get_instance().send(endpoint_ip=monitoring_system_ip,
                                                                                 endpoint_port=monitoring_system_port,
                                                                                 data=label)
-
                                 if sent_to_monitoring:
                                     info(f'Label "{raw_session["command_thought"]}" sent to the Monitoring System', 1)
-                                    self.sessions_to_monitor -= 1
+                                    self.sessions_to_monitor += 1
+                                    trace(f'Labels to sent to the Monitoring System: {self.sessions_to_monitor}')
 
-                                trace(f'Remaining sessions to send to the Monitoring System: {self.sessions_to_monitor}')
+                                    if self.sessions_to_monitor == self.ingestion_system_config['monitoring_window']:
+                                        self.sessions_to_monitor = 0
+                                        self.monitoring = False
+                                        trace(f'Monitoring phase ended')
+                            else:
+                                if self.ingestion_system_config['operative_mode'] == 'execution':
+                                    self.sessions_to_execute += 1
+                                    trace(f'Sessions executed: {self.sessions_to_execute}')
 
-                                # Testing mode
-                                # with open('timestamp.csv', 'a', newline='') as csv_file:
-                                #    csvwriter = csv.writer(csv_file)
-                                #    csvwriter.writerow([uuid, time()])
+                                    if self.sessions_to_execute == self.ingestion_system_config['execution_window']:
+                                        self.monitoring = True
+                                        self.sessions_to_execute = 0
+                                        trace('Entering in monitoring phase')
                         else:
                             error(f'Raw Session {uuid} discarded [threshold not satisfied]')
                     else:

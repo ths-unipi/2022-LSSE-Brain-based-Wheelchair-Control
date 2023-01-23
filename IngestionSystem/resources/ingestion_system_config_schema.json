@@ -17,7 +17,10 @@
     "monitoring_system_port": {
       "type": "integer"
     },
-      "monitoring_threshold": {
+      "execution_window": {
+      "type": "integer"
+    },
+      "monitoring_window": {
       "type": "integer"
     },
     "missing_samples_threshold": {
@@ -30,6 +33,7 @@
     "preparation_system_port",
     "monitoring_system_ip",
     "monitoring_system_port",
-    "monitoring_threshold",
+    "execution_window",
+    "monitoring_window",
     "missing_samples_threshold"]
 }
