@@ -6,10 +6,19 @@ import pickle
 class MentalCommandClassifier:
 
     def __init__(self):
+        """
+        Constructor of the MentalCommandClassifier class.
+        """
         self._prepared_session = None
-        self._mental_command_classifier = None
+        self._best_classifier = None
 
-    def deploy_classifier(self, json_file: dict):
+    def deploy_classifier(self, json_file: dict) -> bool:
+        """
+        Receive a dict object that correspons to the best classifier selected by the DevelopmentSystem and save it on a
+        .json file
+        :param json_file: dict object that corresponds to the best classifier
+        :return: boolean value that represents if the save operation is ended correctly or not.
+        """
         if json_file is None:
             print('No classifier received')
             return False
@@ -24,8 +33,13 @@ class MentalCommandClassifier:
         print("***Execution System***   Deployment completed successfully")
         return True
 
-    def execute_classifier(self, classifier):
-        mlp_classifier = pickle.loads(classifier['classifier'].encode('ISO-8859-1'))
+    def execute_classifier(self) -> int:
+        """
+        Load the best classifier through the 'loads' of the pickle library.
+        Execute the best classifier using the prepare session previously received and produce a final value
+        :return: int value that will correspond to a command for the wheelchair.
+        """
+        mlp_classifier = pickle.loads(self._best_classifier['classifier'].encode('ISO-8859-1'))
         # the final label from the classifier is generated
         session = [self._prepared_session['features']]
         return mlp_classifier.predict(session)

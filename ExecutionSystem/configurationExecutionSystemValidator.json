@@ -5,7 +5,10 @@
     "operating_mode": {
       "type": "string"
     },
-    "threshold_value": {
+    "execution_window_value": {
+      "type": "integer"
+    },
+    "monitoring_window_value": {
       "type": "integer"
     },
     "endpoint_IP": {
@@ -20,7 +23,8 @@
   },
   "required": [
     "operating_mode",
-    "threshold_value",
+    "execution_window_value",
+    "monitoring_window_value",
     "endpoint_IP",
     "endpoint_port",
     "testing"

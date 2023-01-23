@@ -1,7 +1,8 @@
 {
-  "operating_mode": "development",
-  "threshold_value": 30,
+  "operating_mode": "execution",
+  "execution_window_value": 20,
+  "monitoring_window_value": 20,
   "endpoint_IP": "172.16.0.15",
   "endpoint_port": 5000,
-  "testing": true
+  "testing": false
 }
