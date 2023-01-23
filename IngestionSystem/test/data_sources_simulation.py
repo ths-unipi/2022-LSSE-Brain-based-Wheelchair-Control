@@ -114,7 +114,7 @@ class DataSourcesSimulation:
                             self.send_record(data=record)
 
                             # In order to get a timestamp in case of testing mode
-                            if dataset_counter == 0 and catch_timestamp:
+                            if TESTING_MODE and dataset_counter == 0 and catch_timestamp:
                                 save_timestamp()
                                 catch_timestamp = False
                 else:
@@ -127,7 +127,7 @@ class DataSourcesSimulation:
                         self.send_record(data=record)
 
                         # In order to get a timestamp in case of testing mode
-                        if dataset_counter == 0 and catch_timestamp:
+                        if TESTING_MODE and dataset_counter == 0 and catch_timestamp:
                             save_timestamp()
                             catch_timestamp = False
 
@@ -170,7 +170,7 @@ class DataSourcesSimulation:
                             self.send_record(data=record)
 
                             # In order to get a timestamp in case of testing mode
-                            if dataset_counter == 0 and catch_timestamp:
+                            if TESTING_MODE and dataset_counter == 0 and catch_timestamp:
                                 save_timestamp()
                                 catch_timestamp = False
                 else:
@@ -181,7 +181,7 @@ class DataSourcesSimulation:
                             self.send_record(data=record)
 
                             # In order to get a timestamp in case of testing mode
-                            if dataset_counter == 0 and catch_timestamp:
+                            if TESTING_MODE and dataset_counter == 0 and catch_timestamp:
                                 save_timestamp()
                                 catch_timestamp = False
                         else:
@@ -202,7 +202,7 @@ class DataSourcesSimulation:
                             self.send_record(data=record)
 
                             # In order to get a timestamp in case of testing mode
-                            if dataset_counter == 0 and catch_timestamp:
+                            if TESTING_MODE and dataset_counter == 0 and catch_timestamp:
                                 save_timestamp()
                                 catch_timestamp = False
 
@@ -238,13 +238,11 @@ if __name__ == '__main__':
     data_sources_sim = DataSourcesSimulation()
     data_sources_sim.read_dataset()
 
-    if TESTING_MODE:
-        for j in range(0, DATASET_TO_SEND):
-            info_simulation('', f'Sending Dataset #{j + 1}', 0)
+    for j in range(0, DATASET_TO_SEND):
+        info_simulation('', f'Sending Dataset #{j + 1}', 0)
 
-            # In order to flush the queue at the Ingestion System it is necessary wait some minutes every 3 dataset
-            if j == 3:
-                sleep(300)
-            data_sources_sim.send_dataset(dataset_counter=j)
-    else:
-        data_sources_sim.send_dataset(dataset_counter=-1)
+        # In order to flush the queue at the Ingestion System it is necessary wait some minutes every 3 dataset
+        if j == 3:
+            sleep(300)
+
+        data_sources_sim.send_dataset(dataset_counter=j)

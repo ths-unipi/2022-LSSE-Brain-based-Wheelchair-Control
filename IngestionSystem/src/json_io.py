@@ -46,8 +46,8 @@ class JsonIO:
         """
         try:
             self.received_records_queue.put(received_record, timeout=None)
-            if 1000 <= self.received_records_queue.qsize() <= 1100:
-                trace(f'Record queue size: {self.received_records_queue.qsize()}')
+            # if 1000 <= self.received_records_queue.qsize() <= 1100:
+            #    trace(f'Record queue size: {self.received_records_queue.qsize()}')
         except queue.Full:
             error('Full queue exception')
             return False
@@ -68,8 +68,9 @@ class JsonIO:
         :param data: dictionary containing the data to send
         :return: True if the 'send' is successful. False otherwise.
         """
+        connection_string = f'http://{endpoint_ip}:{endpoint_port}/json'
+
         try:
-            connection_string = f'http://{endpoint_ip}:{endpoint_port}/json'
             response = post(url=connection_string, json=data)
         except exceptions.RequestException:
             error(f'{connection_string} unreachable')
@@ -79,6 +80,7 @@ class JsonIO:
             error_message = response.json()['error']
             error(f'Error: {error_message}')
             return False
+
         return True
 
     def listen(self, ip: str, port: int) -> None:
