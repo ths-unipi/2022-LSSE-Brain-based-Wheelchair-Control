@@ -12,8 +12,8 @@ INGESTION_SYSTEM_IP = 'localhost'
 INGESTION_SYSTEM_PORT = 4000
 MISSING_SAMPLES = [9, 10, 11]
 
-TESTING_MODE = False
-DATASET_TO_SEND = 10
+TESTING_MODE = False  # Enables timestamp saving
+DATASET_TO_SEND = 5  # Dataset to test during the testing mode
 
 CONFIG_FILENAME = 'ingestion_system_config.json'
 
@@ -136,9 +136,6 @@ class DataSourcesSimulation:
 
     def execution_mode(self, dataset_counter: int) -> None:
         catch_timestamp = True
-
-        exec_sessions = 0
-        monit_sessions = 0
 
         for session_index in range(0, self.dataset_length):
             # Shuffle in order to create non-synchronized records
