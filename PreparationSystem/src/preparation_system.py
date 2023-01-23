@@ -34,7 +34,7 @@ class PreparationSystem:
         while True:
             # Get received raw session
             self._raw_session = JsonIO.get_instance().get_received_json()
-            print('[+] raw session received')
+            print('[+] Raw session received')
 
             # Correct missing samples
             SessionCleaning().correct_missing_samples(self._raw_session['headset'])
@@ -49,20 +49,20 @@ class PreparationSystem:
             FeaturesExtractor().extract_features \
                 (self._preparation_system_configuration['features'], self._raw_session, self._prepared_session,
                  self._preparation_system_configuration['operative_mode'])
-            print('[+] features extracted and session prepared')
+            print('[+] Features extracted and session prepared')
 
             # Send prepared session to the endpoint corresponding to the current operating mode
             if self._preparation_system_configuration['operative_mode'] == 'development':
                 if JsonIO.get_instance().send(self._preparation_system_configuration['segregation_endpoint_IP'],
                                               self._preparation_system_configuration['segregation_endpoint_port'],
                                               self._prepared_session):
-                    print(f'[+] prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+                    print(f'[+] Prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
             elif self._preparation_system_configuration['operative_mode'] == 'execution':
                 if JsonIO.get_instance().send(self._preparation_system_configuration['execution_endpoint_IP'],
                                               self._preparation_system_configuration['execution_endpoint_port'],
                                               self._prepared_session):
-                    print(f'[+] prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+                    print(f'[+] Prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
 
     @staticmethod
     def _validate_configuration():
@@ -75,7 +75,7 @@ class PreparationSystem:
             with open(os.path.join(os.path.abspath('..'), 'preparation_system_configuration.json')) as f:
                 _configuration = json.load(f)
             # Load schema from file
-            with open(os.path.join(os.path.abspath('..'), 'configuration_schema.json')) as f:
+            with open(os.path.join(os.path.abspath('..'), 'data', 'configuration_schema.json')) as f:
                 _configuration_schema = json.load(f)
 
             # Validate configuration schema
@@ -93,7 +93,7 @@ class PreparationSystem:
 
 if __name__ == '__main__':
     # Start the run method on a new Thread
-    preparation_thread = Thread(target=PreparationSystem().run, args=())
+    preparation_thread = Thread(target=PreparationSystem().run, args=(), daemon=True)
     preparation_thread.start()
     # Start the Flask app listener on the port specified
     JsonIO.get_instance().listener("0.0.0.0", "5000")

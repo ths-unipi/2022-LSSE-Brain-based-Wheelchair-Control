@@ -2,7 +2,7 @@ import queue
 from threading import Thread
 
 from flask import Flask, request
-from requests import post
+from requests import post, exceptions
 
 
 class JsonIO:
@@ -62,15 +62,13 @@ class JsonIO:
         """
         try:
             response = post(f'http://{endpoint_ip}:{endpoint_port}/json', json=json_to_send, timeout=5)
-        except ConnectionError as e:
-            print(f'[-] ConnectionError: {e}')
-            return False
-
-        if response.status_code != 200:
-            error_message = response.json()['error']
-            print(f'[-] Error: {error_message}')
-            return False
-
+            if response.status_code != 200:
+                error_message = response.json()['error']
+                print(f'[-] Error: {error_message}')
+                return False
+        except exceptions.RequestException as e:
+            print(f'[-] Connection Error (endpoint unreachable): {e}')
+            exit(1)
         return True
 
     @staticmethod

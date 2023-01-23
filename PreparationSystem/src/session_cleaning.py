@@ -9,7 +9,9 @@ class SessionCleaning:
         for channel in range(len(headset)):
             # If a sample (a channel) is missing the interpolation is computed
             if not headset[channel]:
-                self._interpolate_list(headset, channel)
+                print(f'[-] Channel nr. {channel + 1} is missing')
+                if 7 <= channel <= 11:
+                    self._interpolate_list(headset, channel)
 
     @staticmethod
     def _interpolate_list(headset, channel):
@@ -26,7 +28,7 @@ class SessionCleaning:
             value = 0
             list_number = 0
             for j in lists_to_use:
-                if 0 <= j < len(headset) and headset[j]:
+                if headset[j]:
                     value += headset[j][i]
                     list_number += 1
             if list_number != 0:

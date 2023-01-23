@@ -53,9 +53,8 @@ class FeaturesExtractor:
         """
         sampling_frequency = 250
         window_seconds = 1.25
-        # Define window length
+        # Define segment length
         segment_length = window_seconds * sampling_frequency
-        # Segment_length = (2 / start_frequency) * sampling_frequency
 
         # Compute the modified periodogram (Welch)
         frequencies, psd = welch(headset, sampling_frequency, nperseg=segment_length)
