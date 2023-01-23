@@ -10,9 +10,12 @@ from utility.logging import error, info_simulation, warning_simulation
 INGESTION_SYSTEM_IP = 'localhost'
 INGESTION_SYSTEM_PORT = 4000
 MISSING_SAMPLES = [9, 10, 11]
-TESTING_MODE = False
-DATASET_TO_SEND = 3
+
 SESSIONS_TO_MONITOR = 0
+MONITORING_MODE = False
+
+TESTING_MODE = True
+DATASET_TO_SEND = 10
 
 
 def save_timestamp():
@@ -39,8 +42,11 @@ def read_dataset():
     settings = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_setting.csv'))
     set_settings = settings.rename(columns={'SETTINGS': 'environment', 'TIMESTAMP': 'timestamp', 'UUID': 'uuid'})
 
-    labels = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_labels.csv'),
-                      nrows=SESSIONS_TO_MONITOR)
+    if MONITORING_MODE:
+        labels = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_labels.csv'),
+                          nrows=SESSIONS_TO_MONITOR)
+    else:
+        labels = read_csv(os.path.join(os.path.abspath('..'), 'data', 'brainControlledWheelchair_labels.csv'))
     set_labels = labels[['LABELS', 'UUID']].rename(columns={'LABELS': 'label', 'UUID': 'uuid'})
 
     dataset = [
@@ -72,7 +78,7 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
         for i in range(0, len(dataset)):
             if dataset[i]['name'] == 'headset':
                 # Read the 22 channels data in the dataset
-                headset_channels = dataset[i]['records'].iloc[session_index * 22:session_index * 22 + 22, :]\
+                headset_channels = dataset[i]['records'].iloc[session_index * 22:session_index * 22 + 22, :] \
                     .to_dict('records')
 
                 # Shuffle the headset EEG data
@@ -96,7 +102,7 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                             save_timestamp()
                             catch_timestamp = False
             else:
-                if dataset[i]["name"] == 'label':
+                if MONITORING_MODE and dataset[i]["name"] == 'label':
                     if session_index < SESSIONS_TO_MONITOR:
                         record = dataset[i]['records'].loc[session_index].to_dict()
                         info_simulation(record["uuid"], f'Sending {dataset[i]["name"]} data', 1)
@@ -124,7 +130,7 @@ def send_dataset(dataset: list, maximum_dataset_length: int, dataset_counter: in
                             catch_timestamp = False
 
         # Send a session very X milliseconds
-        sleep(0.3)
+        sleep(0.4)
 
 
 if __name__ == '__main__':
