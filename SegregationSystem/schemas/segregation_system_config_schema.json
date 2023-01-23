@@ -7,7 +7,10 @@
       "enum": ["collecting_op_mode", "balancing_op_mode", "quality_op_mode", "splitting_op_mode"]
     },
     "user_id": {"type": "number"},
-    "testing_mode": {"type": "boolean"},
+    "testing_mode": {
+      "type": "string",
+      "enum": ["off", "normal", "incremental"]
+    },
     "endpoint_ip": {"type": "string"},
     "endpoint_port": {"type": "string"},
     "db_name": {"type": "string"},

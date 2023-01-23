@@ -104,14 +104,14 @@ class SegregationSystem:
                 b_generator = BalanceBarChartReportGenerator()
                 info = b_generator.generate_balance_bar_chart(dataset)
                 # the bar chart info to build the report
-                b_generator.generate_balancing_report(info, testing_mode)
+                b_generator.generate_balancing_report(info, (False if testing_mode == "off" else True))
 
                 self.segregation_system_config['operative_mode'] = 'quality_op_mode'
                 self._save_config()
 
                 # if the system is in the testing mode, it must not shut down it because the humen evaluation
                 # has been simulated
-                if not self.segregation_system_config['testing_mode']:
+                if self.segregation_system_config['testing_mode'] == "off":
                     log.warning('Shutdown')
                     exit(0)
                 else:
@@ -129,12 +129,21 @@ class SegregationSystem:
                     pass
                 elif res == -1:
                     # if the balance bar chart was evaluated with 'not balanced', the dataset is not usable, so
-                    # it's possible continue collecting new data and build a new dataset (new user_id)
-                    self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
-                    if not testing_mode:
+                    # it's necessary a new configuration
+                    if testing_mode == "incremental":
+                        self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
+                        self._save_config()
+                        collector.retrieve_counter()
+                    elif testing_mode == "normal":
+                        self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                         self.segregation_system_config['user_id'] += 1
-                    self._save_config()
-                    collector.retrieve_counter()
+                        self._save_config()
+                        collector.retrieve_counter()
+                    else:
+                        log.warning("Reconfiguration request")
+                        log.warning("Shutdown")
+                        exit(0)
+
                     continue
                 else:
                     # if the balance bar char evaluation hasn't been done yet, the system shuts down because the human
@@ -149,14 +158,14 @@ class SegregationSystem:
 
                 q_generator = RadarDiagramQualityReportGenerator()
                 q_generator.generate_radar_diagram(dataset)
-                q_generator.generate_quality_report(testing_mode)
+                q_generator.generate_quality_report(False if testing_mode == "off" else True)
 
                 self.segregation_system_config['operative_mode'] = 'splitting_op_mode'
                 self._save_config()
 
                 # if the system is in the testing mode, it must not shut down it because the humen evaluation
                 # has been simulated
-                if not self.segregation_system_config['testing_mode']:
+                if self.segregation_system_config['testing_mode'] == "off":
                     log.warning('Shutdown')
                     exit(0)
                 else:
@@ -174,12 +183,20 @@ class SegregationSystem:
                     pass
                 elif res == -1:
                     # if the radar diagram was evaluated with 'bad quality', the dataset is not usable, so
-                    # it's possible continue collecting new data and build a new dataset (new user_id)
-                    self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
-                    if not testing_mode:
+                    # it's necessary a new configuration
+                    if testing_mode == "incremental":
+                        self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
+                        self._save_config()
+                        collector.retrieve_counter()
+                    elif testing_mode == "normal":
+                        self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
                         self.segregation_system_config['user_id'] += 1
-                    self._save_config()
-                    collector.retrieve_counter()
+                        self._save_config()
+                        collector.retrieve_counter()
+                    else:
+                        log.warning("Reconfiguration request")
+                        log.warning("Shutdown")
+                        exit(0)
                     continue
                 else:
                     # if the radar diagram evaluation hasn't been done yet, the system shuts down because the human
@@ -203,11 +220,11 @@ class SegregationSystem:
                 # the dataset is evaluated and sent, so it's possible continue collecting new data
                 # and build a new dataset (new user_id)
                 self.segregation_system_config['operative_mode'] = 'collecting_op_mode'
-                if not testing_mode:
-                    self.segregation_system_config['user_id'] += 1
-                else:
+                if testing_mode == "incremental":
                     log.info(f"splitted dataset size: {self.segregation_system_config['collecting_threshold']}")
                     self.segregation_system_config['collecting_threshold'] += 30
+                else:
+                    self.segregation_system_config['user_id'] += 1
                 self._save_config()
                 collector.retrieve_counter()
 
