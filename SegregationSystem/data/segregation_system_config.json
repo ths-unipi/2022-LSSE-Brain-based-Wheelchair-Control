@@ -1,6 +1,6 @@
 {
     "operative_mode": "collecting_op_mode",
-    "user_id": 35,
+    "user_id": 39,
     "testing_mode": "normal",
     "endpoint_ip": "127.0.0.1",
     "endpoint_port": "4000",

@@ -1,9 +1,10 @@
 from requests import post
 import random
 import json
+import time
 
 if __name__ == '__main__':
-    sessions = 99
+    sessions = 93
     n = 0
     while n < sessions:
 
@@ -33,11 +34,11 @@ if __name__ == '__main__':
             data['features']['theta'].append(random.randint(-5, 6))
             i += 1
 
-        response = post('http://localhost:5000/json', json=data)
+        response = post('http://127.0.0.1:5000/json', json=data)
         if response.status_code != 200:
             error_message = response.json()['error']
             print(f'Error: {error_message}')
 
         print(n)
         n += 1
-
+        time.sleep(0.1)

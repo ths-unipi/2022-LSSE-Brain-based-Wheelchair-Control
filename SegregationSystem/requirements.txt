@@ -5,5 +5,5 @@ jsonschema
 pytest
 matplotlib
 plotly
-sklearn
+scikit-learn
 kaleido
