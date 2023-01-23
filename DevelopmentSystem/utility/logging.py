@@ -11,20 +11,20 @@ DEFAULT_COLOR = '\x1b[0m'
 
 
 def error(msg: str) -> None:
-    print(f'({datetime.now().strftime("%H:%M:%S.%f")}) {RED_COLOR}[-] {msg}{DEFAULT_COLOR}')
+    print(f'{WHITE_COLOR}({datetime.now().strftime("%H:%M:%S.%f")}) {RED_COLOR}[-] {msg}{DEFAULT_COLOR}')
 
 
 def warning(msg: str) -> None:
-    print(f'({datetime.now().strftime("%H:%M:%S.%f")}) {YELLOW_COLOR}[!] {msg}{DEFAULT_COLOR}')
+    print(f'{WHITE_COLOR}({datetime.now().strftime("%H:%M:%S.%f")}) {YELLOW_COLOR}[!] {msg}{DEFAULT_COLOR}')
 
 
 def info(msg: str) -> None:
-    print(f'({datetime.now().strftime("%H:%M:%S.%f")}) {CYAN_COLOR}[i] {msg}{DEFAULT_COLOR}')
+    print(f'{WHITE_COLOR}({datetime.now().strftime("%H:%M:%S.%f")}) {CYAN_COLOR}[i] {msg}{DEFAULT_COLOR}')
 
 
 def trace(msg: str) -> None:
-    print(f'({datetime.now().strftime("%H:%M:%S.%f")}){DEFAULT_COLOR} {msg}{DEFAULT_COLOR}')
+    print(f'{WHITE_COLOR}({datetime.now().strftime("%H:%M:%S.%f")}){DEFAULT_COLOR} {msg}{DEFAULT_COLOR}')
 
 
 def success(msg: str) -> None:
-    print(f'({datetime.now().strftime("%H:%M:%S.%f")}) {GREEN_COLOR}[+] {msg}{DEFAULT_COLOR}')
+    print(f'{WHITE_COLOR}({datetime.now().strftime("%H:%M:%S.%f")}) {GREEN_COLOR}[+] {msg}{DEFAULT_COLOR}')
