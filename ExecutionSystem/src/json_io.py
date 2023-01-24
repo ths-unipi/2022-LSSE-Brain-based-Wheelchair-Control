@@ -1,5 +1,5 @@
 from flask import Flask, request
-from requests import post
+from requests import post, exceptions
 from threading import Thread
 
 import queue
@@ -62,12 +62,16 @@ class JsonIO:
         :param json_to_send: dict object to send
         :return: boolean that represents if the json is correctly sent or not.
         """
-        response = post(f'http://{endpoint_ip}:{endpoint_port}/json', json=json_to_send)
+        try:
+            response = post(f'http://{endpoint_ip}:{endpoint_port}/json', json=json_to_send)
 
-        if response.status_code != 200:
-            error_message = response.json()['error']
-            print(f'[-] Error: {error_message}')
-            return False
+            if response.status_code != 200:
+                error_message = response.json()['error']
+                print(f'[-] Error: {error_message}')
+                return False
+        except exceptions.RequestException as e:
+            print(f"***JsonIO*** fail in post request: {e}")
+            exit(1)
         return True
 
 app = JsonIO.get_instance().app

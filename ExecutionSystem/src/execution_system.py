@@ -43,11 +43,11 @@ class ExecutionSystem:
         """
         try:
             # load configuration file
-            configuration = self._open_json_file(os.path.join(os.path.abspath('..'), 'configurationExecutionSystem.json'))
+            configuration = self._open_json_file(os.path.join(os.path.abspath('..'), 'configuration_execution_system.json'))
 
             # load validator file
             validator_schema = \
-                self._open_json_file(os.path.join(os.path.abspath('..'), 'configurationExecutionSystemValidator.json'))
+                self._open_json_file(os.path.join(os.path.abspath('..'), 'configuration_execution_system_validator.json'))
 
             # validate json
             validate(configuration, validator_schema)
@@ -57,6 +57,23 @@ class ExecutionSystem:
         except ValidationError:
             print('***Execution System***   Config validation failed')
             exit(1)
+
+    def validate_input (self, json_object: dict, json_schema : str) -> bool:
+        """
+        Use the function 'open_json_file' to load the validator for the json input object.
+        Use the 'validate' function to check if the .json file is structured as the validator says.
+        :param json_object: dict object of the .json file to validate
+        :param json_schema: filepath of the validator for the json input object
+        :return: True if the check is passed, False otherwise.
+        """
+        try:
+            # load validator schema
+            validator_schema = self._open_json_file(json_schema)
+            validate(json_object, validator_schema)
+            return True
+        except:
+            print("***Execution System*** json validation failed")
+            return False
 
 
     def _save_result_on_csv(self, filepath: str, arriving_timestamp: float=None, uuid: str=None):
@@ -97,7 +114,11 @@ class ExecutionSystem:
         while True:
             if self._configuration_execution_system['operating_mode'] == 'development':
                 json_file = JsonIO.get_instance().get_received_json()
-                # if there is the development flow, the best classifier is received and saved on a file
+                # if there is the development flow, the best classifier is received and, after the validation check, is
+                # saved on a file
+                if not self.validate_input(json_file,os.path.join(os.path.abspath('..'), 'classifier_validator.json')):
+                    print("***Execution System*** Classifier validation failed")
+                    continue
                 if mental_command_classifier_instance.deploy_classifier(json_file):
                     if self._configuration_execution_system['testing']:
                         self._save_result_on_csv(os.path.join(os.path.abspath('..'), f'development_{TESTING_THRESHOLD}_classifier.csv'))
@@ -114,6 +135,10 @@ class ExecutionSystem:
                 # if there is the execution flow:
                 # the prepared session is received
                 mental_command_classifier_instance._prepared_session = JsonIO.get_instance().get_received_json()
+                if not self.validate_input(mental_command_classifier_instance._prepared_session,
+                                           os.path.join(os.path.abspath('..'), 'prepared_session_validator.json')):
+                    print("***Execution System*** Prepared session validation failed")
+                    continue
                 # the counter of the Monitoring Phase is incremented
                 monitoring_instance.increment_session_counter()
                 # the best classifier from the .json file is loaded
