@@ -9,25 +9,33 @@
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "maxItems": 22,
+          "minItems": 22
         },
         "beta": {
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "maxItems": 22,
+          "minItems": 22
         },
         "delta": {
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "maxItems": 22,
+          "minItems": 22
         },
         "theta": {
           "type": "array",
           "items": {
             "type": "number"
-          }
+          },
+          "maxItems": 22,
+          "minItems": 22
         },
         "environment": {
           "type": "string",
