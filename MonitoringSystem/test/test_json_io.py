@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from src.json_io import JsonIO
 
 
@@ -14,6 +15,7 @@ def test_receive():
     for i in range(0, 20):
         json_to_send['uuid'] = "a923-45b7-gh12-7408003775." + str(i)
         JsonIO.get_instance().send(json_to_send)
+        time.sleep(0.3)
 
 
 def test2_receive():

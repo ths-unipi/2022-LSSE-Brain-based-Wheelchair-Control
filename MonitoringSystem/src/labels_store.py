@@ -69,7 +69,7 @@ class LabelsStore:
                 LabelsStore._insert_label(self, query, cursor, _uuid, _label)
                 return True
             else:
-                warning(f"LabelsStore - Row already full")
+                warning(f"LabelsStore - Row already full\n")
                 return False
 
     def _check_if_row_exists(self, query, cursor, _uuid):
@@ -113,7 +113,7 @@ class LabelsStore:
             error(f"LabelsStore - Sqlite UPDATE Error: {err}")
             return False
 
-        success(f"LabelsStore -  Successfully UPDATE existing row ")
+        success(f"LabelsStore -  Successfully UPDATE existing row \n")
         self._conn.commit()
 
     def _create_new_row(self, query, cursor, _uuid, _label):
@@ -128,7 +128,7 @@ class LabelsStore:
             error(f"LabelsStore - Sqlite INSERT Error: {err}")
             return False
 
-        success(f"LabelsStore - Successfully INSERT new row")
+        success(f"LabelsStore - Successfully INSERT new row\n")
         self._conn.commit()
 
     # ==================== LOAD SESSION LABELS ====================#

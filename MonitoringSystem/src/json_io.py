@@ -1,6 +1,7 @@
 from flask import Flask, request
 from requests import post
 from threading import Thread
+import logging
 import queue
 
 # used to test method receive()
@@ -42,6 +43,8 @@ class JsonIO:
 
 
 app = JsonIO().get_instance().get_app()
+log = logging.getLogger('werkzeug')
+log.disabled = True
 
 
 @app.post('/json')

@@ -9,6 +9,7 @@ from src.collecting_phase import CollectingPhase
 from src.accuracy_report_generator import AccuracyReportGenerator
 from utility.logging import info, error, success
 
+
 MONITORING_SYSTEM_CONFIG_PATH = os.path.join(os.path.abspath('..'), 'monitoring_system_config.json')
 ACCURACY_REPORT_PATH = os.path.join(os.path.abspath('..'), 'data', 'accuracy_report.json')
 
@@ -35,6 +36,7 @@ class MonitoringSystem:
 
         except FileNotFoundError as err:
             error(f'File not found: {err}')
+            exit(1)
 
     def _validate_schema(self, file_to_validate, schema_path):
         """
@@ -93,7 +95,8 @@ class MonitoringSystem:
                         _testing_mode = self._monitoring_system_config['testing_mode']
 
                         # create accuracy report
-                        _accuracy_report = _accuracy_report_generator.generate_accuracy_report(_labels, _max_errors_tolerated,
+                        _accuracy_report = _accuracy_report_generator.generate_accuracy_report(_labels,
+                                                                                               _max_errors_tolerated,
                                                                                                _testing_mode)
                         # validate accuracy report created
                         MonitoringSystem._validate_schema(self, _accuracy_report, ACCURACY_REPORT_SCHEMA)

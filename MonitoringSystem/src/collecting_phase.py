@@ -11,7 +11,7 @@ class CollectingPhase:
         self.counter_session_labels += 1
 
     def reset_counter(self):
-        info("CollectingPhase - Labels counter set to 0, to produce a new Accuracy Report")
+        info("CollectingPhase - Labels counter set to 0, to produce a new Accuracy Report\n")
         self.counter_session_labels = 0
 
     def check_labels_threshold(self):
