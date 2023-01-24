@@ -32,12 +32,27 @@ class PreparationSystem:
         :return: None
         """
         while True:
+            # Start the Flask app listener on the port specified
+            listener_thread = Thread(target=JsonIO.get_instance().listener, args=('0.0.0.0', 5000), daemon=True)
+            listener_thread.start()
+
             # Get received raw session
             self._raw_session = JsonIO.get_instance().get_received_json()
             print('[+] Raw session received')
 
+            # Check raw session validity
+            if SessionCleaning.validate_raw_session(self._raw_session):
+                print('[+] Raw session is valid')
+            else:
+                print('[-] Raw session is not valid')
+                continue
+
             # Correct missing samples
-            SessionCleaning().correct_missing_samples(self._raw_session['headset'])
+            if SessionCleaning().correct_missing_samples(self._raw_session['headset']):
+                print('[+] Missing samples corrected')
+            else:
+                print('[-] Session unrecoverable')
+                continue
 
             # Correct outliers
             SessionCleaning.correct_outliers(self._raw_session['headset'],
@@ -63,6 +78,7 @@ class PreparationSystem:
                                               self._preparation_system_configuration['execution_endpoint_port'],
                                               self._prepared_session):
                     print(f'[+] Prepared session sent at {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}')
+        exit(0)
 
     @staticmethod
     def _validate_configuration():
@@ -73,14 +89,14 @@ class PreparationSystem:
         try:
             # Load configuration from file
             with open(os.path.join(os.path.abspath('..'), 'preparation_system_configuration.json')) as f:
-                _configuration = json.load(f)
+                configuration = json.load(f)
             # Load schema from file
             with open(os.path.join(os.path.abspath('..'), 'data', 'configuration_schema.json')) as f:
-                _configuration_schema = json.load(f)
+                configuration_schema = json.load(f)
 
             # Validate configuration schema
-            validate(_configuration, _configuration_schema)
-            return _configuration
+            validate(configuration, configuration_schema)
+            return configuration
 
         except FileNotFoundError:
             print('Failed to open configuration file')
@@ -92,8 +108,9 @@ class PreparationSystem:
 
 
 if __name__ == '__main__':
-    # Start the run method on a new Thread
-    preparation_thread = Thread(target=PreparationSystem().run, args=(), daemon=True)
-    preparation_thread.start()
-    # Start the Flask app listener on the port specified
-    JsonIO.get_instance().listener("0.0.0.0", "5000")
+    try:
+        PreparationSystem().run()
+    except KeyboardInterrupt:
+        print('Preparation System terminated')
+        exit(0)
+

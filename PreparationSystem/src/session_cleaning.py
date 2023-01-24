@@ -1,10 +1,16 @@
+import json
+import os
+from jsonschema import validate, ValidationError
+
+
 class SessionCleaning:
 
     def correct_missing_samples(self, headset: list):
         """
-        Corrects missing samples in the list of headset channels.
+        Checks for missing samples in the list of headset channels;
+        if they are recoverable, the missing samples are corrected.
         :param headset: List of EEG channels.
-        :return: None
+        :return: True if there are no missing samples or the missing ones are recoverable.
         """
         for channel in range(len(headset)):
             # If a sample (a channel) is missing the interpolation is computed
@@ -12,11 +18,14 @@ class SessionCleaning:
                 print(f'[-] Channel nr. {channel + 1} is missing')
                 if 7 <= channel <= 11:
                     self._interpolate_list(headset, channel)
+                else:
+                    return False
+        return True
 
     @staticmethod
     def _interpolate_list(headset, channel):
         """
-        Interpolates the specified channel with the adjacent ones
+        Interpolates the specified channel with the adjacent ones in the headset.
         :param headset: List of EEG channels.
         :param channel: The channel to interpolate.
         :return: None
@@ -49,3 +58,26 @@ class SessionCleaning:
                     channel[i] = max_eeg
                 elif channel[i] < min_eeg:
                     channel[i] = min_eeg
+
+    @staticmethod
+    def validate_raw_session(raw_session: dict):
+        """
+        Validates the received raw session according to the loaded schema.
+        :param raw_session: The dict containing the received raw session.
+        :return: True if the raw session is valid, False if it is not valid.
+        """
+        try:
+            with open(os.path.join(os.path.abspath('..'), 'data', 'raw_session_schema.json')) as f:
+                schema = json.load(f)
+
+            validate(raw_session, schema)
+            return True
+
+        except FileNotFoundError:
+            print('[-] Failed to open schema file')
+            return False
+
+        except ValidationError:
+            return False
+
+
