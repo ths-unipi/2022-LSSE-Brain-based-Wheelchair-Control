@@ -31,11 +31,11 @@ class PreparationSystem:
         prepares the session and sends it to the corresponding endpoint based on the current operating mode.
         :return: None
         """
-        while True:
-            # Start the Flask app listener on the port specified
-            listener_thread = Thread(target=JsonIO.get_instance().listener, args=('0.0.0.0', 5000), daemon=True)
-            listener_thread.start()
+        # Start the Flask app listener on the port specified
+        listener_thread = Thread(target=JsonIO.get_instance().listener, args=('0.0.0.0', 5000), daemon=True)
+        listener_thread.start()
 
+        while True:
             # Get received raw session
             self._raw_session = JsonIO.get_instance().get_received_json()
             print('[+] Raw session received')

@@ -11,7 +11,7 @@
     },
     "command_thought": {
       "type": "string",
-      "enum": ["move", "stop", "left", "right"]
+      "enum": ["move", "stop", "left", "right", "None"]
     },
     "environment": {
       "type": "string",
@@ -31,5 +31,5 @@
       }
     }
   },
-  "required": ["uuid", "calendar", "command_thought", "environment", "headset"]
+  "required": ["uuid", "calendar", "environment", "headset", "command_thought"]
 }
