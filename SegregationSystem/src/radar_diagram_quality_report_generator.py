@@ -32,6 +32,7 @@ class RadarDiagramQualityReportGenerator:
                     r=session['features'][band],
                     theta=labels,
                     fill='toself',
+                    # mode='markers',
                     name=f"uuid: {session['uuid']} ",
                 ))
 
