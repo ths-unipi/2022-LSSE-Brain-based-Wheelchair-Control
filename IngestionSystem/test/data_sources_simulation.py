@@ -13,7 +13,7 @@ INGESTION_SYSTEM_PORT = 4000
 MISSING_SAMPLES = [9, 10, 11]
 
 TESTING_MODE = False  # Enables timestamp saving
-DATASET_TO_SEND = 5  # Dataset to test during the testing mode
+DATASET_TO_SEND = 55  # Dataset to test during the testing mode
 
 CONFIG_FILENAME = 'ingestion_system_config.json'
 
@@ -132,7 +132,7 @@ class DataSourcesSimulation:
                             catch_timestamp = False
 
             # Send a session very X milliseconds
-            sleep(0.4)
+            sleep(0.9)
 
     def execution_mode(self, dataset_counter: int) -> None:
         catch_timestamp = True
@@ -210,7 +210,7 @@ class DataSourcesSimulation:
             self.check_current_phase(missing_records=missing_records, missing_channels=missing_channels)
 
             # Send a session very X milliseconds
-            sleep(0.4)
+            sleep(0.9)
 
     def check_current_phase(self, missing_records: int, missing_channels: int):
         if not self.monitoring:
@@ -243,6 +243,6 @@ if __name__ == '__main__':
 
         # In order to flush the queue at the Ingestion System it is necessary wait some minutes every 3 dataset
         if j == 3:
-            sleep(300)
+            sleep(240)
 
         data_sources_sim.send_dataset(dataset_counter=j)

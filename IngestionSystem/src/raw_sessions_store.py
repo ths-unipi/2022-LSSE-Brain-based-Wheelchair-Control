@@ -285,7 +285,7 @@ class RawSessionsStore:
             raw_session = {
                 'uuid': result[0],
                 'calendar': json.loads(result[1])['calendar'],
-                'command_thought': None,
+                'command_thought': 'None',
                 'environment': json.loads(result[3])['environment'],
                 'headset': list()
             }
