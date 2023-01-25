@@ -1,8 +1,11 @@
+import json
 import os
 import sqlite3
 import uuid
 
-from utility.logging import error, trace, success
+from jsonschema import validate, ValidationError
+
+from utility.logging import error, trace, success, warning
 
 # labels to integer conversion
 LABEL_TO_INT = {
@@ -78,6 +81,17 @@ class LearningSessionStore:
         return True
 
     def store_dataset(self, received_dataset: dict) -> bool:
+        # open schema
+        with open(os.path.join(os.path.abspath('..'), 'resources', 'received_dataset_schema.json')) as f:
+            received_dataset_schema = json.load(f)
+
+        # validate the config
+        try:
+            validate(received_dataset, received_dataset_schema)
+        except ValidationError:
+            warning('Received Dataset validation failed')
+            return False
+
         # convert training set to a list of tuple
         training = []
         for session in received_dataset['training']:
