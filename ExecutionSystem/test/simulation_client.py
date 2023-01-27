@@ -19,5 +19,5 @@ def execution_simulation():
         print(session)
     post("http://127.0.0.1:5000/json", json=session)
 if __name__ == '__main__':
-    #deployment_simulation()
-    execution_simulation()
+    deployment_simulation()
+    #execution_simulation()

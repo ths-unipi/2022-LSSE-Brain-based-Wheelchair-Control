@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "required": ["uuid", "features"],
   "properties": {
     "uuid": {
       "type": "string"
@@ -10,8 +11,8 @@
       "items": {
         "type": "number"
       },
-      "maxItems": 89,
-      "minItems": 89
+      "minItems": 89,
+      "maxItems": 89
     }
   }
 }

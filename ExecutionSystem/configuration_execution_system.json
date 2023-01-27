@@ -1,5 +1,5 @@
 {
-  "operating_mode": "execution",
+  "operating_mode": "development",
   "execution_window_value": 20,
   "monitoring_window_value": 20,
   "endpoint_IP": "172.16.0.15",

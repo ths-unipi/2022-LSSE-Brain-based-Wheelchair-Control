@@ -1,15 +1,17 @@
-from jsonschema import validate, ValidationError
-from src.json_io import JsonIO
-from threading import Thread
-from src.mental_command_classifier import MentalCommandClassifier
-from src.monitoring_phase import MonitoringPhase
-
 import json
 import os
 import csv
 import time
 
+from threading import Thread
+from src.json_io import JsonIO
+from src.mental_command_classifier import MentalCommandClassifier
+from src.monitoring_phase import MonitoringPhase
+from jsonschema import validate, ValidationError
+
+
 TESTING_THRESHOLD = 10
+
 
 class ExecutionSystem:
 
@@ -25,8 +27,8 @@ class ExecutionSystem:
         :return: dict object that represent the .json file
         """
         try:
-            with open(path) as f:
-                json_file = json.load(f)
+            with open(path) as file:
+                json_file = json.load(file)
 
         except FileNotFoundError:
             print('***Execution System***   Failed to open file')
@@ -34,8 +36,7 @@ class ExecutionSystem:
 
         return json_file
 
-
-    def _validate_configuration(self):
+    def _validate_configuration(self) -> dict:
         """
         Use the function 'open_json_file' to load the configuration file of the System and the validator for it.
         Use the 'validate' function to check if the .json file is structured as the validator says.
@@ -43,11 +44,13 @@ class ExecutionSystem:
         """
         try:
             # load configuration file
-            configuration = self._open_json_file(os.path.join(os.path.abspath('..'), 'configuration_execution_system.json'))
+            configuration = \
+                self._open_json_file(os.path.join(os.path.abspath('..'), 'configuration_execution_system.json'))
 
             # load validator file
             validator_schema = \
-                self._open_json_file(os.path.join(os.path.abspath('..'), 'configuration_execution_system_validator.json'))
+                self._open_json_file\
+                    (os.path.join(os.path.abspath('..'), 'configuration_execution_system_validator.json'))
 
             # validate json
             validate(configuration, validator_schema)
@@ -58,7 +61,7 @@ class ExecutionSystem:
             print('***Execution System***   Config validation failed')
             exit(1)
 
-    def validate_input (self, json_object: dict, json_schema : str) -> bool:
+    def validate_input(self, json_object: dict, json_schema: str) -> bool:
         """
         Use the function 'open_json_file' to load the validator for the json input object.
         Use the 'validate' function to check if the .json file is structured as the validator says.
@@ -71,17 +74,16 @@ class ExecutionSystem:
             validator_schema = self._open_json_file(json_schema)
             validate(json_object, validator_schema)
             return True
-        except:
+        except ValidationError:
             print("***Execution System*** json validation failed")
             return False
 
-
-    def _save_result_on_csv(self, filepath: str, arriving_timestamp: float=None, uuid: str=None):
+    def _save_result_on_csv(self, filepath: str, arriving_timestamp: float = None, uuid: str = None):
         """
         *** For testing purpose ***
         Save the timestamp in which a classifier is correctly deployed into a row of a .csv file
         :param filepath: path of the .csv file in which the results must be saved
-        :return: None
+        :return: Noneexecution
         """
         time_stamp = time.time()
         with open(filepath, 'a', newline='') as csvfile:
@@ -96,8 +98,8 @@ class ExecutionSystem:
         Main function of the ExecutionSystem class that calls also the methods of other classes in order to:
 
         *** Development Phase ***
-        - Deploy correctly a classifier that is received from the DeploymentSystem saving it in a file .json and stopping
-        the module execution to switch in a "execution mode".
+        - Deploy correctly a classifier that is received from the DeploymentSystem saving it in a file .json and
+        stopping the module execution to switch in a "execution mode".
 
         *** Execution Phase ***
         - Receive correctly a prepared session from the PreparedSystem and produce the value that corresponds to
@@ -106,6 +108,9 @@ class ExecutionSystem:
         produced labels also to the MonitoringSystem
         :return: None
         """
+        listener_thread = Thread(target=JsonIO.get_instance().listener, args=('0.0.0.0', 5000))
+        listener_thread.setDaemon(True)
+        listener_thread.start()
         print(f"MODE SELECTED: {self._configuration_execution_system['operating_mode']}")
         print(f"MODE TESTING: {self._configuration_execution_system['testing']}")
         mental_command_classifier_instance = MentalCommandClassifier()
@@ -116,12 +121,13 @@ class ExecutionSystem:
                 json_file = JsonIO.get_instance().get_received_json()
                 # if there is the development flow, the best classifier is received and, after the validation check, is
                 # saved on a file
-                if not self.validate_input(json_file,os.path.join(os.path.abspath('..'), 'classifier_validator.json')):
+                if not self.validate_input(json_file, os.path.join(os.path.abspath('..'), 'classifier_validator.json')):
                     print("***Execution System*** Classifier validation failed")
                     continue
                 if mental_command_classifier_instance.deploy_classifier(json_file):
                     if self._configuration_execution_system['testing']:
-                        self._save_result_on_csv(os.path.join(os.path.abspath('..'), f'development_{TESTING_THRESHOLD}_classifier.csv'))
+                        self._save_result_on_csv\
+                            (os.path.join(os.path.abspath('..'), f'development_{TESTING_THRESHOLD}_classifier.csv'))
                         counter_testing += 1
                         print(f"*** (TEST) Execution System***   N. of classifiers collected: {counter_testing}")
                         if counter_testing == TESTING_THRESHOLD:
@@ -143,13 +149,14 @@ class ExecutionSystem:
                 monitoring_instance.increment_session_counter()
                 # the best classifier from the .json file is loaded
                 mental_command_classifier_instance._best_classifier = self._open_json_file(os.path.join
-                                            (os.path.abspath('..'), 'data','mental_command_classifier.json'))
-                #print(classifier)
+                                            (os.path.abspath('..'), 'data', 'mental_command_classifier.json'))
+                # print(classifier)
                 # the response of the classifier is computed
                 arriving_timestamp = time.time()
                 final_label = list(mental_command_classifier_instance.execute_classifier())[0]
                 if self._configuration_execution_system['testing']:
-                    self._save_result_on_csv(os.path.join(os.path.abspath('..'), f'execution_{TESTING_THRESHOLD}_sessions.csv'),
+                    self._save_result_on_csv\
+                        (os.path.join(os.path.abspath('..'), f'execution_{TESTING_THRESHOLD}_sessions.csv'),
                                              arriving_timestamp, mental_command_classifier_instance._prepared_session['uuid'])
                     counter_testing += 1
                     print(f"*** (TEST) Execution System***   N. of sessions collected: {counter_testing}")
@@ -170,8 +177,10 @@ class ExecutionSystem:
                                                     self._configuration_execution_system['endpoint_port'], label_to_send)
         exit(0)
 
+
 if __name__ == '__main__':
-    execution_thread = Thread(target=ExecutionSystem().run, args=())
-    execution_thread.setDaemon(True)
-    execution_thread.start()
-    JsonIO.get_instance().listener('0.0.0.0', 5000)
+    try:
+        ExecutionSystem().run()
+    except KeyboardInterrupt:
+        print("***Execution System terminated***")
+        exit(0)

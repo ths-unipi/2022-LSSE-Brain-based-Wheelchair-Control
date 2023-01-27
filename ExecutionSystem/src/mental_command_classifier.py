@@ -39,7 +39,12 @@ class MentalCommandClassifier:
         Execute the best classifier using the prepare session previously received and produce a final value
         :return: int value that will correspond to a command for the wheelchair.
         """
-        mlp_classifier = pickle.loads(self._best_classifier['classifier'].encode('ISO-8859-1'))
-        # the final label from the classifier is generated
-        session = [self._prepared_session['features']]
-        return mlp_classifier.predict(session)
+        try:
+            mlp_classifier = pickle.loads(self._best_classifier['classifier'].encode('ISO-8859-1'))
+            # the final label from the classifier is generated
+            session = [self._prepared_session['features']]
+            return mlp_classifier.predict(session)
+        except UnicodeDecodeError:
+            print("***Execution System*** Label's production failed, classifier not decodable!")
+            print("***Execution System terminated***")
+            exit(1)
