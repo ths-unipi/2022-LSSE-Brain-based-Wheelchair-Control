@@ -101,9 +101,9 @@ class DataSourcesSimulation:
             # Shuffle in order to create non-synchronized records
             random.shuffle(self.dataset)
 
-            while is_queue_full():
-                trace('Ingestion queue full..waiting for 50 sec')
-                sleep(50)
+            # while is_queue_full():
+            #     trace('Ingestion queue full..waiting for 50 sec')
+            #     sleep(50)
 
             info_simulation('', '============================ START SESSION ============================', 0)
             for i in range(0, len(self.dataset)):
@@ -156,9 +156,9 @@ class DataSourcesSimulation:
             # Shuffle in order to create non-synchronized records
             random.shuffle(self.dataset)
 
-            while is_queue_full():
-                trace('Ingestion queue full..waiting for 50 sec')
-                sleep(50)
+            # while is_queue_full():
+            #     trace('Ingestion queue full..waiting for 50 sec')
+            #     sleep(50)
 
             # Counters related to a single session
             missing_channels = 0
