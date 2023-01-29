@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any
 
 from flask import Flask, request
@@ -6,7 +7,7 @@ from threading import Thread
 from requests import post, exceptions
 import queue
 
-from utility.logging import error, trace
+from utility.logging import error
 
 
 class JsonIO:
@@ -46,8 +47,8 @@ class JsonIO:
         """
         try:
             self.received_records_queue.put(received_record, timeout=None)
-            # if 1000 <= self.received_records_queue.qsize() <= 1100:
-            #    trace(f'Record queue size: {self.received_records_queue.qsize()}')
+            # with open(os.path.join(os.path.abspath('..'), 'data', 'queue_size.txt'), 'w') as f:
+            #    f.write(f'{self.received_records_queue.qsize()}')
         except queue.Full:
             error('Full queue exception')
             return False
@@ -58,6 +59,10 @@ class JsonIO:
         Extracts a record from the queue containing all the received records
         :return: record
         """
+        # if self.received_records_queue.qsize() > 0:
+        #    with open(os.path.join(os.path.abspath('..'), 'data', 'queue_size.txt'), 'w') as f:
+        #        f.write(f'{self.received_records_queue.qsize() - 1}')
+
         return self.received_records_queue.get(block=True)
 
     def send(self, endpoint_ip: str, endpoint_port: int, data: dict) -> bool:

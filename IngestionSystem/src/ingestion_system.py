@@ -1,7 +1,5 @@
-import csv
 import os
 import json
-from time import time
 
 from jsonschema import validate, ValidationError
 from threading import Thread

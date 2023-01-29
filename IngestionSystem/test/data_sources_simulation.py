@@ -12,8 +12,8 @@ INGESTION_SYSTEM_IP = 'localhost'
 INGESTION_SYSTEM_PORT = 4000
 MISSING_SAMPLES = [9, 10, 11]
 
-TESTING_MODE = False  # Enables timestamp saving
-DATASET_TO_SEND = 55  # Dataset to test during the testing mode
+TESTING_MODE = True  # Enables timestamp saving
+DATASET_TO_SEND = 100  # Dataset to test during the testing mode
 
 CONFIG_FILENAME = 'ingestion_system_config.json'
 
@@ -22,6 +22,17 @@ def save_timestamp():
     t = time()
     df = DataFrame([[t]], columns=['Timestamp'])
     df.to_csv(f'timestamp-{t}.csv', index=False)
+
+
+def is_queue_full() -> bool:
+    try:
+        with open(os.path.join(os.path.abspath('..'), 'data', 'queue_size.txt'), 'r') as f:
+            queue_size = int(f.read())
+            return queue_size > 2000
+    except FileNotFoundError:
+        return False
+    except ValueError:
+        return False
 
 
 class DataSourcesSimulation:
@@ -90,6 +101,10 @@ class DataSourcesSimulation:
             # Shuffle in order to create non-synchronized records
             random.shuffle(self.dataset)
 
+            while is_queue_full():
+                trace('Ingestion queue full..waiting for 50 sec')
+                sleep(50)
+
             info_simulation('', '============================ START SESSION ============================', 0)
             for i in range(0, len(self.dataset)):
                 if self.dataset[i]['name'] == 'headset':
@@ -132,7 +147,7 @@ class DataSourcesSimulation:
                             catch_timestamp = False
 
             # Send a session very X milliseconds
-            sleep(0.9)
+            sleep(0.5)
 
     def execution_mode(self, dataset_counter: int) -> None:
         catch_timestamp = True
@@ -140,6 +155,10 @@ class DataSourcesSimulation:
         for session_index in range(0, self.dataset_length):
             # Shuffle in order to create non-synchronized records
             random.shuffle(self.dataset)
+
+            while is_queue_full():
+                trace('Ingestion queue full..waiting for 50 sec')
+                sleep(50)
 
             # Counters related to a single session
             missing_channels = 0
@@ -210,7 +229,7 @@ class DataSourcesSimulation:
             self.check_current_phase(missing_records=missing_records, missing_channels=missing_channels)
 
             # Send a session very X milliseconds
-            sleep(0.9)
+            sleep(0.5)
 
     def check_current_phase(self, missing_records: int, missing_channels: int):
         if not self.monitoring:
@@ -240,9 +259,4 @@ if __name__ == '__main__':
 
     for j in range(0, DATASET_TO_SEND):
         info_simulation('', f'Sending Dataset #{j + 1}', 0)
-
-        # In order to flush the queue at the Ingestion System it is necessary wait some minutes every 3 dataset
-        if j == 3:
-            sleep(240)
-
         data_sources_sim.send_dataset(dataset_counter=j)

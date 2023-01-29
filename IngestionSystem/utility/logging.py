@@ -41,7 +41,7 @@ def info_simulation(uuid: str, msg: str, info_type: int) -> None:
 
 
 def trace(msg: str) -> None:
-    print(f'({datetime.now().strftime("%H:%M:%S.%f")}) {DEFAULT_COLOR} {msg} {DEFAULT_COLOR}')
+    print(f'({datetime.now().strftime("%H:%M:%S.%f")}){DEFAULT_COLOR} {msg} {DEFAULT_COLOR}')
 
 
 def success(msg: str) -> None:
