@@ -10,7 +10,7 @@ from src.monitoring_phase import MonitoringPhase
 from jsonschema import validate, ValidationError
 
 
-TESTING_THRESHOLD = 10
+TESTING_THRESHOLD = 1000
 
 
 class ExecutionSystem:
