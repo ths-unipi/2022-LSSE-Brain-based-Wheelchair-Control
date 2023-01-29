@@ -49,9 +49,9 @@ class PreparationSystem:
 
             # Correct missing samples
             if SessionCleaning().correct_missing_samples(self._raw_session['headset']):
-                print('[+] Missing samples corrected')
+                print('[+] Headset samples ok')
             else:
-                print('[-] Session unrecoverable')
+                print('[-] Missing samples are unrecoverable, raw session discarded')
                 continue
 
             # Correct outliers
@@ -113,4 +113,3 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print('Preparation System terminated')
         exit(0)
-
